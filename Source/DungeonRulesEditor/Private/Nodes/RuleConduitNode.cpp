@@ -8,6 +8,7 @@
 //#include "AnimationTransitionGraph.h"
 //#include "AnimationConduitGraphSchema.h"
 //#include "AnimGraphNode_TransitionResult.h"
+#include "DungeonRulesEdTypes.h"
 
 #define LOCTEXT_NAMESPACE "RuleConduitNode"
 
@@ -22,8 +23,8 @@ URuleConduitNode::URuleConduitNode()
 
 void URuleConduitNode::AllocateDefaultPins()
 {
-	CreatePin(EGPD_Input, TEXT("Transition"), TEXT("In"));
-	CreatePin(EGPD_Output, TEXT("Transition"), TEXT("Out"));
+	CreatePin(EGPD_Input, DungeonRulesPinCategory::Transition, TEXT("In"));
+	CreatePin(EGPD_Output, DungeonRulesPinCategory::Transition, TEXT("Out"));
 }
 
 void URuleConduitNode::AutowireNewNode(UEdGraphPin* FromPin)
@@ -49,24 +50,17 @@ FText URuleConduitNode::GetTooltipText() const
 	return LOCTEXT("ConduitNodeTooltip", "This is a conduit, which allows specification of a predicate condition for an entire group of transitions");
 }
 
-FString URuleConduitNode::GetStateName() const
+#if false
+void URuleConduitNode::PostPasteNode()
 {
-	return (BoundGraph != NULL) ? *(BoundGraph->GetName()) : TEXT("(null)");
-}
-
-UEdGraphPin* URuleConduitNode::GetInputPin() const
-{
-	return Pins[0];
-}
-
-UEdGraphPin* URuleConduitNode::GetOutputPin() const
-{
-	return Pins[1];
+	// Find an interesting name, but try to keep the same if possible
+	TSharedPtr<INameValidatorInterface> NameValidator = FNameValidatorFactory::MakeValidator(this);
+	FBlueprintEditorUtils::RenameGraphWithSuggestion(BoundGraph, NameValidator, GetStateName());
+	Super::PostPasteNode();
 }
 
 void URuleConduitNode::PostPlacedNewNode()
 {
-#if false
 	// Create a new animation graph
 	check(BoundGraph == NULL);
 	BoundGraph = FBlueprintEditorUtils::CreateNewGraph(
@@ -91,7 +85,6 @@ void URuleConduitNode::PostPlacedNewNode()
 	{
 		ParentGraph->SubGraphs.Add(BoundGraph);
 	}
-#endif
 }
 
 void URuleConduitNode::DestroyNode()
@@ -100,7 +93,6 @@ void URuleConduitNode::DestroyNode()
 
 	BoundGraph = NULL;
 	Super::DestroyNode();
-
 	if (GraphToRemove)
 	{
 		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNodeChecked(this);
@@ -111,7 +103,6 @@ void URuleConduitNode::DestroyNode()
 void URuleConduitNode::ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const
 {
 	Super::ValidateNodeDuringCompilation(MessageLog);
-#if false
 	UAnimationTransitionGraph* TransGraph = CastChecked<UAnimationTransitionGraph>(BoundGraph);
 	UAnimGraphNode_TransitionResult* ResultNode = TransGraph->GetResultNode();
 	check(ResultNode);
@@ -128,20 +119,31 @@ void URuleConduitNode::ValidateNodeDuringCompilation(class FCompilerResultsLog& 
 			MessageLog.Warning(TEXT("@@ will never be taken, please connect something to @@"), this, BoolResultPin);
 		}
 	}
+}
+#endif
+
+UEdGraphPin* URuleConduitNode::GetInputPin() const
+{
+	return Pins[0];
+}
+
+UEdGraphPin* URuleConduitNode::GetOutputPin() const
+{
+	return Pins[1];
+}
+
+FString URuleConduitNode::GetStateName() const
+{
+#if false
+	return (BoundGraph != NULL) ? *(BoundGraph->GetName()) : TEXT("(null)");
+#else
+	return TEXT("(null)");
 #endif
 }
 
 FString URuleConduitNode::GetDesiredNewNodeName() const
 {
 	return TEXT("Conduit");
-}
-
-void URuleConduitNode::PostPasteNode()
-{
-	// Find an interesting name, but try to keep the same if possible
-	TSharedPtr<INameValidatorInterface> NameValidator = FNameValidatorFactory::MakeValidator(this);
-	FBlueprintEditorUtils::RenameGraphWithSuggestion(BoundGraph, NameValidator, GetStateName());
-	Super::PostPasteNode();
 }
 
 #undef LOCTEXT_NAMESPACE

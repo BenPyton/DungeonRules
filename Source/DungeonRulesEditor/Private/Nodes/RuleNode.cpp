@@ -1,9 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-/*=============================================================================
-	DungeonRuleNode.cpp
-=============================================================================*/
-
 #include "RuleNode.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "RuleTransitionNode.h"
@@ -15,17 +11,11 @@
 
 #define LOCTEXT_NAMESPACE "DungeonRuleNode"
 
-/////////////////////////////////////////////////////
-// UDungeonRuleNode
-
 URuleNode::URuleNode()
 	: Super()
 	, NodeName(TEXT("None"))
 {
 	bCanRenameNode = true;
-#if false
-	bAlwaysResetOnEntry = false;
-#endif
 }
 
 void URuleNode::AllocateDefaultPins()
@@ -58,18 +48,6 @@ FText URuleNode::GetTooltipText() const
 	return LOCTEXT("DungeonRuleNode_Tooltip", "This is a state");
 }
 
-#if false
-void URuleNode::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
-{
-	FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
-	if (PropertyName == FName(TEXT("StateType")))
-	{
-	}
-
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-}
-#endif
-
 FString URuleNode::GetStateName() const
 {
 #if false
@@ -90,20 +68,6 @@ UEdGraphPin* URuleNode::GetOutputPin() const
 {
 	return Pins[1];
 }
-
-#if false
-UEdGraphPin* URuleNode::GetPoseSinkPinInsideState() const
-{
-	if (UDungeonRulesGraph* StateGraph = Cast<UDungeonRulesGraph>(BoundGraph))
-	{
-		return (StateGraph->MyResultNode != NULL) ? StateGraph->MyResultNode->FindPin(TEXT("Result")) : NULL;
-	}
-	else
-	{
-		return NULL;
-	}
-}
-#endif
 
 void URuleNode::PostPasteNode()
 {

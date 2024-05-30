@@ -190,23 +190,6 @@ void URuleNodeBase::GetTransitionList(TArray<URuleTransitionNode*>& OutTransitio
 		}
 	}
 
-#if false
-	// Bidirectional transitions where we are the 'backwards' link.
-	// Conduits and other states types that don't support bidirectional transitions should hide it from the details panel.
-	for (int32 LinkIndex = 0; LinkIndex < Pins[0]->LinkedTo.Num(); ++LinkIndex)
-	{
-		UEdGraphNode* TargetNode = Pins[0]->LinkedTo[LinkIndex]->GetOwningNode();
-		if (URuleTransitionNode* Transition = Cast<URuleTransitionNode>(TargetNode))
-		{
-			// Anim state nodes that don't support bidirectional transitions should hide this property in FAnimTransitionNodeDetails::CustomizeDetails
-			if (Transition->Bidirectional)
-			{
-				OutTransitions.Add(Transition);
-			}
-		}
-	}
-#endif
-
 	// Sort the transitions by priority order, lower numbers are higher priority
 	if (bWantSortedList)
 	{

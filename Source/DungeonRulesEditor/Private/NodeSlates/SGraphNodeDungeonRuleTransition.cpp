@@ -123,6 +123,7 @@ TSharedRef<SWidget> SGraphNodeDungeonRuleTransition::GenerateRichTooltip()
 {
 	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
 
+#if false
 	if (TransNode->BoundGraph == NULL)
 	{
 		return SNew(STextBlock).Text(LOCTEXT("NoAnimGraphBoundToNodeMessage", "Error: No graph"));
@@ -156,35 +157,6 @@ TSharedRef<SWidget> SGraphNodeDungeonRuleTransition::GenerateRichTooltip()
 			.Text(TooltipDesc)
 		];
 
-#if false
-	if(TransNode->bAutomaticRuleBasedOnSequencePlayerInState)
-	{
-		if (CanExecPin != nullptr && CanExecPin->LinkedTo.Num() > 0)
-		{
-			Widget->AddSlot()
-				.AutoHeight()
-				.Padding(2.0f)
-				[
-					SNew(STextBlock)
-					.TextStyle(FAppStyle::Get(), TEXT("Graph.TransitionNode.TooltipRule"))
-					.Text(LOCTEXT("AnimGraphNodeAutomaticRuleWarning_ToolTip", "Warning : Automatic Rule Based Transition will override graph exit rule."))
-					.ColorAndOpacity(FCoreStyle::Get().GetColor("ErrorReporting.WarningBackgroundColor"))
-				];
-		}
-		else
-		{
-			Widget->AddSlot()
-				.AutoHeight()
-				.Padding(2.0f)
-				[
-					SNew(STextBlock)
-					.TextStyle(FAppStyle::Get(), TEXT("Graph.TransitionNode.TooltipRule"))
-					.Text(LOCTEXT("AnimGraphNodeAutomaticRule_ToolTip", "Automatic Rule"))
-				];
-		}
-	}
-	else
-#endif
 	{
 		Widget->AddSlot()
 		.AutoHeight()
@@ -211,6 +183,9 @@ TSharedRef<SWidget> SGraphNodeDungeonRuleTransition::GenerateRichTooltip()
 		];
 			
 	return Widget;
+#else
+	return SNew(STextBlock).Text(FText::FromString(TEXT("Rich Tooltip")));
+#endif
 }
 
 TSharedPtr<SToolTip> SGraphNodeDungeonRuleTransition::GetComplexTooltip()

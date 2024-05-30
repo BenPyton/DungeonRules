@@ -17,6 +17,7 @@
 #include "Templates/SharedPointer.h"
 #include "UObject/Object.h"
 #include "UObject/WeakObjectPtr.h"
+#include "DungeonRulesEdTypes.h"
 
 class FArchive;
 
@@ -40,8 +41,8 @@ void URuleAliasNode::Serialize(FArchive& Ar)
 
 void URuleAliasNode::AllocateDefaultPins()
 {
-	CreatePin(EGPD_Input, TEXT("Transition"), TEXT("In"));
-	CreatePin(EGPD_Output, TEXT("Transition"), TEXT("Out"));
+	CreatePin(EGPD_Input, DungeonRulesPinCategory::Transition, TEXT("In"));
+	CreatePin(EGPD_Output, DungeonRulesPinCategory::Transition, TEXT("Out"));
 }
 
 void URuleAliasNode::ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const

@@ -10,10 +10,6 @@
 //#include "DungeonRulesGraph.h"
 //#include "DungeonRulesTransitionGraph.h"
 //#include "DungeonRulesTransitionSchema.h"
-//#include "DungeonRulesCustomTransitionGraph.h"
-//#include "DungeonRulesCustomTransitionSchema.h"
-//#include "AnimGraphNode_BlendSpacePlayer.h"
-//#include "AnimGraphNode_SequencePlayer.h"
 //#include "AnimGraphNode_StateResult.h"
 //#include "AnimGraphNode_TransitionResult.h"
 #include "RuleConduitNode.h"
@@ -21,7 +17,6 @@
 #include "EdGraphUtilities.h"
 #include "Kismet2/Kismet2NameValidators.h"
 #include "ScopedTransaction.h"
-//#include "Animation/BlendProfile.h"
 #include "UObject/UE5MainStreamObjectVersion.h"
 #include "DungeonRulesEdTypes.h"
 
@@ -57,19 +52,6 @@ protected:
 	virtual FString& AccessShareDataName(URuleTransitionNode* Node) override;
 	virtual FGuid& AccessShareDataGuid(URuleTransitionNode* Node) override;
 };
-
-//////////////////////////////////////////////////////////////////////////
-// FRuleTransitionNodeSharedCrossfadeHelper
-
-class PROCEDURALDUNGEONEDITOR_API FRuleTransitionNodeSharedCrossfadeHelper : public IRuleTransitionNodeSharedDataHelper
-{
-protected:
-	virtual bool CheckIfNodesShouldShareData(const URuleTransitionNode* NodeA, const URuleTransitionNode* NodeB) override;
-	virtual bool CheckIfHasDataToShare(const URuleTransitionNode* Node) override;
-	virtual void ShareData(URuleTransitionNode* NodeWhoWantsToShare, const URuleTransitionNode* ShareFrom) override;
-	virtual FString& AccessShareDataName(URuleTransitionNode* Node) override;
-	virtual FGuid& AccessShareDataGuid(URuleTransitionNode* Node) override;
-};
 #endif
 
 /////////////////////////////////////////////////////
@@ -79,17 +61,8 @@ URuleTransitionNode::URuleTransitionNode()
 	: Super()
 {
 #if false
-	CrossfadeDuration = 0.2f;
-	BlendMode = EAlphaBlendOption::HermiteCubic;
-	bAutomaticRuleBasedOnSequencePlayerInState = false;
-	AutomaticRuleTriggerTime = -1.f;
 	bSharedRules = false;
 	SharedRulesGuid.Invalidate();
-	bSharedCrossfade = false;
-	SharedCrossfadeIdx = INDEX_NONE;
-	SharedCrossfadeGuid.Invalidate();
-	Bidirectional = false;
-	LogicType = ETransitionLogicType::TLT_StandardBlend;
 #endif
 	PriorityOrder = 1;
 }
@@ -104,7 +77,9 @@ void URuleTransitionNode::AllocateDefaultPins()
 
 void URuleTransitionNode::PostPlacedNewNode()
 {
+#if false
 	CreateBoundGraph();
+#endif
 }
 
 void URuleTransitionNode::PostLoad()
@@ -117,55 +92,8 @@ void URuleTransitionNode::PostLoad()
 	{
 		FRuleTransitionNodeSharedRulesHelper().MakeSureGuidExists(this);
 	}
-
-	// make sure we have guid for shared crossfade 
-	if (bSharedCrossfade && !SharedCrossfadeGuid.IsValid())
-	{
-		FRuleTransitionNodeSharedCrossfadeHelper().MakeSureGuidExists(this);
-	}
-
-	if(GetLinkerUEVersion() < VER_UE4_ADDED_NON_LINEAR_TRANSITION_BLENDS)
-	{
-		switch(CrossfadeMode_DEPRECATED)
-		{
-			case ETransitionBlendMode::TBM_Linear:
-				BlendMode = EAlphaBlendOption::Linear;
-				break;
-			case ETransitionBlendMode::TBM_Cubic:
-				// Old cubic was actually an in/out hermite polynomial (FMath::SmoothStep)
-				BlendMode = EAlphaBlendOption::HermiteCubic;
-				break;
-			default:
-				break;
-		}
-	}
-
-	if(GetLinkerCustomVersion(FAnimPhysObjectVersion::GUID) < FAnimPhysObjectVersion::FixupBadBlendProfileReferences)
-	{
-		ValidateBlendProfile();
-	}
 #endif
 }
-
-#if false
-bool URuleTransitionNode::ValidateBlendProfile()
-{
-	if(BlendProfile)
-	{
-		// validate the skeleton of our blend profile
-		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNodeChecked(this);
-		UAnimBlueprint* AnimBP = CastChecked<UAnimBlueprint>(Blueprint);
-
-		if(AnimBP->TargetSkeleton && !AnimBP->TargetSkeleton->BlendProfiles.Contains(BlendProfile))
-		{
-			BlendProfile = nullptr;
-			return false;
-		}
-	}
-
-	return true;
-}
-#endif
 
 void URuleTransitionNode::PostPasteNode()
 {
@@ -174,12 +102,6 @@ void URuleTransitionNode::PostPasteNode()
 	{
 		FRuleTransitionNodeSharedRulesHelper().UpdateSharedData(this, MakeShareable(new FRuleTransitionNodeSharedRulesNameValidator(this)));
 	}
-
-	if (bSharedCrossfade)
-	{
-		FRuleTransitionNodeSharedCrossfadeHelper().UpdateSharedData(this, MakeShareable(new FRuleTransitionNodeSharedCrossfadeNameValidator(this)));
-	}
-#endif
 
 	if (BoundGraph == NULL)
 	{
@@ -193,23 +115,6 @@ void URuleTransitionNode::PostPasteNode()
 		GraphNode->PostPasteNode();
 		GraphNode->ReconstructNode();
 	}
-
-#if false
-	if(CustomTransitionGraph)
-	{
-		// Needs to be added to the parent graph
-		UEdGraph* ParentGraph = GetGraph();
-
-		if(ParentGraph->SubGraphs.Find(CustomTransitionGraph) == INDEX_NONE)
-		{
-			ParentGraph->SubGraphs.Add(CustomTransitionGraph);
-		}
-
-		// Transactional flag is lost in copy/paste, restore it.
-		CustomTransitionGraph->SetFlags(RF_Transactional);
-	}
-
-	ValidateBlendProfile();
 #endif
 
 	Super::PostPasteNode();
@@ -231,11 +136,14 @@ FText URuleTransitionNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 	URuleNodeBase* PrevState = GetPreviousState();
 	URuleNodeBase* NextState = GetNextState();
 
-	/*if (!SharedRulesName.IsEmpty())
+#if false
+	if (!SharedRulesName.IsEmpty())
 	{
 		return FText::FromString(SharedRulesName);
 	}
-	else*/ if ((PrevState != NULL) && (NextState != NULL))
+	else
+#endif
+	if ((PrevState != NULL) && (NextState != NULL))
 	{
 		FFormatNamedArguments Args;
 		Args.Add(TEXT("PrevState"), FText::FromString(PrevState->GetStateName()));
@@ -243,6 +151,7 @@ FText URuleTransitionNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 
 		return FText::Format(LOCTEXT("PrevStateToNewState", "{PrevState} to {NextState}"), Args);
 	}
+#if false
 	else
 	{
 		FFormatNamedArguments Args;
@@ -253,6 +162,8 @@ FText URuleTransitionNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 		//        times).
 		return FText::Format(LOCTEXT("TransitioNState", "Trans {BoundGraph}}"), Args);
 	}
+#endif
+	return FText::FromString(TEXT("NULL"));
 }
 
 FText URuleTransitionNode::GetTooltipText() const
@@ -406,9 +317,11 @@ TArray<URuleTransitionNode*> URuleTransitionNode::GetListTransitionNodesToRelink
 void URuleTransitionNode::PrepareForCopying()
 {
 	Super::PrepareForCopying();
+#if false
 	// move bound graph node here, so during copying it will be referenced
 	// for shared nodes at least one of them has to be referencing it, so we will be fine
 	BoundGraph->Rename(NULL, this, REN_DoNotDirty | REN_DontCreateRedirectors);
+#endif
 }
 
 void URuleTransitionNode::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
@@ -449,7 +362,11 @@ void URuleTransitionNode::PostEditChangeProperty(struct FPropertyChangedEvent& P
 
 FString URuleTransitionNode::GetStateName() const
 {
+#if false
 	return (BoundGraph != NULL) ? *(BoundGraph->GetName()) : TEXT("(null)");
+#else
+	return TEXT("(null)");
+#endif
 }
 
 #if false
@@ -458,29 +375,6 @@ void URuleTransitionNode::MakeRulesShareable(FString ShareName)
 	bSharedRules = true;
 	SharedRulesName = ShareName;
 	SharedRulesGuid = FGuid::NewGuid();
-}
-
-void URuleTransitionNode::MakeCrossfadeShareable(FString ShareName)
-{
-	// Give us a unique idx. This remaps every SharedCrossfadeIdx in the graph (in case some were deleted)
-	UEdGraph* CurrentGraph = GetGraph();
-
-	SharedCrossfadeIdx = INDEX_NONE;
-	TArray<int32> Remap;
-	for (int32 idx=0; idx < CurrentGraph->Nodes.Num(); idx++)
-	{
-		if (URuleTransitionNode* Node = Cast<URuleTransitionNode>(CurrentGraph->Nodes[idx]))
-		{
-			if (Node->SharedCrossfadeIdx != INDEX_NONE || Node == this)
-			{
-				Node->SharedCrossfadeIdx = Remap.AddUnique(Node->SharedCrossfadeIdx)+1; // Remaps existing index to lowest index available
-			}
-		}
-	}
-
-	bSharedCrossfade = true;
-	SharedCrossfadeName = ShareName;
-	SharedCrossfadeGuid = FGuid::NewGuid();
 }
 
 void URuleTransitionNode::UnshareRules()
@@ -494,14 +388,6 @@ void URuleTransitionNode::UnshareRules()
 		BoundGraph = NULL;
 		CreateBoundGraph();
 	}
-}
-
-void URuleTransitionNode::UnshareCrossade()
-{
-	bSharedCrossfade = false;
-	SharedCrossfadeIdx = INDEX_NONE;
-	SharedCrossfadeName.Empty();
-	SharedCrossfadeGuid.Invalidate();
 }
 
 void URuleTransitionNode::UseSharedRules(const URuleTransitionNode* Node)
@@ -534,70 +420,12 @@ void URuleTransitionNode::UseSharedRules(const URuleTransitionNode* Node)
 	{
 		FBlueprintEditorUtils::RemoveGraph(Blueprint, GraphToDelete);
 	}
-
-	// If this node has shared crossfade settings, and we currently dont... share with it automatically.
-	// We'll see if this is actually helpful or just confusing. I think it might be a common operation
-	// and this avoid having to manually select to share the rules and then share the crossfade settings.
-	if ((SharedCrossfadeIdx == INDEX_NONE) && (Node->SharedCrossfadeIdx != INDEX_NONE))
-	{
-		UseSharedCrossfade(Node);
-	}
-}
-
-void URuleTransitionNode::UseSharedCrossfade(const URuleTransitionNode* Node)
-{
-	if(Node == this || Node == nullptr)
-	{
-		return;
-	}
-
-	FScopedTransaction Transaction(LOCTEXT("UseSharedCrossfade", "Use Shared Crossfade"));
-
-	Modify();
-
-	bSharedCrossfade = Node->bSharedCrossfade;
-	SharedCrossfadeName = Node->SharedCrossfadeName;
-	SharedCrossfadeGuid = Node->SharedCrossfadeGuid;
-	CopyCrossfadeSettings(Node);
-}
-
-void URuleTransitionNode::CopyCrossfadeSettings(const URuleTransitionNode* SrcNode)
-{
-	CrossfadeDuration = SrcNode->CrossfadeDuration;
-	CrossfadeMode_DEPRECATED = SrcNode->CrossfadeMode_DEPRECATED;
-	BlendMode = SrcNode->BlendMode;
-	CustomBlendCurve = SrcNode->CustomBlendCurve;
-	BlendProfile = SrcNode->BlendProfile;
-	SharedCrossfadeIdx = SrcNode->SharedCrossfadeIdx;
-	SharedCrossfadeName = SrcNode->SharedCrossfadeName;
-	SharedCrossfadeGuid = SrcNode->SharedCrossfadeGuid;
-}
-
-void URuleTransitionNode::PropagateCrossfadeSettings()
-{
-	UEdGraph* CurrentGraph = GetGraph();
-	for (int32 idx = 0; idx < CurrentGraph->Nodes.Num(); idx++)
-	{
-		if (URuleTransitionNode* Node = Cast<URuleTransitionNode>(CurrentGraph->Nodes[idx]))
-		{
-			if (Node->SharedCrossfadeIdx != INDEX_NONE && Node->SharedCrossfadeGuid == SharedCrossfadeGuid)
-			{
-				Node->Modify();
-				Node->CopyCrossfadeSettings(this);
-			}
-		}
-	}
-}
-
-bool URuleTransitionNode::IsReverseTrans(const URuleNodeBase* Node)
-{
-	return (Bidirectional && GetNextState() == Node);
 }
 #endif
 
+#if false
 void URuleTransitionNode::CreateBoundGraph()
 {
-#if false
 	// Create a new animation graph
 	check(BoundGraph == NULL);
 	BoundGraph = FBlueprintEditorUtils::CreateNewGraph(this, NAME_None, UDungeonRulesTransitionGraph::StaticClass(), UDungeonRulesTransitionSchema::StaticClass());
@@ -617,36 +445,6 @@ void URuleTransitionNode::CreateBoundGraph()
 	{
 		ParentGraph->SubGraphs.Add(BoundGraph);
 	}
-#endif
-}
-
-#if false
-void URuleTransitionNode::CreateCustomTransitionGraph()
-{
-	// Create a new animation graph
-	check(CustomTransitionGraph == NULL);
-	CustomTransitionGraph = FBlueprintEditorUtils::CreateNewGraph(
-		this,
-		NAME_None,
-		UDungeonRulesCustomTransitionGraph::StaticClass(),
-		UDungeonRulesCustomTransitionSchema::StaticClass());
-	check(CustomTransitionGraph);
-
-	// Find an interesting name
-	FEdGraphUtilities::RenameGraphToNameOrCloseToName(CustomTransitionGraph, TEXT("CustomTransition"));
-
-	// Initialize the anim graph
-	const UEdGraphSchema* Schema = CustomTransitionGraph->GetSchema();
-	Schema->CreateDefaultNodesForGraph(*CustomTransitionGraph);
-
-	// Add the new graph as a child of our parent graph
-	UEdGraph* ParentGraph = GetGraph();
-
-	if(ParentGraph->SubGraphs.Find(CustomTransitionGraph) == INDEX_NONE)
-	{
-		ParentGraph->Modify();
-		ParentGraph->SubGraphs.Add(CustomTransitionGraph);
-	}
 }
 #endif
 
@@ -662,9 +460,9 @@ void URuleTransitionNode::DestroyNode()
 #if false
 	// BoundGraph may be shared with another graph, if so, don't remove it here
 	UEdGraph* GraphToRemove = IsBoundGraphShared() ? NULL : GetBoundGraph();
-#endif
 
 	BoundGraph = NULL;
+#endif
 	Super::DestroyNode();
 
 #if false
@@ -672,12 +470,6 @@ void URuleTransitionNode::DestroyNode()
 	{
 		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNodeChecked(this);
 		FBlueprintEditorUtils::RemoveGraph(Blueprint, GraphToRemove, EGraphRemoveFlags::Recompile);
-	}
-
-	if (CustomTransitionGraph)
-	{
-		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNodeChecked(this);
-		FBlueprintEditorUtils::RemoveGraph(Blueprint, CustomTransitionGraph, EGraphRemoveFlags::Recompile);
 	}
 #endif
 }
@@ -708,10 +500,10 @@ bool URuleTransitionNode::IsBoundGraphShared() const
 }
 #endif
 
+#if false
 void URuleTransitionNode::ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const
 {
 	Super::ValidateNodeDuringCompilation(MessageLog);
-#if false
 	if (UAnimationTransitionGraph* TransGraph = Cast<UAnimationTransitionGraph>(BoundGraph))
 	{
 		UAnimGraphNode_TransitionResult* ResultNode = TransGraph->GetResultNode();
@@ -790,7 +582,6 @@ void URuleTransitionNode::ValidateNodeDuringCompilation(class FCompilerResultsLo
 	{
 		MessageLog.Error(TEXT("@@ contains an invalid or NULL BoundGraph.  Please delete and recreate the transition."), this);
 	}
-#endif
 }
 
 UObject* URuleTransitionNode::GetJumpTargetForDoubleClick() const
@@ -802,17 +593,13 @@ UObject* URuleTransitionNode::GetJumpTargetForDoubleClick() const
 TArray<UEdGraph*> URuleTransitionNode::GetSubGraphs() const
 { 
 	TArray<UEdGraph*> SubGraphs;
-#if false
 	if(!IsBoundGraphShared())
 	{
 		SubGraphs.Add(BoundGraph);
 	}
-	SubGraphs.Add(CustomTransitionGraph);
-#else
-	SubGraphs.Add(BoundGraph);
-#endif
 	return SubGraphs; 
 }
+#endif
 
 #if false
 //////////////////////////////////////////////////////////////////////////
@@ -903,34 +690,6 @@ FString& FRuleTransitionNodeSharedRulesHelper::AccessShareDataName(URuleTransiti
 FGuid& FRuleTransitionNodeSharedRulesHelper::AccessShareDataGuid(URuleTransitionNode* Node)
 {
 	return Node->SharedRulesGuid;
-}
-
-//////////////////////////////////////////////////////////////////////////
-// FRuleTransitionNodeSharedCrossfadeHelper
-
-bool FRuleTransitionNodeSharedCrossfadeHelper::CheckIfNodesShouldShareData(const URuleTransitionNode* NodeA, const URuleTransitionNode* NodeB)
-{
-	return NodeA->bSharedCrossfade && NodeB->bSharedCrossfade && NodeA->SharedCrossfadeGuid == NodeB->SharedCrossfadeGuid;
-}
-
-bool FRuleTransitionNodeSharedCrossfadeHelper::CheckIfHasDataToShare(const URuleTransitionNode* Node)
-{
-	return Node->SharedCrossfadeIdx != INDEX_NONE;
-}
-
-void FRuleTransitionNodeSharedCrossfadeHelper::ShareData(URuleTransitionNode* NodeWhoWantsToShare, const URuleTransitionNode* ShareFrom)
-{
-	NodeWhoWantsToShare->UseSharedCrossfade(ShareFrom);
-}
-
-FString& FRuleTransitionNodeSharedCrossfadeHelper::AccessShareDataName(URuleTransitionNode* Node)
-{
-	return Node->SharedCrossfadeName;
-}
-
-FGuid& FRuleTransitionNodeSharedCrossfadeHelper::AccessShareDataGuid(URuleTransitionNode* Node)
-{
-	return Node->SharedCrossfadeGuid;
 }
 #endif
 
