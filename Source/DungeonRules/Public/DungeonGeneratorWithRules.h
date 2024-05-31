@@ -25,18 +25,33 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
-#include "RuleTransitionCondition.generated.h"
+#include "DungeonGenerator.h"
+#include "DungeonGeneratorWithRules.generated.h"
 
-class URoomData;
-class ADungeonGenerator;
+class UDungeonRule;
+class UDungeonRules;
 
-UCLASS(Abstract, Blueprintable, BlueprintType, EditInlineNew)
-class DUNGEONRULES_API URuleTransitionCondition : public UObject
+UCLASS(ClassGroup = "Procedural Dungeon")
+class DUNGEONRULES_API ADungeonGeneratorWithRules : public ADungeonGenerator
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Dungeon Rules")
-	bool Check(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
+	//~ Begin ADungeonGenerator Interface
+	virtual URoomData* ChooseFirstRoomData_Implementation() override;
+	virtual URoomData* ChooseNextRoomData_Implementation(const URoomData* CurrentRoom, const FDoorDef& DoorData, int& DoorIndex) override;
+	//virtual TSubclassOf<ADoor> ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoomData* NextRoom, const UDoorType* DoorType, bool& Flipped) override;
+	//virtual bool IsValidDungeon_Implementation() override;
+	virtual bool ContinueToAddRoom_Implementation() override;
+	virtual void OnGenerationInit_Implementation() override;
+
+	//~ End ADungeonGenerator Interface
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dungeon Rules")
+	TObjectPtr<UDungeonRules> DungeonRules {nullptr};
+
+private:
+	UPROPERTY(Transient)
+	TObjectPtr<const UDungeonRule> CurrentRule {nullptr};
 };

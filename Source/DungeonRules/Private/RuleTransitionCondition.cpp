@@ -25,7 +25,7 @@
 #include "RuleTransitionCondition.h"
 #include "DungeonRulesLog.h"
 
-bool URuleTransitionCondition::Check_Implementation(ADungeonGenerator* Generator, URoomData* PreviousRoom) const
+bool URuleTransitionCondition::Check_Implementation(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
 {
 	RulesLog_Error("Check is not implemented in %s.", *GetNameSafe(this));
 	return false;

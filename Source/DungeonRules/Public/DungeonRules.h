@@ -40,19 +40,19 @@ struct FDungeonRuleTransition
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(Instanced)
+	// The priority over other transitions.
+	// The less this number is, the more priority the transition has.
+	UPROPERTY(EditAnywhere, Category = "Transition")
+	int32 Priority {0};
+
+	UPROPERTY(EditAnywhere, Instanced, Category = "Transition")
 	URuleTransitionCondition* Condition {nullptr};
 
 	UPROPERTY()
 	TWeakObjectPtr<class UDungeonRule> NextRule {nullptr};
 
-	// The priority over other transitions.
-	// The less this number is, the more priority the transition has.
-	UPROPERTY()
-	int32 Priority {0};
-
 public:
-	bool CheckCondition(ADungeonGenerator* Generator, URoomData* PreviousRoom) const;
+	bool CheckCondition(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
 };
 
 UCLASS()
@@ -61,14 +61,14 @@ class UDungeonRule : public UObject
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(Instanced)
-	UDungeonRoomChooser* RoomChooser {nullptr};
+	UPROPERTY(EditAnywhere, Instanced, Category = "Dungeon Rule")
+	TObjectPtr<UDungeonRoomChooser> RoomChooser {nullptr};
 
 	UPROPERTY()
 	TArray<FDungeonRuleTransition> Transitions;
 
 public:
-	const UDungeonRule* GetNextRule(ADungeonGenerator* Generator, URoomData* PreviousRoom) const;
+	const UDungeonRule* GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
 };
 
 /**
@@ -83,20 +83,20 @@ public:
 	UDungeonRules();
 
 	UPROPERTY()
-	TArray<UDungeonRule*> Rules;
+	TArray<TObjectPtr<UDungeonRule>> Rules;
+
+	UPROPERTY()
+	TObjectPtr<UDungeonRule> FirstRule;
 
 public:
-	URoomData* GetFirstRoomData(ADungeonGenerator* Generator);
-	URoomData* GetNextRoomData(ADungeonGenerator* Generator, URoomData* PreviousRoom, const FDoorDef& DoorData, int& DoorIndex);
-	void TransitToNextRule(ADungeonGenerator* Generator, URoomData* RoomData);
+	URoomData* GetFirstRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule) const;
+	URoomData* GetNextRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const URoomData* PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const;
+	const UDungeonRule* GetNextRule(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const URoomData* RoomData) const;
+	FORCEINLINE const UDungeonRule* GetFirstRule() const { return FirstRule; }
 
 #if WITH_EDITORONLY_DATA
 public:
 	UPROPERTY()
 	class UEdGraph* EdGraph {nullptr};
 #endif
-
-private:
-	UPROPERTY(Transient)
-	const UDungeonRule* CurrentRule {nullptr};
 };

@@ -29,7 +29,7 @@
 #include "DungeonRoomChooser.h"
 #include "RuleTransitionCondition.h"
 
-const UDungeonRule* UDungeonRule::GetNextRule(ADungeonGenerator* Generator, URoomData* PreviousRoom) const
+const UDungeonRule* UDungeonRule::GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
 {
 	const UDungeonRule* NextRule = this;
 	int32 CurrentPriority = UINT32_MAX;
@@ -48,7 +48,7 @@ const UDungeonRule* UDungeonRule::GetNextRule(ADungeonGenerator* Generator, URoo
 	return NextRule;
 }
 
-bool FDungeonRuleTransition::CheckCondition(ADungeonGenerator* Generator, URoomData* PreviousRoom) const
+bool FDungeonRuleTransition::CheckCondition(ADungeonGenerator* Generator,  const URoomData* PreviousRoom) const
 {
 	if (!IsValid(Condition))
 		return true;
@@ -61,7 +61,7 @@ UDungeonRules::UDungeonRules()
 {
 }
 
-URoomData* UDungeonRules::GetFirstRoomData(ADungeonGenerator* Generator)
+URoomData* UDungeonRules::GetFirstRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule) const
 {
 	if (!IsValid(CurrentRule))
 	{
@@ -83,11 +83,10 @@ URoomData* UDungeonRules::GetFirstRoomData(ADungeonGenerator* Generator)
 		return nullptr;
 	}
 
-	TransitToNextRule(Generator, Room);
 	return Room;
 }
 
-URoomData* UDungeonRules::GetNextRoomData(ADungeonGenerator* Generator, URoomData* PreviousRoom, const FDoorDef& DoorData, int& DoorIndex)
+URoomData* UDungeonRules::GetNextRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const URoomData* PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const
 {
 	if (!IsValid(CurrentRule))
 	{
@@ -109,15 +108,13 @@ URoomData* UDungeonRules::GetNextRoomData(ADungeonGenerator* Generator, URoomDat
 		return nullptr;
 	}
 
-	TransitToNextRule(Generator, Room);
 	return Room;
 }
 
-void UDungeonRules::TransitToNextRule(ADungeonGenerator* Generator, URoomData* Room)
+const UDungeonRule* UDungeonRules::GetNextRule(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const URoomData* Room) const
 {
 	if (!IsValid(CurrentRule))
-		return;
+		return nullptr;
 
-	const UDungeonRule* NextRule = CurrentRule->GetNextRule(Generator, Room);
-	CurrentRule = NextRule;
+	return CurrentRule->GetNextRule(Generator, Room);
 }
