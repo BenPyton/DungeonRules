@@ -3,6 +3,7 @@
 #include "DungeonRulesConnectionDrawingPolicy.h"
 
 #include "Nodes/RuleEntryNode.h"
+#include "Nodes/RuleExitNode.h"
 #include "Nodes/RuleNodeBase.h"
 #include "Nodes/RuleTransitionNode.h"
 #include "NodeSlates/SGraphNodeDungeonRuleTransition.h"
@@ -59,7 +60,12 @@ void FDungeonRulesConnectionDrawingPolicy::DetermineWiringStyle(UEdGraphPin* Out
 	const bool bDeemphasizeUnhoveredPins = HoveredPins.Num() > 0;
 	if (bDeemphasizeUnhoveredPins)
 	{
-		ApplyHoverDeemphasis(OutputPin, InputPin, /*inout*/ Params.WireThickness, /*inout*/ Params.WireColor);
+		// These "Valid" and "MaybeInvalid" pins are a hack in case the preview arrow is dragged from the input pin (e.g. from the exit node)
+		// Because "ApplyHoverDeemphasis" function will need a valid "Valid" pin, and "MabeInvalid" pin can be nullptr in order to make it emphasized.
+		const bool bPreviewLinkFromInputPin = (!OutputPin && InputPin);
+		UEdGraphPin* ValidPin = (bPreviewLinkFromInputPin) ? InputPin : OutputPin;
+		UEdGraphPin* MaybeInvalidPin = (bPreviewLinkFromInputPin) ? OutputPin : InputPin;
+		ApplyHoverDeemphasis(ValidPin, MaybeInvalidPin, /*inout*/ Params.WireThickness, /*inout*/ Params.WireColor);
 	}
 
 	// Make the transition that is currently relinked, semi-transparent.
@@ -152,25 +158,28 @@ void FDungeonRulesConnectionDrawingPolicy::Draw(TMap<TSharedRef<SWidget>, FArran
 void FDungeonRulesConnectionDrawingPolicy::DrawPreviewConnector(const FGeometry& PinGeometry, const FVector2D& StartPoint, const FVector2D& EndPoint, UEdGraphPin* Pin)
 {
 	FConnectionParams Params;
-	DetermineWiringStyle(Pin, nullptr, /*inout*/ Params);
+	UEdGraphPin* InputPin = (Pin->Direction == EGPD_Input) ? Pin : nullptr;
+	UEdGraphPin* OutputPin = (Pin->Direction == EGPD_Output) ? Pin : nullptr;
+	DetermineWiringStyle(OutputPin, InputPin, /*inout*/ Params);
 
-	const FVector2D SeedPoint = EndPoint;
-	const FVector2D AdjustedStartPoint = FGeometryHelper::FindClosestPointOnGeom(PinGeometry, SeedPoint);
+	const FVector2D OutputPoint = (OutputPin) ? FGeometryHelper::FindClosestPointOnGeom(PinGeometry, EndPoint) : StartPoint;
+	const FVector2D InputPoint = (InputPin) ? FGeometryHelper::FindClosestPointOnGeom(PinGeometry, StartPoint) : EndPoint;
 
 	Params.bUserFlag2 = false; // bUserFlag2 is used to indicate whether the drawn arrow is a preview transition (the temporary transition when creating or relinking).
-	DrawSplineWithArrow(AdjustedStartPoint, EndPoint, Params);
+	DrawSplineWithArrow(OutputPoint, InputPoint, Params);
 }
 
 
 void FDungeonRulesConnectionDrawingPolicy::DrawSplineWithArrow(const FVector2D& StartAnchorPoint, const FVector2D& EndAnchorPoint, const FConnectionParams& Params)
 {
 	Internal_DrawLineWithArrow(StartAnchorPoint, EndAnchorPoint, Params);
-
+#if false
 	// Is the connection bidirectional?
 	if (Params.bUserFlag1)
 	{
 		Internal_DrawLineWithArrow(EndAnchorPoint, StartAnchorPoint, Params);
 	}
+#endif
 }
 
 void FDungeonRulesConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVector2D& StartAnchorPoint, const FVector2D& EndAnchorPoint, const FConnectionParams& Params)

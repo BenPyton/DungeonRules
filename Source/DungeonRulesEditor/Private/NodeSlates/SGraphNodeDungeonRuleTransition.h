@@ -32,17 +32,17 @@ public:
 
 	void Construct(const FArguments& InArgs, URuleTransitionNode* InNode);
 
-	// SNodePanel::SNode interface
+	//~ Begin SNodePanel::SNode Interface
 	virtual void GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const override;
 	virtual void MoveTo(const FVector2D& NewPosition, FNodeSet& NodeFilter, bool bMarkDirty = true) override;
 	virtual bool RequiresSecondPassLayout() const override;
 	virtual void PerformSecondPassLayout(const TMap< UObject*, TSharedRef<SNode> >& NodeToWidgetLookup) const override;
-	// End of SNodePanel::SNode interface
+	//~ End SNodePanel::SNode Interface
 
-	// SGraphNode interface
+	//~ Begin SGraphNode Interface
 	virtual void UpdateGraphNode() override;
 	virtual TSharedPtr<SToolTip> GetComplexTooltip() override;
-	// End of SGraphNode interface
+	//~ End SGraphNode Interface
 
 	// SWidget interface
 	void OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
@@ -63,11 +63,10 @@ private:
 
 private:
 	FText GetPreviewCornerText(bool reverse) const;
+	FText GetTransitionDescription() const;
 	FSlateColor GetTransitionColor() const;
 	const FSlateBrush* GetTransitionIconImage() const;
+	FText GetTransitionPriorityOrder() const;
 
-	TSharedRef<SWidget> GenerateInlineDisplayOrEditingWidget(bool bShowGraphPreview);
 	TSharedRef<SWidget> GenerateRichTooltip();
-
-	FString GetCurrentDuration() const;
 };

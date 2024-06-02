@@ -53,9 +53,13 @@ public:
 	bool CanPasteNodes() const;
 	void DuplicateNodes();
 	bool CanDuplicateNodes() const;
-
 	bool CanCreateComment() const;
 	void OnCreateComment();
+	void OnRenameNode();
+	bool CanRenameNodes() const;
+
+	bool OnNodeVerifyTitleCommit(const FText& NewText, UEdGraphNode* NodeBeingChanged, FText& OutErrorMessage);
+	void OnNodeTitleCommitted(const FText& NewText, ETextCommit::Type CommitInfo, UEdGraphNode* NodeBeingChanged);
 
 /*
 	virtual void OnClassListUpdated();

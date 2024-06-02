@@ -89,10 +89,14 @@ void FDungeonRulesToolkit::CreateCommandList()
 		FCanExecuteAction::CreateRaw(this, &FDungeonRulesToolkit::CanDuplicateNodes)
 	);
 
-	GraphEditorCommands->MapAction(
-		FGraphEditorCommands::Get().CreateComment,
+	GraphEditorCommands->MapAction(FGraphEditorCommands::Get().CreateComment,
 		FExecuteAction::CreateRaw(this, &FDungeonRulesToolkit::OnCreateComment),
 		FCanExecuteAction::CreateRaw(this, &FDungeonRulesToolkit::CanCreateComment)
+	);
+
+	GraphEditorCommands->MapAction(FGenericCommands::Get().Rename,
+		FExecuteAction::CreateSP(this, &FDungeonRulesToolkit::OnRenameNode),
+		FCanExecuteAction::CreateSP(this, &FDungeonRulesToolkit::CanRenameNodes)
 	);
 }
 
@@ -337,8 +341,10 @@ TSharedRef<SGraphEditor> FDungeonRulesToolkit::CreateGraphEditorWidget()
 
 	SGraphEditor::FGraphEditorEvents InEvents;
 	InEvents.OnSelectionChanged = SGraphEditor::FOnSelectionChanged::CreateSP(this, &FDungeonRulesToolkit::OnSelectedNodesChanged);
-	//InEvents.OnTextCommitted = FOnNodeTextCommitted::CreateSP(this, &FDungeonRulesToolkit::OnNodeTitleCommitted);
+	InEvents.OnVerifyTextCommit = FOnNodeVerifyTextCommit::CreateSP(this, &FDungeonRulesToolkit::OnNodeVerifyTitleCommit);
+	InEvents.OnTextCommitted = FOnNodeTextCommitted::CreateSP(this, &FDungeonRulesToolkit::OnNodeTitleCommitted);
 	//InEvents.OnNodeDoubleClicked = FSingleNodeEvent::CreateSP(this, &FDungeonRulesToolkit::PlaySingleNode);
+
 
 	return SNew(SGraphEditor)
 		.AdditionalCommands(GraphEditorCommands)
@@ -784,6 +790,85 @@ void FDungeonRulesToolkit::OnCreateComment()
 		{
 			Action->PerformAction(EdGraph, nullptr, FVector2D());
 		}
+	}
+}
+
+void FDungeonRulesToolkit::OnRenameNode()
+{
+	TSharedPtr<SGraphEditor> CurrentGraphEditor = UpdateGraphEdPtr.Pin();
+	if (CurrentGraphEditor.IsValid())
+	{
+		const FGraphPanelSelectionSet SelectedNodes = GetSelectedNodes();
+		for (FGraphPanelSelectionSet::TConstIterator NodeIt(SelectedNodes); NodeIt; ++NodeIt)
+		{
+			UEdGraphNode* SelectedNode = Cast<UEdGraphNode>(*NodeIt);
+			if (SelectedNode != nullptr && SelectedNode->GetCanRenameNode())
+			{
+				//FKismetEditorUtilities::BringKismetToFocusAttentionOnObject(SelectedNode, true);
+				CurrentGraphEditor->IsNodeTitleVisible(SelectedNode, /*bRequestRename*/ true);
+				break;
+			}
+		}
+	}
+}
+
+bool FDungeonRulesToolkit::CanRenameNodes() const
+{
+	UEdGraph* EditingGraph = UpdateGraphEdPtr.Pin()->GetCurrentGraph();
+	if (!EditingGraph || !EditingGraph->bEditable)
+		return false;
+
+#if false
+	if (const UEdGraphNode* SelectedNode = GetSingleSelectedNode())
+	{
+		return SelectedNode->GetCanRenameNode();
+	}
+#endif
+
+	const FGraphPanelSelectionSet SelectedNodes = GetSelectedNodes();
+	for (const UObject* Node : SelectedNodes)
+	{
+		const UEdGraphNode* SelectedNode = Cast<const UEdGraphNode>(Node);
+		if (SelectedNode->GetCanRenameNode())
+			return true;
+	}
+
+	return false;
+}
+
+bool FDungeonRulesToolkit::OnNodeVerifyTitleCommit(const FText& NewText, UEdGraphNode* NodeBeingChanged, FText& OutErrorMessage)
+{
+
+	if (!NodeBeingChanged || !NodeBeingChanged->GetCanRenameNode())
+		return false;
+
+	// Clear off any existing error message 
+	NodeBeingChanged->ErrorMsg.Empty();
+	NodeBeingChanged->bHasCompilerMessage = false;
+
+	TSharedPtr<INameValidatorInterface> NameEntryValidator = FNameValidatorFactory::MakeValidator(NodeBeingChanged);
+
+	EValidatorResult Result = NameEntryValidator->IsValid(NewText.ToString(), true);
+	if (Result == EValidatorResult::Ok)
+		return true;
+
+	else if (UpdateGraphEdPtr.IsValid())
+	{
+		NodeBeingChanged->bHasCompilerMessage = true;
+		NodeBeingChanged->ErrorMsg = NameEntryValidator->GetErrorString(NewText.ToString(), Result);
+		NodeBeingChanged->ErrorType = EMessageSeverity::Error;
+	}
+
+	return false;
+}
+
+void FDungeonRulesToolkit::OnNodeTitleCommitted(const FText& NewText, ETextCommit::Type CommitInfo, UEdGraphNode* NodeBeingChanged)
+{
+	if (NodeBeingChanged)
+	{
+		const FScopedTransaction Transaction(NSLOCTEXT("K2_RenameNode", "RenameNode", "Rename Node"));
+		NodeBeingChanged->Modify();
+		NodeBeingChanged->OnRenameNode(NewText.ToString());
 	}
 }
 

@@ -24,6 +24,9 @@ public:
 	UPROPERTY()
 	TObjectPtr<class URuleEntryNode> EntryNode;
 
+	UPROPERTY()
+	TObjectPtr<class URuleExitNode> ExitNode;
+
 	virtual void OnSave();
 	//virtual void RefreshNodes(); // used in DungeonRulesToolkit.cpp --- Is Needed?
 

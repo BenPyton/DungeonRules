@@ -19,6 +19,7 @@
 #include "ScopedTransaction.h"
 #include "UObject/UE5MainStreamObjectVersion.h"
 #include "DungeonRulesEdTypes.h"
+#include "RuleTransitionCondition.h"
 
 //////////////////////////////////////////////////////////////////////////
 // IRuleTransitionNodeSharedDataHelper
@@ -236,16 +237,7 @@ void URuleTransitionNode::CreateConnections(URuleNodeBase* PreviousState, URuleN
 
 void URuleTransitionNode::RelinkHead(URuleNodeBase* NewTargetState)
 {
-	URuleNodeBase* SourceState = GetPreviousState();
 	URuleNodeBase* TargetStateBeforeRelinking = GetNextState();
-
-	// Remove the incoming transition from the previous target state
-	TargetStateBeforeRelinking->GetInputPin()->Modify();
-	TargetStateBeforeRelinking->GetInputPin()->BreakLinkTo(SourceState->GetOutputPin());
-
-	// Add the new incoming transition to the new target state
-	NewTargetState->GetInputPin()->Modify();
-	NewTargetState->GetInputPin()->MakeLinkTo(SourceState->GetOutputPin());
 
 	// Relink the target state of the transition node
 	Pins[1]->Modify();
@@ -367,6 +359,14 @@ FString URuleTransitionNode::GetStateName() const
 #else
 	return TEXT("(null)");
 #endif
+}
+
+FText URuleTransitionNode::GetConditionDescription() const
+{
+	if (!Condition)
+		return NSLOCTEXT("DungeonRules", "URuleTransitionNode_NoCondition", "Always true.");
+
+	return Condition->GetDescription();
 }
 
 #if false

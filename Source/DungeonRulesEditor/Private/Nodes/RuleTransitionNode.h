@@ -89,6 +89,9 @@ public:
 	// @return the name of this state
 	DUNGEONRULESEDITOR_API FString GetStateName() const override;
 
+	// @return The description of the condition
+	FText GetConditionDescription() const;
+
 	DUNGEONRULESEDITOR_API URuleNodeBase* GetPreviousState() const;
 	DUNGEONRULESEDITOR_API URuleNodeBase* GetNextState() const;
 	DUNGEONRULESEDITOR_API void CreateConnections(URuleNodeBase* PreviousState, URuleNodeBase* NextState);
@@ -114,7 +117,6 @@ public:
 	DUNGEONRULESEDITOR_API void UseSharedRules(const URuleTransitionNode* Node);
 #endif
 
-	DUNGEONRULESEDITOR_API bool IsReverseTrans(const URuleNodeBase* Node);
 protected:
 #if false
 	void CreateBoundGraph();

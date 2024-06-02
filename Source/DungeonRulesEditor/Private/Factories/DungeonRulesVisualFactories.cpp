@@ -6,6 +6,7 @@
 #include "Nodes/RuleAliasNode.h"
 #include "Nodes/RuleConduitNode.h"
 #include "Nodes/RuleEntryNode.h"
+#include "Nodes/RuleExitNode.h"
 #include "Nodes/RuleNode.h"
 #include "Nodes/RuleTransitionNode.h"
 //#include "DungeonRulesGraphSchema.h"
@@ -13,20 +14,20 @@
 #include "NodeSlates/SGraphNodeDungeonRule.h"
 #include "NodeSlates/SGraphNodeDungeonRuleAlias.h"
 #include "NodeSlates/SGraphNodeDungeonRuleEntry.h"
+#include "NodeSlates/SGraphNodeDungeonRuleExit.h"
 #include "NodeSlates/SGraphNodeDungeonRuleTransition.h"
 #include "EdGraph/EdGraphNode.h"
 #include "EdGraph/EdGraphPin.h"
 #include "EdGraph/EdGraphSchema.h"
-#include "EdGraphSchema_K2.h"
-//#include "K2Node_AnimNodeReference.h"
+//#include "EdGraphSchema_K2.h"
 #include "KismetPins/SGraphPinExec.h"
 #include "DungeonRulesConnectionDrawingPolicy.h"
-#include "Templates/Casts.h"
-#include "UObject/Class.h"
-#include "UObject/NameTypes.h"
-#include "UObject/WeakObjectPtr.h"
-#include "UObject/WeakObjectPtrTemplates.h"
-#include "Widgets/DeclarativeSyntaxSupport.h"
+//#include "Templates/Casts.h"
+//#include "UObject/Class.h"
+//#include "UObject/NameTypes.h"
+//#include "UObject/WeakObjectPtr.h"
+//#include "UObject/WeakObjectPtrTemplates.h"
+//#include "Widgets/DeclarativeSyntaxSupport.h"
 #include "DungeonRulesEdTypes.h"
 
 TSharedPtr<class SGraphNode> FDungeonRulesNodeFactory::CreateNode(class UEdGraphNode* InNode) const 
@@ -51,28 +52,16 @@ TSharedPtr<class SGraphNode> FDungeonRulesNodeFactory::CreateNode(class UEdGraph
 	{
 		return SNew(SGraphNodeDungeonRuleEntry, EntryNode);
 	}
-#if false
-	else if (UK2Node_AnimNodeReference* AnimNodeReference = Cast<UK2Node_AnimNodeReference>(InNode))
+	else if (URuleExitNode* ExitNode = Cast<URuleExitNode>(InNode))
 	{
-		return SNew(SAnimNodeReference, AnimNodeReference);
+		return SNew(SGraphNodeDungeonRuleExit, ExitNode);
 	}
-#endif
 	
 	return nullptr;
 }
 
 TSharedPtr<class SGraphPin> FDungeonRulesPinFactory::CreatePin(class UEdGraphPin* InPin) const
 {
-#if false
-	if (InPin->GetSchema()->IsA<UDungeonRulesGraphSchema>() && InPin->PinType.PinCategory == UEdGraphSchema_K2::PC_Struct)
-	{
-		if ((InPin->PinType.PinSubCategoryObject == FPoseLink::StaticStruct()) || (InPin->PinType.PinSubCategoryObject == FComponentSpacePoseLink::StaticStruct()))
-		{
-			return SNew(SGraphPinPose, InPin);
-		}
-	}
-#endif
-
 	if (InPin->GetSchema()->IsA<UDungeonRulesSchema>() && InPin->PinType.PinCategory == DungeonRulesPinCategory::Exec)
 	{
 		return SNew(SGraphPinExec, InPin);

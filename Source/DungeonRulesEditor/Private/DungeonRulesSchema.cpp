@@ -17,6 +17,7 @@
 #include "DungeonRulesGraph.h"
 //#include "DungeonRulesGraphSchema.h"
 #include "Nodes/RuleEntryNode.h"
+#include "Nodes/RuleExitNode.h"
 #include "Nodes/RuleNodeBase.h"
 #include "Nodes/RuleNode.h"
 #include "Nodes/RuleTransitionNode.h"
@@ -126,14 +127,24 @@ UDungeonRulesSchema::UDungeonRulesSchema()
 void UDungeonRulesSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 {
 	// Create the entry/exit tunnels
-	FGraphNodeCreator<URuleEntryNode> NodeCreator(Graph);
-	URuleEntryNode* EntryNode = NodeCreator.CreateNode();
-	NodeCreator.Finalize();
+	FGraphNodeCreator<URuleEntryNode> EntryNodeCreator(Graph);
+	URuleEntryNode* EntryNode = EntryNodeCreator.CreateNode();
+	EntryNodeCreator.Finalize();
 	SetNodeMetaData(EntryNode, FNodeMetadata::DefaultGraphNode);
 
 	if (UDungeonRulesGraph* DungeonRulesGraph = CastChecked<UDungeonRulesGraph>(&Graph))
 	{
 		DungeonRulesGraph->EntryNode = EntryNode;
+	}
+
+	FGraphNodeCreator<URuleExitNode> ExitNodeCreator(Graph);
+	URuleExitNode* ExitNode = ExitNodeCreator.CreateNode();
+	ExitNodeCreator.Finalize();
+	SetNodeMetaData(ExitNode, FNodeMetadata::DefaultGraphNode);
+
+	if (UDungeonRulesGraph* DungeonRulesGraph = CastChecked<UDungeonRulesGraph>(&Graph))
+	{
+		DungeonRulesGraph->ExitNode = ExitNode;
 	}
 }
 
@@ -170,25 +181,6 @@ const FPinConnectionResponse UDungeonRulesSchema::CanCreateConnection(const UEdG
 		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Cannot wire a transition to a transition"));
 	}
 	
-	// Compare the directions
-	bool bDirectionsOK = false;
-
-	if ((PinA->Direction == EGPD_Input) && (PinB->Direction == EGPD_Output))
-	{
-		bDirectionsOK = true;
-	}
-	else if ((PinB->Direction == EGPD_Input) && (PinA->Direction == EGPD_Output))
-	{
-		bDirectionsOK = true;
-	}
-
-	/*
-	if (!bDirectionsOK)
-	{
-		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Directions are not compatible"));
-	}
-	*/
-
 	// Transitions are exclusive (both input and output), but states are not
 	if (bPinAIsTransition)
 	{
@@ -240,23 +232,18 @@ bool UDungeonRulesSchema::TryCreateConnection(UEdGraphPin* PinA, UEdGraphPin* Pi
 
 bool UDungeonRulesSchema::CreateAutomaticConversionNodeAndConnections(UEdGraphPin* PinA, UEdGraphPin* PinB) const
 {
-	URuleNodeBase* NodeA = Cast<URuleNodeBase>(PinA->GetOwningNode());
-	URuleNodeBase* NodeB = Cast<URuleNodeBase>(PinB->GetOwningNode());
+	// Reaching here should have taken care of the pin direction.
+	check(PinA->Direction != PinB->Direction);
 
-	if ((NodeA != NULL) && (NodeB != NULL) 
-		&& (NodeA->GetInputPin() != NULL) && (NodeA->GetOutputPin() != NULL)
-		&& (NodeB->GetInputPin() != NULL) && (NodeB->GetOutputPin() != NULL))
+	URuleNodeBase* NodeFrom = Cast<URuleNodeBase>((PinA->Direction == EGPD_Output) ? PinA->GetOwningNode() : PinB->GetOwningNode());
+	URuleNodeBase* NodeTo = Cast<URuleNodeBase>((PinA->Direction == EGPD_Input) ? PinA->GetOwningNode() : PinB->GetOwningNode());
+
+	if (NodeFrom && NodeTo
+		&& (NodeFrom->GetOutputPin() != nullptr)
+		&& (NodeTo->GetInputPin() != nullptr))
 	{
-		URuleTransitionNode* TransitionNode = FDungeonRulesGraphSchemaAction_NewStateNode::SpawnNodeFromTemplate<URuleTransitionNode>(NodeA->GetGraph(), NewObject<URuleTransitionNode>(), FVector2D(0.0f, 0.0f), false);
-
-		if (PinA->Direction == EGPD_Output)
-		{
-			TransitionNode->CreateConnections(NodeA, NodeB);
-		}
-		else
-		{
-			TransitionNode->CreateConnections(NodeB, NodeA);
-		}
+		URuleTransitionNode* TransitionNode = FDungeonRulesGraphSchemaAction_NewStateNode::SpawnNodeFromTemplate<URuleTransitionNode>(NodeFrom->GetGraph(), NewObject<URuleTransitionNode>(), FVector2D(0.0f, 0.0f), false);
+		TransitionNode->CreateConnections(NodeFrom, NodeTo);
 
 #if false
 		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(TransitionNode->GetBoundGraph());
@@ -279,22 +266,13 @@ bool UDungeonRulesSchema::TryRelinkConnectionTarget(UEdGraphPin* SourcePin, UEdG
 
 	URuleNodeBase* OldTargetState = Cast<URuleNodeBase>(OldTargetPin->GetOwningNode());
 	URuleNodeBase* NewTargetState = Cast<URuleNodeBase>(NewTargetPin->GetOwningNode());
-	if (OldTargetState == nullptr || OldTargetState->GetInputPin() == nullptr || OldTargetState->GetOutputPin() == nullptr ||
-		NewTargetState == nullptr || NewTargetState->GetInputPin() == nullptr || NewTargetState->GetOutputPin() == nullptr)
-	{
+	if (!OldTargetState || !NewTargetState)
 		return false;
-	}
 
 	// In the case we are relinking the transition starting at the entry state, the SourceState is nullptr. Special case handling.
 	URuleEntryNode* EntryState = Cast<URuleEntryNode>(SourcePin->GetOwningNode());
 	if (EntryState)
 	{
-		// Remove the incoming transition from the previous target state
-		OldTargetPin->Modify();
-		OldTargetPin->LinkedTo.Remove(SourcePin);
-		SourcePin->Modify();
-		SourcePin->LinkedTo.Remove(OldTargetPin);
-
 		// Add the new incoming transition to the new target state
 		TryCreateConnection(SourcePin, NewTargetPin);
 
@@ -430,7 +408,7 @@ void UDungeonRulesSchema::GetContextMenuActions(UToolMenu* Menu, UGraphNodeConte
 
 	if (Context->Node)
 	{
-		FToolMenuSection& Section = Menu->AddSection("DUngeonRulesMachineNodeActions", LOCTEXT("NodeActionsMenuHeader", "Node Actions"));
+		FToolMenuSection& Section = Menu->AddSection("DungeonRulesMachineNodeActions", LOCTEXT("NodeActionsMenuHeader", "Node Actions"));
 		if (!Context->bIsDebugging)
 		{
 			// Node contextual actions

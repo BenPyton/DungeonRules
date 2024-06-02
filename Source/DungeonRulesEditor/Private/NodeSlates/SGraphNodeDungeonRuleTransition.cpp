@@ -141,22 +141,33 @@ TSharedRef<SWidget> SGraphNodeDungeonRuleTransition::GenerateRichTooltip()
 			CanExecPin = ResultNode->FindPin(TEXT("bCanEnterTransition"));
 		}
 	}*/
+#endif
 
 	TSharedRef<SVerticalBox> Widget = SNew(SVerticalBox);
 
-	const FText TooltipDesc = GetPreviewCornerText(false);
+	const FText TooltipName = GetPreviewCornerText(false);
+	const FText TooltipDesc = GetTransitionDescription();
 
-	
-	// Transition rule linearized
 	Widget->AddSlot()
 		.AutoHeight()
 		.Padding( 2.0f )
 		[
 			SNew(STextBlock)
 			.TextStyle( FAppStyle::Get(), TEXT("Graph.TransitionNode.TooltipName") )
-			.Text(TooltipDesc)
+			.Text(TooltipName)
 		];
 
+	Widget->AddSlot()
+		.AutoHeight()
+		.Padding(2.0f)
+		[
+			SNew(STextBlock)
+				.TextStyle(FAppStyle::Get(), TEXT("Graph.TransitionNode.TooltipRule"))
+				.Text(TooltipDesc)
+		];
+
+#if false
+	// Transition rule linearized
 	{
 		Widget->AddSlot()
 		.AutoHeight()
@@ -181,11 +192,9 @@ TSharedRef<SWidget> SGraphNodeDungeonRuleTransition::GenerateRichTooltip()
 		[
 			IDocumentation::Get()->CreateToolTip(FText::FromString("Documentation"), NULL, TransNode->GetDocumentationLink(), TransNode->GetDocumentationExcerptName())
 		];
+#endif
 			
 	return Widget;
-#else
-	return SNew(STextBlock).Text(FText::FromString(TEXT("Rich Tooltip")));
-#endif
 }
 
 TSharedPtr<SToolTip> SGraphNodeDungeonRuleTransition::GetComplexTooltip()
@@ -217,11 +226,24 @@ void SGraphNodeDungeonRuleTransition::UpdateGraphNode()
 				.Image( FAppStyle::GetBrush("Graph.TransitionNode.ColorSpill") )
 				.ColorAndOpacity( this, &SGraphNodeDungeonRuleTransition::GetTransitionColor )
 			]
+#if false
 			+SOverlay::Slot()
 			[
 				// TODO: remove icon and write the priority number instead
 				SNew(SImage)
 				.Image( this, &SGraphNodeDungeonRuleTransition::GetTransitionIconImage )
+			]
+#endif
+			+ SOverlay::Slot()
+			.HAlign(HAlign_Center)
+			.VAlign(VAlign_Center)
+			.Padding(5.0f)
+			[
+				SNew(STextBlock)
+				.Text(this, &SGraphNodeDungeonRuleTransition::GetTransitionPriorityOrder)
+				.ColorAndOpacity(FLinearColor::Black)
+				.Justification(ETextJustify::Center)
+				.MinDesiredWidth(15.0f)
 			]
 		];
 }
@@ -266,6 +288,16 @@ FText SGraphNodeDungeonRuleTransition::GetPreviewCornerText(bool bReverse) const
 	}
 
 	return Result;
+}
+
+
+FText SGraphNodeDungeonRuleTransition::GetTransitionDescription() const
+{
+	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
+	if (!TransNode)
+		return FText::FromString("ERROR");
+
+	return TransNode->GetConditionDescription();
 }
 
 FLinearColor SGraphNodeDungeonRuleTransition::StaticGetTransitionColor(URuleTransitionNode* TransNode, bool bIsHovered)
@@ -364,24 +396,13 @@ FSlateColor SGraphNodeDungeonRuleTransition::GetTransitionColor() const
 const FSlateBrush* SGraphNodeDungeonRuleTransition::GetTransitionIconImage() const
 {
 	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
-#if false
-	return (TransNode->LogicType == ETransitionLogicType::TLT_Inertialization)
-		? FAppStyle::GetBrush("Graph.TransitionNode.Icon_Inertialization")
-		: FAppStyle::GetBrush("Graph.TransitionNode.Icon");
-#else
 	return FAppStyle::GetBrush("Graph.TransitionNode.Icon");
-#endif
 }
 
-FString SGraphNodeDungeonRuleTransition::GetCurrentDuration() const
+FText SGraphNodeDungeonRuleTransition::GetTransitionPriorityOrder() const
 {
 	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
-
-#if false
-	return FString::Printf(TEXT("%.2f seconds"), TransNode->CrossfadeDuration);
-#else
-	return FString("TO REMOVE");
-#endif
+	return FText::AsNumber(TransNode->PriorityOrder);
 }
 
 void SGraphNodeDungeonRuleTransition::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)

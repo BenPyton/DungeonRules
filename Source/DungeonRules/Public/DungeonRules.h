@@ -67,6 +67,9 @@ public:
 	UPROPERTY()
 	TArray<FDungeonRuleTransition> Transitions;
 
+	UPROPERTY()
+	FString Name;
+
 public:
 	const UDungeonRule* GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
 };

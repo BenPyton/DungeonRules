@@ -20,42 +20,20 @@
 class FDungeonRuleNodeNameValidator : public FStringSetNameValidator
 {
 public:
-	FDungeonRuleNodeNameValidator(const URuleNodeBase* InStateNode)
+	FDungeonRuleNodeNameValidator(const URuleNodeBase* InNode)
 		: FStringSetNameValidator(FString())
 	{
-		TArray<URuleNodeBase*> Nodes;
-		UDungeonRulesGraph* StateMachine = CastChecked<UDungeonRulesGraph>(InStateNode->GetOuter());
+		UDungeonRulesGraph* RulesGraph = CastChecked<UDungeonRulesGraph>(InNode->GetOuter());
 
-		StateMachine->GetNodesOfClass<URuleNodeBase>(Nodes);
-		for (auto NodeIt = Nodes.CreateIterator(); NodeIt; ++NodeIt)
+		TArray<URuleNodeBase*> Nodes;
+		RulesGraph->GetNodesOfClass<URuleNodeBase>(Nodes);
+		for (URuleNodeBase* Node : Nodes)
 		{
-			auto Node = *NodeIt;
-			if (Node != InStateNode)
+			if (Node != InNode)
 			{
 				Names.Add(Node->GetStateName());
 			}
 		}
-
-#if false
-		// Include the name of animation layers
-		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(StateMachine);
-		
-		if (Blueprint)
-		{
-			UClass* TargetClass = *Blueprint->SkeletonGeneratedClass;
-			if (TargetClass)
-			{
-				IAnimClassInterface* AnimClassInterface = IAnimClassInterface::GetFromClass(TargetClass);
-				for (const FAnimBlueprintFunction& AnimBlueprintFunction : AnimClassInterface->GetAnimBlueprintFunctions())
-				{
-					if (AnimBlueprintFunction.Name != UEdGraphSchema_K2::GN_AnimGraph)
-					{
-						Names.Add(AnimBlueprintFunction.Name.ToString());
-					}
-				}
-			}
-		}
-#endif
 	}
 };
 
@@ -67,11 +45,11 @@ URuleNodeBase::URuleNodeBase()
 {
 }
 
+#if false
 void URuleNodeBase::PostPasteNode()
 {
 	Super::PostPasteNode();
 
-#if false
 	for(UEdGraph* SubGraph : GetSubGraphs())
 	{
 		if(SubGraph)
@@ -95,8 +73,8 @@ void URuleNodeBase::PostPasteNode()
 			FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
 		}
 	}
-#endif
 }
+#endif
 
 #if false
 UObject* URuleNodeBase::GetJumpTargetForDoubleClick() const
@@ -136,8 +114,7 @@ void URuleNodeBase::OnRenameNode(const FString& NewName)
 
 TSharedPtr<class INameValidatorInterface> URuleNodeBase::MakeNameValidator() const
 {
-	//return MakeShareable(new FDungeonRuleNodeNameValidator(this));
-	return NULL;
+	return MakeShareable(new FDungeonRuleNodeNameValidator(this));
 }
 
 #if false
@@ -180,10 +157,14 @@ void URuleNodeBase::PostLoad()
 
 void URuleNodeBase::GetTransitionList(TArray<URuleTransitionNode*>& OutTransitions, bool bWantSortedList /*= false*/) const
 {
+	UEdGraphPin* OutputPin = GetOutputPin();
+	if (!OutputPin)
+		return;
+
 	// Normal transitions
-	for (int32 LinkIndex = 0; LinkIndex < Pins[1]->LinkedTo.Num(); ++LinkIndex)
+	for (int32 LinkIndex = 0; LinkIndex < OutputPin->LinkedTo.Num(); ++LinkIndex)
 	{
-		UEdGraphNode* TargetNode = Pins[1]->LinkedTo[LinkIndex]->GetOwningNode();
+		UEdGraphNode* TargetNode = OutputPin->LinkedTo[LinkIndex]->GetOwningNode();
 		if (URuleTransitionNode* Transition = Cast<URuleTransitionNode>(TargetNode))
 		{
 			OutTransitions.Add(Transition);

@@ -303,6 +303,7 @@ void SGraphNodeDungeonRule::UpdateGraphNode()
 							.BackgroundColor( this, &SGraphNodeDungeonRule::GetErrorColor )
 							.ToolTipText( this, &SGraphNodeDungeonRule::GetErrorMsgToolTip )
 						]
+#if false
 						+SHorizontalBox::Slot()
 						.AutoWidth()
 						.VAlign(VAlign_Center)
@@ -310,6 +311,7 @@ void SGraphNodeDungeonRule::UpdateGraphNode()
 							SNew(SImage)
 							.Image(NodeTypeIcon)
 						]
+#endif
 						+SHorizontalBox::Slot()
 						.Padding(FMargin(4.0f, 0.0f, 4.0f, 0.0f))
 						[

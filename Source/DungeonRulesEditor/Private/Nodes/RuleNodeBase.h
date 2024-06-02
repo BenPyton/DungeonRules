@@ -25,8 +25,8 @@ public:
 	virtual void PostLoad() override;
 
 	// UEdGraphNode interface
-	virtual void PostPasteNode() override;
 #if false
+	virtual void PostPasteNode() override;
 	virtual UObject* GetJumpTargetForDoubleClick() const override;
 	virtual bool CanJumpToDefinition() const override;
 	virtual void JumpToDefinition() const override;
@@ -39,10 +39,10 @@ public:
 	// End of UEdGraphNode interface
 
 	// @return the input pin for this state
-	DUNGEONRULESEDITOR_API virtual UEdGraphPin* GetInputPin() const { return NULL; }
+	DUNGEONRULESEDITOR_API virtual UEdGraphPin* GetInputPin() const { return nullptr; }
 
 	// @return the output pin for this state
-	DUNGEONRULESEDITOR_API virtual UEdGraphPin* GetOutputPin() const { return NULL; }
+	DUNGEONRULESEDITOR_API virtual UEdGraphPin* GetOutputPin() const { return nullptr; }
 
 	// @return the name of this state
 	DUNGEONRULESEDITOR_API virtual FString GetStateName() const { return TEXT("BaseState"); }

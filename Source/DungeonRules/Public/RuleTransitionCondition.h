@@ -39,4 +39,7 @@ class DUNGEONRULES_API URuleTransitionCondition : public UObject
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Dungeon Rules")
 	bool Check(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Dungeon Rules")
+	FText GetDescription() const;
 };
