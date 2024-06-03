@@ -19,7 +19,7 @@
 #include "ScopedTransaction.h"
 #include "UObject/UE5MainStreamObjectVersion.h"
 #include "DungeonRulesEdTypes.h"
-#include "RuleTransitionCondition.h"
+#include "DungeonRules.h"
 
 //////////////////////////////////////////////////////////////////////////
 // IRuleTransitionNodeSharedDataHelper
@@ -65,7 +65,6 @@ URuleTransitionNode::URuleTransitionNode()
 	bSharedRules = false;
 	SharedRulesGuid.Invalidate();
 #endif
-	PriorityOrder = 1;
 }
 
 void URuleTransitionNode::AllocateDefaultPins()
@@ -80,6 +79,11 @@ void URuleTransitionNode::PostPlacedNewNode()
 {
 #if false
 	CreateBoundGraph();
+#else
+	if (NodeInstance)
+		return;
+
+	CreateInstance();
 #endif
 }
 
@@ -116,6 +120,12 @@ void URuleTransitionNode::PostPasteNode()
 		GraphNode->PostPasteNode();
 		GraphNode->ReconstructNode();
 	}
+#else
+	if (NodeInstance)
+	{
+		// Deep copy the pasted node instance
+		CreateInstance(NodeInstance);
+	}
 #endif
 
 	Super::PostPasteNode();
@@ -129,6 +139,44 @@ void URuleTransitionNode::PostPasteNode()
 			DestroyNode();
 			break;
 		}
+	}
+}
+
+#if WITH_EDITOR
+
+void URuleTransitionNode::PostEditImport()
+{
+	ResetInstanceOwner();
+#if false
+	if (NodeInstance)
+	{
+		InitializeInstance();
+	}
+#endif
+}
+
+void URuleTransitionNode::PostEditUndo()
+{
+	UEdGraphNode::PostEditUndo();
+	ResetInstanceOwner();
+}
+
+#endif
+
+void URuleTransitionNode::PostCopyNode()
+{
+	ResetInstanceOwner();
+}
+
+void URuleTransitionNode::ResetInstanceOwner()
+{
+	if (NodeInstance)
+	{
+		UEdGraph* MyGraph = GetGraph();
+		UObject* GraphOwner = MyGraph ? MyGraph->GetOuter() : nullptr;
+
+		NodeInstance->Rename(nullptr, GraphOwner, REN_DontCreateRedirectors | REN_DoNotDirty);
+		NodeInstance->ClearFlags(RF_Transient);
 	}
 }
 
@@ -313,6 +361,12 @@ void URuleTransitionNode::PrepareForCopying()
 	// move bound graph node here, so during copying it will be referenced
 	// for shared nodes at least one of them has to be referencing it, so we will be fine
 	BoundGraph->Rename(NULL, this, REN_DoNotDirty | REN_DontCreateRedirectors);
+#else
+	if (NodeInstance)
+	{
+		// Temporarily take ownership of the node instance, so that it is not deleted when cutting
+		NodeInstance->Rename(nullptr, this, REN_DontCreateRedirectors | REN_DoNotDirty);
+	}
 #endif
 }
 
@@ -363,10 +417,13 @@ FString URuleTransitionNode::GetStateName() const
 
 FText URuleTransitionNode::GetConditionDescription() const
 {
+	return FText::FromString(TEXT("TODO"));
+#if false
 	if (!Condition)
 		return NSLOCTEXT("DungeonRules", "URuleTransitionNode_NoCondition", "Always true.");
 
 	return Condition->GetDescription();
+#endif
 }
 
 #if false
@@ -692,5 +749,23 @@ FGuid& FRuleTransitionNodeSharedRulesHelper::AccessShareDataGuid(URuleTransition
 	return Node->SharedRulesGuid;
 }
 #endif
+
+void URuleTransitionNode::CreateInstance(const UDungeonRuleTransition* Template)
+{
+	UEdGraph* Graph = GetGraph();
+	UObject* GraphOwner = Graph ? Graph->GetOuter() : nullptr;
+	if (!GraphOwner)
+		return;
+
+	if (!Template)
+	{
+		NodeInstance = NewObject<UDungeonRuleTransition>(GraphOwner);
+		NodeInstance->SetFlags(RF_Transactional);
+	}
+	else
+	{
+		NodeInstance = DuplicateObject(Template, GraphOwner);
+	}
+}
 
 #undef LOCTEXT_NAMESPACE

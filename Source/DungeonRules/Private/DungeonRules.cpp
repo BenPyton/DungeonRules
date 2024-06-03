@@ -29,32 +29,47 @@
 #include "DungeonRoomChooser.h"
 #include "RuleTransitionCondition.h"
 
-const UDungeonRule* UDungeonRule::GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
-{
-	const UDungeonRule* NextRule = this;
-	int32 CurrentPriority = UINT32_MAX;
-	for (const FDungeonRuleTransition& Transition : Transitions)
-	{
-		if (Transition.Priority >= CurrentPriority)
-			continue;
-
-		if (!Transition.CheckCondition(Generator, PreviousRoom))
-			continue;
-
-		NextRule = Transition.NextRule.Get();
-		CurrentPriority = Transition.Priority;
-	}
-
-	return NextRule;
-}
-
-bool FDungeonRuleTransition::CheckCondition(ADungeonGenerator* Generator,  const URoomData* PreviousRoom) const
+bool UDungeonRuleTransition::CheckCondition(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
 {
 	if (!IsValid(Condition))
 		return true;
 
 	return Condition->Check(Generator, PreviousRoom);
 }
+
+const UDungeonRule* UDungeonRule::GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
+{
+	const UDungeonRule* NextRule = this;
+	int32 CurrentPriority = INT32_MAX;
+	for (const auto& TransitionPtr : Transitions)
+	{
+		const UDungeonRuleTransition* Transition = TransitionPtr.Get();
+		if (!Transition)
+		{
+			RulesLog_Warning("Invalid DungeonRuleTransition found in %s.", *RuleName);
+			continue;
+		}
+
+		if (Transition->PriorityOrder >= CurrentPriority)
+			continue;
+
+		if (!Transition->CheckCondition(Generator, PreviousRoom))
+			continue;
+
+		NextRule = Transition->NextRule.Get();
+		CurrentPriority = Transition->PriorityOrder;
+	}
+
+	return NextRule;
+}
+
+#if WITH_EDITOR
+void UDungeonRule::AddTransition(const UDungeonRuleTransition* Transition)
+{
+	check(Transition);
+	Transitions.AddUnique(Transition);
+}
+#endif
 
 UDungeonRules::UDungeonRules()
 	: Super()
@@ -122,17 +137,25 @@ const UDungeonRule* UDungeonRules::GetNextRule(ADungeonGenerator* Generator, con
 #if WITH_EDITOR
 void UDungeonRules::Clear()
 {
-	Rules.Empty();
 	FirstRule = nullptr;
+	Rules.Empty();
+	Transitions.Empty();
 }
 
 void UDungeonRules::AddRule(UDungeonRule* Rule)
 {
+	check(Rule);
 	Rules.AddUnique(Rule);
 }
 
 void UDungeonRules::SetFirstRule(UDungeonRule* Rule)
 {
 	FirstRule = Rule;
+}
+
+void UDungeonRules::AddTransition(UDungeonRuleTransition* Transition)
+{
+	check(Transition);
+	Transitions.AddUnique(Transition);
 }
 #endif

@@ -3,10 +3,22 @@
 #include "DungeonRulesGraph.h"
 #include "Nodes/RuleNodeBase.h"
 #include "Nodes/RuleNode.h"
+#include "Nodes/RuleTransitionNode.h"
+#include "Nodes/RuleEntryNode.h"
 #include "DungeonRules.h"
 #include "DUngeonRulesEdLog.h"
 
 #define LOCTEXT_NAMESPACE "DungeonRulesGraph"
+
+// Manage the version of the graph.
+// When modifying the structure of the graph, a new version should be added.
+// (don't forget to update the Latest value!!!)
+// (also, don't forget to update the UpdateVersion() to upgrade the graph to the latest version!!!)
+namespace DungeonRulesVersion
+{
+	const int32 Initial = 0;
+	const int32 Latest = Initial;
+}
 
 UDungeonRulesGraph::UDungeonRulesGraph()
 	: Super()
@@ -96,6 +108,7 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 	// Clear previous data in the asset
 	DungeonRulesAsset->Clear();
 
+	// Add rule instances to the asset
 	for (const UEdGraphNode* Node : Nodes)
 	{
 		const URuleNode* RuleNode = Cast<URuleNode>(Node);
@@ -106,10 +119,61 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 		if (!Rule)
 			continue;
 
-		Rule->Rename(*Rule->GetName(), DungeonRulesAsset);
-		DungeonEd_LogWarning("Rule new outer: %s", *GetNameSafe(Rule->GetOuter()));
+		//DungeonEd_LogWarning("Rule %s old outer: %s", *Rule->RuleName, *GetNameSafe(Rule->GetOuter()));
+		//Rule->Rename(*Rule->GetName(), DungeonRulesAsset);
+		//DungeonEd_LogWarning("Rule %s new outer: %s", *Rule->RuleName, *GetNameSafe(Rule->GetOuter()));
+		if (Rule->GetOuter() != DungeonRulesAsset)
+		{
+			DungeonEd_LogWarning("Rule %s has not the asset %s as outer!", *Rule->RuleName, *DungeonRulesAsset->GetName());
+		}
+
 		DungeonRulesAsset->AddRule(Rule);
 	}
+
+	// Add transition instances to the asset + in the rule instances too
+	for (const UEdGraphNode* Node : Nodes)
+	{
+		const URuleTransitionNode* TransitionNode = Cast<URuleTransitionNode>(Node);
+		if (!TransitionNode)
+			continue;
+
+		UDungeonRuleTransition* Transition = TransitionNode->GetNodeInstance();
+		if (!Transition)
+			continue;
+
+		//DungeonEd_LogWarning("Transition %s old outer: %s", *Transition->GetName(), *GetNameSafe(Transition->GetOuter()));
+		//Transition->Rename(*Transition->GetName(), DungeonRulesAsset);
+		//DungeonEd_LogWarning("Transition %s new outer: %s", *Transition->GetName(), *GetNameSafe(Transition->GetOuter()));
+		if (Transition->GetOuter() != DungeonRulesAsset)
+		{
+			DungeonEd_LogWarning("Transition %s has not the asset %s as outer!", *Transition->GetName(), *DungeonRulesAsset->GetName());
+		}
+
+		DungeonRulesAsset->AddTransition(Transition);
+
+		// Add the transition into the list of the previous rule
+		if (URuleNode* PrevRuleNode = Cast<URuleNode>(TransitionNode->GetPreviousState()))
+		{
+			UDungeonRule* Rule = PrevRuleNode->GetRuleInstance();
+			if (Rule)
+				Rule->AddTransition(Transition);
+		}
+
+		Transition->NextRule = nullptr;
+		if (URuleNode* NextRuleNode = Cast<URuleNode>(TransitionNode->GetNextState()))
+		{
+			Transition->NextRule = NextRuleNode->GetRuleInstance();
+			if (!Transition->NextRule.IsValid())
+			{
+				DungeonEd_LogWarning("The next rule node of %s has no rule instance!", *Transition->GetName());
+			}
+		}
+	}
+
+	// Set the first rule
+	URuleNode* FirstNode = Cast<URuleNode>(EntryNode->GetOutputNode());
+	UDungeonRule* FirstRule = (FirstNode) ? FirstNode->GetRuleInstance() : nullptr;
+	DungeonRulesAsset->SetFirstRule(FirstRule);
 }
 
 void UDungeonRulesGraph::OnCreated()
@@ -132,10 +196,10 @@ void UDungeonRulesGraph::Initialize()
 
 void UDungeonRulesGraph::UpdateVersion()
 {
-	if (GraphVersion == 1)
-	{
+	if (GraphVersion == DungeonRulesVersion::Latest)
 		return;
-	}
+
+	/** Here put the functions to upgrade the graph to the latest version. **/
 
 	MarkVersion();
 	Modify();
@@ -143,7 +207,7 @@ void UDungeonRulesGraph::UpdateVersion()
 
 void UDungeonRulesGraph::MarkVersion()
 {
-	GraphVersion = 1;
+	GraphVersion = DungeonRulesVersion::Latest;
 }
 
 #if false

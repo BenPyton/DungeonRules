@@ -142,12 +142,13 @@ void URuleNode::PostPasteNode()
 		GraphNode->PostPasteNode();
 		GraphNode->ReconstructNode();
 	}
-#endif
+#else
 	if (RuleInstance)
 	{
 		// Deep copy the pasted rule instance
 		CreateInstance(RuleInstance);
 	}
+#endif
 	Super::PostPasteNode();
 }
 

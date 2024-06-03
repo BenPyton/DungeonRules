@@ -13,6 +13,7 @@
 #include "HAL/PlatformApplicationMisc.h"
 #include "Nodes/RuleNodeBase.h"
 #include "Nodes/RuleNode.h"
+#include "Nodes/RuleTransitionNode.h"
 #include "Editor.h"
 #include "Misc/EngineVersionComparison.h"
 #include "SNodePanel.h" // GetSnapGridSize
@@ -370,6 +371,10 @@ void FDungeonRulesToolkit::OnSelectedNodesChanged(const TSet<class UObject*>& Ne
 			if (URuleNode* GraphNode = Cast<URuleNode>(SelectedObj))
 			{
 				Selection.Add(GraphNode->GetRuleInstance());
+			}
+			else if(URuleTransitionNode * TransNode = Cast<URuleTransitionNode>(SelectedObj))
+			{
+				Selection.Add(TransNode->GetNodeInstance());
 			}
 			else
 			{

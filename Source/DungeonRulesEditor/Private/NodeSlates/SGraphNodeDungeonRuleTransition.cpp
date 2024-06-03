@@ -14,6 +14,7 @@
 //#include "Animation/AnimNode_StateMachine.h"
 //#include "Animation/DungeonRuleMachineTypes.h"
 #include "DungeonRulesGraph.h"
+#include "DungeonRules.h"
 //#include "AnimationTransitionGraph.h"
 #include "ConnectionDrawingPolicy.h"
 #include "Containers/EnumAsByte.h"
@@ -262,6 +263,9 @@ FText SGraphNodeDungeonRuleTransition::GetPreviewCornerText(bool bReverse) const
 	{
 		if (NextState != NULL)
 		{
+			const UDungeonRuleTransition* TransitionInstance = TransNode->GetNodeInstance();
+			int32 ThisPriorityOrder = TransitionInstance->PriorityOrder;
+
 			TArray<URuleTransitionNode*> TransitionFromSource;
 			PrevState->GetTransitionList(/*out*/ TransitionFromSource);
 
@@ -271,14 +275,18 @@ FText SGraphNodeDungeonRuleTransition::GetPreviewCornerText(bool bReverse) const
 				// See if the priorities differ
 				for (int32 Index = 0; (Index < TransitionFromSource.Num()) && !bMultiplePriorities; ++Index)
 				{
-					const bool bDifferentPriority = (TransitionFromSource[Index]->PriorityOrder != TransNode->PriorityOrder);
+					const UDungeonRuleTransition* OtherTransition = TransitionFromSource[Index]->GetNodeInstance();
+					if (!OtherTransition)
+						continue;
+
+					const bool bDifferentPriority = (OtherTransition->PriorityOrder != ThisPriorityOrder);
 					bMultiplePriorities |= bDifferentPriority;
 				}
 			}
 
 			if (bMultiplePriorities)
 			{
-				Result = FText::Format(LOCTEXT("TransitionXToYWithPriority", "{0} to {1} (Priority {2})"), FText::FromString(PrevState->GetStateName()), FText::FromString(NextState->GetStateName()), FText::AsNumber(TransNode->PriorityOrder));
+				Result = FText::Format(LOCTEXT("TransitionXToYWithPriority", "{0} to {1} (Priority {2})"), FText::FromString(PrevState->GetStateName()), FText::FromString(NextState->GetStateName()), FText::AsNumber(ThisPriorityOrder));
 			}
 			else
 			{
@@ -402,7 +410,8 @@ const FSlateBrush* SGraphNodeDungeonRuleTransition::GetTransitionIconImage() con
 FText SGraphNodeDungeonRuleTransition::GetTransitionPriorityOrder() const
 {
 	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
-	return FText::AsNumber(TransNode->PriorityOrder);
+	const UDungeonRuleTransition* TransInstance = TransNode->GetNodeInstance();
+	return TransInstance ? FText::AsNumber(TransInstance->PriorityOrder) : FText::FromString("?");
 }
 
 void SGraphNodeDungeonRuleTransition::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)

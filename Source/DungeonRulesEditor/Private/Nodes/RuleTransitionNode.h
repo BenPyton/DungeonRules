@@ -15,6 +15,7 @@
 class UCurveFloat;
 class UEdGraph;
 class UEdGraphPin;
+class UDungeonRuleTransition;
 
 UCLASS(MinimalAPI, config=Editor)
 class URuleTransitionNode : public URuleNodeBase
@@ -29,11 +30,6 @@ public:
 	//UPROPERTY()
 	TObjectPtr<class UEdGraph> BoundGraph;
 #endif
-
-	// The priority order of this transition. If multiple transitions out of a state go
-	// true at the same time, the one with the smallest priority order will take precedent
-	UPROPERTY(EditAnywhere, Category=Transition)
-	int32 PriorityOrder;
 
 #if false
 	/** The rules for this transition may be shared with other transition nodes */
@@ -86,6 +82,16 @@ public:
 	virtual UEdGraphPin* GetOutputPin() const override { return Pins[1]; }
 	//~ End URuleNodeBase Interface
 
+	//~ Begin UObject Interface
+#if WITH_EDITOR
+	virtual void PostEditImport() override;
+	virtual void PostEditUndo() override;
+#endif
+	//~ End UObject Interface
+
+	virtual void PostCopyNode() override;
+	void ResetInstanceOwner();
+
 	// @return the name of this state
 	DUNGEONRULESEDITOR_API FString GetStateName() const override;
 
@@ -108,6 +114,8 @@ public:
 	 */
 	DUNGEONRULESEDITOR_API static TArray<URuleTransitionNode*> GetListTransitionNodesToRelink(UEdGraphPin* SourcePin, UEdGraphPin* OldTargetPin, const TArray<UEdGraphNode*>& InSelectedGraphNodes);
 
+	UDungeonRuleTransition* GetNodeInstance() const { return NodeInstance; }
+
 #if false
 	DUNGEONRULESEDITOR_API bool IsBoundGraphShared() const;
 
@@ -123,6 +131,9 @@ protected:
 #endif
 
 private:
-	UPROPERTY(EditAnywhere, Instanced)
-	TObjectPtr<class URuleTransitionCondition> Condition {nullptr};
+	void CreateInstance(const UDungeonRuleTransition* Template = nullptr);
+
+private:
+	UPROPERTY()
+	TObjectPtr<UDungeonRuleTransition> NodeInstance {nullptr};
 };

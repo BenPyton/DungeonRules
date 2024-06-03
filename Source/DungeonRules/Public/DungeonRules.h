@@ -34,8 +34,8 @@ class URuleTransitionCondition;
 class ADungeonGenerator;
 class URoomData;
 
-USTRUCT()
-struct DUNGEONRULES_API FDungeonRuleTransition
+UCLASS()
+class DUNGEONRULES_API UDungeonRuleTransition : public UObject
 {
 	GENERATED_BODY()
 
@@ -43,10 +43,10 @@ public:
 	// The priority over other transitions.
 	// The less this number is, the more priority the transition has.
 	UPROPERTY(EditAnywhere, Category = "Transition")
-	int32 Priority {0};
+	int32 PriorityOrder {0};
 
 	UPROPERTY(EditAnywhere, Instanced, Category = "Transition")
-	URuleTransitionCondition* Condition {nullptr};
+	TObjectPtr<URuleTransitionCondition> Condition {nullptr};
 
 	UPROPERTY()
 	TWeakObjectPtr<class UDungeonRule> NextRule {nullptr};
@@ -65,7 +65,7 @@ public:
 	TObjectPtr<UDungeonRoomChooser> RoomChooser {nullptr};
 
 	UPROPERTY()
-	TArray<FDungeonRuleTransition> Transitions;
+	TArray<TWeakObjectPtr<const UDungeonRuleTransition>> Transitions;
 
 	// Displayed name of the rule
 	UPROPERTY()
@@ -73,6 +73,11 @@ public:
 
 public:
 	const UDungeonRule* GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
+
+#if WITH_EDITOR
+public:
+	void AddTransition(const UDungeonRuleTransition* Transition);
+#endif
 };
 
 /**
@@ -98,6 +103,7 @@ public:
 	void Clear();
 	void AddRule(UDungeonRule* Rule);
 	void SetFirstRule(UDungeonRule* Rule);
+	void AddTransition(UDungeonRuleTransition* Transition);
 #endif
 
 #if WITH_EDITORONLY_DATA
@@ -109,6 +115,9 @@ public:
 private:
 	UPROPERTY()
 	TArray<TObjectPtr<UDungeonRule>> Rules;
+
+	UPROPERTY()
+	TArray<TObjectPtr<UDungeonRuleTransition>> Transitions;
 
 	UPROPERTY()
 	TObjectPtr<UDungeonRule> FirstRule;

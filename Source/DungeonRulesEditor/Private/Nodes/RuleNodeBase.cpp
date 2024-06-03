@@ -171,6 +171,7 @@ void URuleNodeBase::GetTransitionList(TArray<URuleTransitionNode*>& OutTransitio
 		}
 	}
 
+#if false // Don't need sorted since the priority is compared at runtime
 	// Sort the transitions by priority order, lower numbers are higher priority
 	if (bWantSortedList)
 	{
@@ -184,6 +185,7 @@ void URuleNodeBase::GetTransitionList(TArray<URuleTransitionNode*>& OutTransitio
 
 		OutTransitions.Sort(FCompareTransitionsByPriority());
 	}
+#endif
 }
 
 #if false
