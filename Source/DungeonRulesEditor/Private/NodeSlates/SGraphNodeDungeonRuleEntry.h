@@ -22,12 +22,6 @@ public:
 
 	void Construct(const FArguments& InArgs, URuleEntryNode* InNode);
 
-#if false // Blueprint
-	//~ Begin SNodePanel::SNode Interface
-	virtual void GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const override;
-	//~ End SNodePanel::SNode Interface
-#endif
-
 	//~ Begin SGraphNode Interface
 	virtual void UpdateGraphNode() override;
 	virtual void AddPin(const TSharedRef<SGraphPin>& PinToAdd) override;

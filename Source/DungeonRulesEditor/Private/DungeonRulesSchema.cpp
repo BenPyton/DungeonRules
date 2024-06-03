@@ -73,11 +73,6 @@ UEdGraphNode* FDungeonRulesGraphSchemaAction_NewStateNode::PerformAction(class U
 	NodeTemplate->AllocateDefaultPins();
 	NodeTemplate->AutowireNewNode(FromPin);
 
-#if false // Blueprint
-	UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(ParentGraph);
-	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
-#endif
-
 	return NodeTemplate;
 }
 
@@ -217,14 +212,6 @@ bool UDungeonRulesSchema::TryCreateConnection(UEdGraphPin* PinA, UEdGraphPin* Pi
 
 	const bool bModified = UEdGraphSchema::TryCreateConnection(PinA, PinB);
 
-#if false // Blueprint
-	if (bModified)
-	{
-		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNodeChecked(PinA->GetOwningNode());
-		FBlueprintEditorUtils::MarkBlueprintAsModified(Blueprint);
-	}
-#endif
-
 	return bModified;
 }
 
@@ -242,11 +229,6 @@ bool UDungeonRulesSchema::CreateAutomaticConversionNodeAndConnections(UEdGraphPi
 	{
 		URuleTransitionNode* TransitionNode = FDungeonRulesGraphSchemaAction_NewStateNode::SpawnNodeFromTemplate<URuleTransitionNode>(NodeFrom->GetGraph(), NewObject<URuleTransitionNode>(), FVector2D(0.0f, 0.0f), false);
 		TransitionNode->CreateConnections(NodeFrom, NodeTo);
-
-#if false // Blueprint
-		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(TransitionNode->GetBoundGraph());
-		FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
-#endif
 
 		return true;
 	}
@@ -274,11 +256,6 @@ bool UDungeonRulesSchema::TryRelinkConnectionTarget(UEdGraphPin* SourcePin, UEdG
 		// Add the new incoming transition to the new target state
 		TryCreateConnection(SourcePin, NewTargetPin);
 
-#if false // Blueprint
-		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(EntryState->GetGraph());
-		FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
-#endif
-
 		return true;
 	}
 
@@ -293,12 +270,6 @@ bool UDungeonRulesSchema::TryRelinkConnectionTarget(UEdGraphPin* SourcePin, UEdG
 #if WITH_EDITOR
 	if (!TransitionNodes.IsEmpty())
 	{
-#if false // Blueprint
-		//UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(OneRelinkedTransition->GetBoundGraph());
-		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(TransitionNodes[0]->GetBoundGraph());
-		FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
-#endif
-
 		SourcePin->GetOwningNode()->PinConnectionListChanged(SourcePin);
 		OldTargetPin->GetOwningNode()->PinConnectionListChanged(OldTargetPin);
 		NewTargetPin->GetOwningNode()->PinConnectionListChanged(NewTargetPin);
@@ -380,12 +351,8 @@ void UDungeonRulesSchema::GetGraphContextActions(FGraphContextMenuBuilder& Conte
 	// Add Comment
 	if (!ContextMenuBuilder.FromPin)
 	{
-#if false // Blueprint
-		UBlueprint* OwnerBlueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(ContextMenuBuilder.CurrentGraph);
-		const bool bIsManyNodesSelected = (FKismetEditorUtilities::GetNumberOfSelectedNodes(OwnerBlueprint) > 0);
-#else
+		// TODO: Get number of selected nodes.
 		const bool bIsManyNodesSelected = false;
-#endif
 		const FText MenuDescription = bIsManyNodesSelected ? LOCTEXT("CreateCommentSelection", "Create Comment from Selection") : LOCTEXT("AddComment", "Add Comment");
 		const FText ToolTip = LOCTEXT("CreateCommentSelectionTooltip", "Create a resizeable comment box around selected nodes.");
 
@@ -402,8 +369,6 @@ EGraphType UDungeonRulesSchema::GetGraphType(const UEdGraph* TestEdGraph) const
 void UDungeonRulesSchema::GetContextMenuActions(UToolMenu* Menu, UGraphNodeContextMenuContext* Context) const
 {
 	check(Context && Context->Graph);
-	//UBlueprint* OwnerBlueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(Context->Graph);
-
 	if (Context->Node)
 	{
 		FToolMenuSection& Section = Menu->AddSection("DungeonRulesMachineNodeActions", LOCTEXT("NodeActionsMenuHeader", "Node Actions"));
@@ -535,27 +500,19 @@ void UDungeonRulesSchema::GetAssetsPinHoverMessage(const TArray<FAssetData>& Ass
 void UDungeonRulesSchema::BreakNodeLinks(UEdGraphNode& TargetNode) const
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("UnrealEd", "GraphEd_BreakNodeLinks", "Break Node Links"));
-
-	//UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNodeChecked(&TargetNode);
 	Super::BreakNodeLinks(TargetNode);
-	//FBlueprintEditorUtils::MarkBlueprintAsModified(Blueprint);
 }
 
 void UDungeonRulesSchema::BreakPinLinks(UEdGraphPin& TargetPin, bool bSendsNodeNotification) const
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("UnrealEd", "GraphEd_BreakPinLinks", "Break Pin Links"));
-	// cache this here, as BreakPinLinks can trigger a node reconstruction invalidating the TargetPin references
-	//UBlueprint* const Blueprint = FBlueprintEditorUtils::FindBlueprintForNodeChecked(TargetPin.GetOwningNode());
 	Super::BreakPinLinks(TargetPin, bSendsNodeNotification);
-	//FBlueprintEditorUtils::MarkBlueprintAsModified(Blueprint);
 }
 
 void UDungeonRulesSchema::BreakSinglePinLink(UEdGraphPin* SourcePin, UEdGraphPin* TargetPin) const
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("UnrealEd", "GraphEd_BreakSinglePinLink", "Break Pin Link"));
-	//UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNodeChecked(TargetPin->GetOwningNode());
 	Super::BreakSinglePinLink(SourcePin, TargetPin);
-	//FBlueprintEditorUtils::MarkBlueprintAsModified(Blueprint);
 }
 
 #undef LOCTEXT_NAMESPACE

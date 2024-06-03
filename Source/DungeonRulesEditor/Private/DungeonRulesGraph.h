@@ -30,17 +30,10 @@ public:
 	virtual void OnSave();
 	//virtual void RefreshNodes(); // used in DungeonRulesToolkit.cpp --- Is Needed?
 
-	// Parent instance node
-	//UPROPERTY()
-	//TObjectPtr<class UAnimGraphNode_StateMachineBase> OwnerAnimGraphNode;
-
 	UPROPERTY()
 	int32 GraphVersion;
 
 	virtual void OnCreated();
-#if false
-	virtual void OnLoaded();
-#endif
 	virtual void Initialize();
 
 	virtual void UpdateAsset(int32 UpdateFlags = 0);

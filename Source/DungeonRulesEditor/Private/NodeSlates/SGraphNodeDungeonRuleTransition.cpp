@@ -3,19 +3,10 @@
 
 #include "SGraphNodeDungeonRuleTransition.h"
 
-//#include "AnimGraphNode_Base.h"
-//#include "AnimGraphNode_StateMachineBase.h"
-//#include "AnimGraphNode_TransitionResult.h"
 #include "Nodes/RuleNodeBase.h"
 #include "Nodes/RuleTransitionNode.h"
-//#include "Animation/AnimBlueprint.h"
-//#include "Animation/AnimBlueprintGeneratedClass.h"
-//#include "Animation/AnimInstance.h"
-//#include "Animation/AnimNode_StateMachine.h"
-//#include "Animation/DungeonRuleMachineTypes.h"
 #include "DungeonRulesGraph.h"
 #include "DungeonRules.h"
-//#include "AnimationTransitionGraph.h"
 #include "ConnectionDrawingPolicy.h"
 #include "Containers/EnumAsByte.h"
 #include "Delegates/Delegate.h"
@@ -30,7 +21,6 @@
 #include "Misc/AssertionMacros.h"
 #include "Misc/Attribute.h"
 #include "SGraphPanel.h"
-//#include "SKismetLinearExpression.h"
 #include "SlotBase.h"
 #include "Styling/AppStyle.h"
 #include "Templates/Casts.h"
@@ -124,26 +114,6 @@ TSharedRef<SWidget> SGraphNodeDungeonRuleTransition::GenerateRichTooltip()
 {
 	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
 
-#if false // Subgraph
-	if (TransNode->BoundGraph == NULL)
-	{
-		return SNew(STextBlock).Text(LOCTEXT("NoAnimGraphBoundToNodeMessage", "Error: No graph"));
-	}
-
-	// Find the expression hooked up to the can execute pin of the transition node
-	const UEdGraphSchema_K2* Schema = GetDefault<UEdGraphSchema_K2>();
-
-	UEdGraphPin* CanExecPin = NULL;
-
-	/*if (UAnimationTransitionGraph* TransGraph = Cast<UAnimationTransitionGraph>(TransNode->BoundGraph))
-	{
-		if (UAnimGraphNode_TransitionResult* ResultNode = TransGraph->GetResultNode())
-		{
-			CanExecPin = ResultNode->FindPin(TEXT("bCanEnterTransition"));
-		}
-	}*/
-#endif
-
 	TSharedRef<SVerticalBox> Widget = SNew(SVerticalBox);
 
 	const FText TooltipName = GetPreviewCornerText(false);
@@ -167,26 +137,6 @@ TSharedRef<SWidget> SGraphNodeDungeonRuleTransition::GenerateRichTooltip()
 				.Text(TooltipDesc)
 		];
 
-#if false // Subgraph
-	// Transition rule linearized
-	{
-		Widget->AddSlot()
-		.AutoHeight()
-		.Padding( 2.0f )
-		[
-			SNew(STextBlock)
-			.TextStyle( FAppStyle::Get(), TEXT("Graph.TransitionNode.TooltipRule") )
-			.Text(LOCTEXT("AnimGraphNodeTransitionRule_ToolTip", "Transition Rule (in words)"))
-		];
-
-		Widget->AddSlot()
-			.AutoHeight()
-			.Padding( 2.0f )
-			[
-				SNew(SKismetLinearExpression, CanExecPin)
-			];
-	}
-#endif
 #if false // TODO: documentation
 	Widget->AddSlot()
 		.AutoHeight()
@@ -312,87 +262,9 @@ FText SGraphNodeDungeonRuleTransition::GetTransitionDescription() const
 FLinearColor SGraphNodeDungeonRuleTransition::StaticGetTransitionColor(URuleTransitionNode* TransNode, bool bIsHovered)
 {
 	//@TODO: Make configurable by styling
-	const FLinearColor ActiveColor(1.0f, 0.4f, 0.3f, 1.0f);
 	const FLinearColor HoverColor(0.724f, 0.256f, 0.0f, 1.0f);
 	FLinearColor BaseColor(0.9f, 0.9f, 0.9f, 1.0f);
-
-#if false // Blueprint
-	// Display various types of debug data
-	UAnimBlueprint* AnimBlueprint = Cast<UAnimBlueprint>(FBlueprintEditorUtils::FindBlueprintForNodeChecked(TransNode));
-	check(AnimBlueprint);
-	UAnimInstance* ActiveObject = Cast<UAnimInstance>(AnimBlueprint->GetObjectBeingDebugged());
-	UAnimBlueprintGeneratedClass* Class = AnimBlueprint->GetAnimBlueprintGeneratedClass();
-
-	//@TODO: WIP fast path / slow path coloring
-	if (AnimBlueprint->bWarnAboutBlueprintUsage || ((ActiveObject != nullptr) && (ActiveObject->PCV_ShouldNotifyAboutNodesNotUsingFastPath() || ActiveObject->PCV_ShouldWarnAboutNodesNotUsingFastPath())))
-	{
-		if (UAnimationTransitionGraph* TransGraph = Cast<UAnimationTransitionGraph>(TransNode->GetBoundGraph()))
-		{
-			if (UAnimGraphNode_TransitionResult* ResultNode = TransGraph->GetResultNode())
-			{
-				if (ResultNode->BlueprintUsage == EBlueprintUsage::UsesBlueprint)
-				{
-					BaseColor = FLinearColor(0.4f, 0.4f, 1.0f);
-				}
-			}
-		}
-	}
-
-	if ((ActiveObject != NULL) && (Class != NULL))
-	{
-		UAnimationStateMachineGraph* StateMachineGraph = CastChecked<UAnimationStateMachineGraph>(TransNode->GetGraph());
-		if (FStateMachineDebugData* DebugInfo = Class->GetAnimBlueprintDebugData().StateMachineDebugData.Find(StateMachineGraph))
-		{
-			// A transition node could be associated with multiple transitions indicies when coming from an alias. Check all of them
-			TArray<int32> TransitionIndices;
-			DebugInfo->NodeToTransitionIndex.MultiFind(TransNode, TransitionIndices);
-			const int32 TransNum = TransitionIndices.Num();
-			for (int32 Index = 0; Index < TransNum; ++Index)
-			{
-				if(IsTransitionActive(TransitionIndices[Index], *Class, *StateMachineGraph, *ActiveObject))
-				{	
-					// We're active!
-					return ActiveColor;
-				}
-			}
-		}
-	}
-#endif
-
-	//@TODO: ANIMATION: Sort out how to display this
-	// 			if (TransNode->SharedCrossfadeIdx != INDEX_NONE)
-	// 			{
-	// 				WireColor.R = (TransNode->SharedCrossfadeIdx & 1 ? 1.0f : 0.15f);
-	// 				WireColor.G = (TransNode->SharedCrossfadeIdx & 2 ? 1.0f : 0.15f);
-	// 				WireColor.B = (TransNode->SharedCrossfadeIdx & 4 ? 1.0f : 0.15f);
-	// 			}
-
-#if false // Shared Transitions
-	// If shared transition, show different color
-	if (TransNode->bSharedRules)
-	{
-		BaseColor = TransNode->SharedColor;
-	}
-#endif
-
 	return bIsHovered ? HoverColor : BaseColor;
-}
-
-bool SGraphNodeDungeonRuleTransition::IsTransitionActive(int32 TransitionIndex, UAnimBlueprintGeneratedClass& AnimClass, UDungeonRulesGraph& StateMachineGraph, UAnimInstance& AnimInstance)
-{
-	if (AnimClass.GetAnimNodeProperties().Num())
-	{
-#if false // Subgraph
-		if (FAnimNode_StateMachine* CurrentInstance = AnimClass.GetPropertyInstance<FAnimNode_StateMachine>(&AnimInstance, StateMachineGraph.OwnerAnimGraphNode))
-		{
-			if (CurrentInstance->IsTransitionActive(TransitionIndex))
-			{
-				return true;
-			}
-		}
-#endif
-	}
-	return false;
 }
 
 FSlateColor SGraphNodeDungeonRuleTransition::GetTransitionColor() const

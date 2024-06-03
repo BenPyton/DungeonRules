@@ -5,9 +5,6 @@
 #include "RuleTransitionNode.h"
 #include "Kismet2/Kismet2NameValidators.h"
 #include "Kismet2/CompilerResultsLog.h"
-//#include "AnimationTransitionGraph.h"
-//#include "AnimationConduitGraphSchema.h"
-//#include "AnimGraphNode_TransitionResult.h"
 #include "DungeonRulesEdTypes.h"
 
 #define LOCTEXT_NAMESPACE "RuleConduitNode"
@@ -50,78 +47,6 @@ FText URuleConduitNode::GetTooltipText() const
 	return LOCTEXT("ConduitNodeTooltip", "This is a conduit, which allows specification of a predicate condition for an entire group of transitions");
 }
 
-#if false // Blueprint
-void URuleConduitNode::PostPasteNode()
-{
-	// Find an interesting name, but try to keep the same if possible
-	TSharedPtr<INameValidatorInterface> NameValidator = FNameValidatorFactory::MakeValidator(this);
-	FBlueprintEditorUtils::RenameGraphWithSuggestion(BoundGraph, NameValidator, GetStateName());
-	Super::PostPasteNode();
-}
-
-void URuleConduitNode::PostPlacedNewNode()
-{
-	// Create a new animation graph
-	check(BoundGraph == NULL);
-	BoundGraph = FBlueprintEditorUtils::CreateNewGraph(
-		this,
-		NAME_None,
-		UAnimationTransitionGraph::StaticClass(),
-		UAnimationConduitGraphSchema::StaticClass());
-	check(BoundGraph);
-
-	// Find an interesting name
-	TSharedPtr<INameValidatorInterface> NameValidator = FNameValidatorFactory::MakeValidator(this);
-	FBlueprintEditorUtils::RenameGraphWithSuggestion(BoundGraph, NameValidator, TEXT("Conduit"));
-
-	// Initialize the transition graph
-	const UEdGraphSchema* Schema = BoundGraph->GetSchema();
-	Schema->CreateDefaultNodesForGraph(*BoundGraph);
-
-	// Add the new graph as a child of our parent graph
-	UEdGraph* ParentGraph = GetGraph();
-
-	if(ParentGraph->SubGraphs.Find(BoundGraph) == INDEX_NONE)
-	{
-		ParentGraph->SubGraphs.Add(BoundGraph);
-	}
-}
-
-void URuleConduitNode::DestroyNode()
-{
-	UEdGraph* GraphToRemove = BoundGraph;
-
-	BoundGraph = NULL;
-	Super::DestroyNode();
-	if (GraphToRemove)
-	{
-		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNodeChecked(this);
-		FBlueprintEditorUtils::RemoveGraph(Blueprint, GraphToRemove, EGraphRemoveFlags::Recompile);
-	}
-}
-
-void URuleConduitNode::ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const
-{
-	Super::ValidateNodeDuringCompilation(MessageLog);
-	UAnimationTransitionGraph* TransGraph = CastChecked<UAnimationTransitionGraph>(BoundGraph);
-	UAnimGraphNode_TransitionResult* ResultNode = TransGraph->GetResultNode();
-	check(ResultNode);
-
-	if (ResultNode->PropertyBindings.Num() > 0 && ResultNode->PropertyBindings.CreateIterator()->Value.bIsBound)
-	{
-		// Rule is bound so nothing more to check
-	}
-	else
-	{
-		UEdGraphPin* BoolResultPin = ResultNode->Pins[0];
-		if ((BoolResultPin->LinkedTo.Num() == 0) && (BoolResultPin->DefaultValue.ToBool() == false))
-		{
-			MessageLog.Warning(TEXT("@@ will never be taken, please connect something to @@"), this, BoolResultPin);
-		}
-	}
-}
-#endif
-
 UEdGraphPin* URuleConduitNode::GetInputPin() const
 {
 	return Pins[0];
@@ -134,11 +59,7 @@ UEdGraphPin* URuleConduitNode::GetOutputPin() const
 
 FString URuleConduitNode::GetStateName() const
 {
-#if false // Subgraph
-	return (BoundGraph != NULL) ? *(BoundGraph->GetName()) : TEXT("(null)");
-#else
 	return TEXT("(null)");
-#endif
 }
 
 FString URuleConduitNode::GetDesiredNewNodeName() const

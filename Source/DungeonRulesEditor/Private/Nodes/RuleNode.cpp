@@ -6,8 +6,6 @@
 #include "DungeonRulesGraph.h"
 #include "DungeonRules.h"
 #include "Kismet2/Kismet2NameValidators.h"
-//#include "AnimGraphNode_StateResult.h"
-//#include "DungeonRulesGraphSchema.h"
 #include "DungeonRulesEdTypes.h"
 #include "DungeonRulesEdLog.h"
 #include "Internationalization/Regex.h"
@@ -73,11 +71,7 @@ FText URuleNode::GetTooltipText() const
 
 FString URuleNode::GetStateName() const
 {
-#if false // Subgraph
-	return (BoundGraph != NULL) ? *(BoundGraph->GetName()) : TEXT("(null)");
-#else
 	return RuleInstance ? RuleInstance->RuleName : TEXT("NULL");
-#endif
 }
 
 void URuleNode::PostCopyNode()
@@ -131,60 +125,20 @@ UEdGraphPin* URuleNode::GetOutputPin() const
 
 void URuleNode::PostPasteNode()
 {
-#if false // Subgraph
-	// Find an interesting name, but try to keep the same if possible
-	TSharedPtr<INameValidatorInterface> NameValidator = FNameValidatorFactory::MakeValidator(this);
-	FBlueprintEditorUtils::RenameGraphWithSuggestion(BoundGraph, NameValidator, GetStateName());
-
-	for (UEdGraphNode* GraphNode : BoundGraph->Nodes)
-	{
-		GraphNode->CreateNewGuid();
-		GraphNode->PostPasteNode();
-		GraphNode->ReconstructNode();
-	}
-#else
 	if (RuleInstance)
 	{
 		// Deep copy the pasted rule instance
 		CreateInstance(RuleInstance);
 	}
-#endif
 	Super::PostPasteNode();
 }
 
 void URuleNode::PostPlacedNewNode()
 {
-#if false // Subgraph
-	// Create a new animation graph
-	check(BoundGraph == NULL);
-	BoundGraph = FBlueprintEditorUtils::CreateNewGraph(
-		this,
-		NAME_None,
-		UAnimationStateGraph::StaticClass(),
-		UAnimationStateGraphSchema::StaticClass());
-	check(BoundGraph);
-
-	// Find an interesting name
-	TSharedPtr<INameValidatorInterface> NameValidator = FNameValidatorFactory::MakeValidator(this);
-	FBlueprintEditorUtils::RenameGraphWithSuggestion(BoundGraph, NameValidator, TEXT("State"));
-
-	// Initialize the anim graph
-	const UEdGraphSchema* Schema = BoundGraph->GetSchema();
-	Schema->CreateDefaultNodesForGraph(*BoundGraph);
-
-	// Add the new graph as a child of our parent graph
-	UEdGraph* ParentGraph = GetGraph();
-
-	if(ParentGraph->SubGraphs.Find(BoundGraph) == INDEX_NONE)
-	{
-		ParentGraph->SubGraphs.Add(BoundGraph);
-	}
-#else
 	if (RuleInstance)
 		return;
 
 	CreateInstance();
-#endif
 }
 
 void URuleNode::PrepareForCopying()
@@ -194,24 +148,6 @@ void URuleNode::PrepareForCopying()
 		// Temporarily take ownership of the node instance, so that it is not deleted when cutting
 		RuleInstance->Rename(nullptr, this, REN_DontCreateRedirectors | REN_DoNotDirty);
 	}
-}
-
-void URuleNode::DestroyNode()
-{
-#if false // Subgraph + Blueprint
-	UEdGraph* GraphToRemove = BoundGraph;
-
-	BoundGraph = NULL;
-	Super::DestroyNode();
-
-	if (GraphToRemove)
-	{
-		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNodeChecked(this);
-		FBlueprintEditorUtils::RemoveGraph(Blueprint, GraphToRemove, EGraphRemoveFlags::Recompile);
-	}
-#else
-	Super::DestroyNode();
-#endif
 }
 
 void URuleNode::OnRenameNode(const FString& NewName)

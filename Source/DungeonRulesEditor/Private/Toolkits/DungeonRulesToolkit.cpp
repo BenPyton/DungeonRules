@@ -783,13 +783,6 @@ bool FDungeonRulesToolkit::CanRenameNodes() const
 	if (!EditingGraph || !EditingGraph->bEditable)
 		return false;
 
-#if false // TODO: remove
-	if (const UEdGraphNode* SelectedNode = GetSingleSelectedNode())
-	{
-		return SelectedNode->GetCanRenameNode();
-	}
-#endif
-
 	const FGraphPanelSelectionSet SelectedNodes = GetSelectedNodes();
 	for (const UObject* Node : SelectedNodes)
 	{

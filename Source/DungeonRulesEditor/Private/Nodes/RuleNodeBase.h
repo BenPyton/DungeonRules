@@ -25,16 +25,10 @@ public:
 	virtual void PostLoad() override;
 
 	// UEdGraphNode interface
-#if false // Subgraph
-	virtual void PostPasteNode() override;
 	virtual UObject* GetJumpTargetForDoubleClick() const override;
 	virtual bool CanJumpToDefinition() const override;
 	virtual void JumpToDefinition() const override;
-#endif
 	virtual bool CanCreateUnderSpecifiedSchema(const UEdGraphSchema* Schema) const override;
-#if false // Subgraph
-	virtual void OnRenameNode(const FString& NewName) override;
-#endif
 	virtual TSharedPtr<class INameValidatorInterface> MakeNameValidator() const override;
 	// End of UEdGraphNode interface
 
@@ -49,13 +43,6 @@ public:
 
 	// Populates the OutTransitions array with a list of transition nodes connected to this state
 	DUNGEONRULESEDITOR_API virtual void GetTransitionList(TArray<class URuleTransitionNode*>& OutTransitions, bool bWantSortedList = false) const;
-
-#if false // Subgraph + Blueprint
-	virtual UEdGraph* GetBoundGraph() const { return NULL; }
-	virtual void ClearBoundGraph() {}
-
-	DUNGEONRULESEDITOR_API UAnimBlueprint* GetAnimBlueprint() const;
-#endif
 
 	virtual void PostCopyNode() {}
 

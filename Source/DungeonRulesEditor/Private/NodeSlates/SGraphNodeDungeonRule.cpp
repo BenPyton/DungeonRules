@@ -377,17 +377,6 @@ TSharedPtr<SToolTip> SGraphNodeDungeonRule::GetComplexTooltip()
 	return SNew(SToolTip)
 		[
 			SNew(SVerticalBox)
-	
-			+SVerticalBox::Slot()
-			.AutoHeight()
-			[
-				// Create the tooltip preview, ensure to disable state overlays to stop
-				// PIE and read-only borders obscuring the graph
-				SNew(SGraphPreviewer, StateNode->GetBoundGraph())
-				.CornerOverlayText(this, &SGraphNodeDungeonRule::GetPreviewCornerText)
-				.ShowGraphStateOverlay(false)
-			]
-	
 			+SVerticalBox::Slot()
 			.AutoHeight()
 			.Padding(FMargin(0.0f, 5.0f, 0.0f, 0.0f))

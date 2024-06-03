@@ -19,12 +19,6 @@ class URuleNode : public URuleNodeBase
 public:
 	URuleNode();
 
-#if false // Subgraph
-	// The animation graph for this state
-	//UPROPERTY()
-	TObjectPtr<class UEdGraph> BoundGraph;
-#endif
-
 	//~ Begin UEdGraphNode Interface
 	virtual void AllocateDefaultPins() override;
 	virtual void AutowireNewNode(UEdGraphPin* FromPin) override;
@@ -34,10 +28,6 @@ public:
 	virtual void PostPasteNode() override;
 	virtual void PostPlacedNewNode() override;
 	virtual void PrepareForCopying() override;
-	virtual void DestroyNode() override;
-#if false // Subgraph
-	virtual TArray<UEdGraph*> GetSubGraphs() const override { return TArray<UEdGraph*>( { BoundGraph } ); }
-#endif
 	virtual void OnRenameNode(const FString& NewName) override;
 	//~ End UEdGraphNode Interface
 	
@@ -59,12 +49,6 @@ public:
 
 	virtual void PostCopyNode() override;
 	void ResetInstanceOwner();
-
-#if false // Subgraph
-public:
-	virtual UEdGraph* GetBoundGraph() const override { return BoundGraph; }
-	virtual void ClearBoundGraph() override { BoundGraph = nullptr; }
-#endif
 
 private:
 	void CreateInstance(const UDungeonRule* Template = nullptr);

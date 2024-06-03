@@ -54,7 +54,6 @@ public:
 
 	static FLinearColor StaticGetTransitionColor(URuleTransitionNode* TransNode, bool bIsHovered);
 
-	static bool IsTransitionActive(int32 TransitionIndex, class UAnimBlueprintGeneratedClass& AnimClass, class UDungeonRulesGraph& StateMachineGraph, class UAnimInstance& AnimInstance);
 private:
 	TSharedPtr<STextEntryPopup> TextEntryWidget;
 

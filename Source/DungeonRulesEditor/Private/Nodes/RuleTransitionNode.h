@@ -25,33 +25,7 @@ class URuleTransitionNode : public URuleNodeBase
 public:
 	URuleTransitionNode();
 
-#if false // Subgraph
-	// The transition logic graph for this transition (returning a boolean)
-	//UPROPERTY()
-	TObjectPtr<class UEdGraph> BoundGraph;
-#endif
-
-#if false // Shared Transitions
-	/** The rules for this transition may be shared with other transition nodes */
-	//UPROPERTY()
-	bool bSharedRules;
-
-	/** What we call this transition if we are shared ('Transition X to Y' can't be used since its used in multiple places) */
-	//UPROPERTY()
-	FString	SharedRulesName;
-
-	/** Shared rules guid useful when copying between different state machines */
-	//UPROPERTY()
-	FGuid SharedRulesGuid;
-
-	/** Color we draw in the editor as if we are shared */
-	//UPROPERTY()
-	FLinearColor SharedColor;
-#endif
-
 	//~ Begin UObject Interface
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-	virtual void PostLoad() override;
 	virtual void Serialize(FArchive& Ar) override;
 	//~ End UObject Interface
 
@@ -65,19 +39,9 @@ public:
 	virtual void PrepareForCopying() override;
 	virtual void PostPasteNode() override;
 	virtual void PostPlacedNewNode() override;
-#if false // Subgraph + Blueprint
-	virtual void DestroyNode() override;
-	virtual void ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const override;
-	virtual UObject* GetJumpTargetForDoubleClick() const override;
-	virtual TArray<UEdGraph*> GetSubGraphs() const override;
-#endif
 	//~ End UEdGraphNode Interface
 
 	//~ Begin URuleNodeBase Interface
-#if false // Subgraph
-	virtual UEdGraph* GetBoundGraph() const override { return BoundGraph; }
-	virtual void ClearBoundGraph() override { BoundGraph = nullptr; }
-#endif
 	virtual UEdGraphPin* GetInputPin() const override { return Pins[0]; }
 	virtual UEdGraphPin* GetOutputPin() const override { return Pins[1]; }
 	//~ End URuleNodeBase Interface
@@ -115,20 +79,6 @@ public:
 	DUNGEONRULESEDITOR_API static TArray<URuleTransitionNode*> GetListTransitionNodesToRelink(UEdGraphPin* SourcePin, UEdGraphPin* OldTargetPin, const TArray<UEdGraphNode*>& InSelectedGraphNodes);
 
 	UDungeonRuleTransition* GetNodeInstance() const { return NodeInstance; }
-
-#if false // Shared Transitions
-	DUNGEONRULESEDITOR_API bool IsBoundGraphShared() const;
-
-	DUNGEONRULESEDITOR_API void MakeRulesShareable(FString ShareName);
-	DUNGEONRULESEDITOR_API void UnshareRules();
-
-	DUNGEONRULESEDITOR_API void UseSharedRules(const URuleTransitionNode* Node);
-#endif
-
-protected:
-#if false // Subgraph
-	void CreateBoundGraph();
-#endif
 
 private:
 	void CreateInstance(const UDungeonRuleTransition* Template = nullptr);

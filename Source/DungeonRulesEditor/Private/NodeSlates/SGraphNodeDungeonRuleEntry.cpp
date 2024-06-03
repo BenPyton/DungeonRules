@@ -34,12 +34,6 @@ void SGraphNodeDungeonRuleEntry::Construct(const FArguments& InArgs, URuleEntryN
 	this->UpdateGraphNode();
 }
 
-#if false // Blueprint
-void SGraphNodeDungeonRuleEntry::GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const
-{
-}
-#endif
-
 FSlateColor SGraphNodeDungeonRuleEntry::GetBorderBackgroundColor() const
 {
 	FLinearColor InactiveStateColor(0.08f, 0.08f, 0.08f);

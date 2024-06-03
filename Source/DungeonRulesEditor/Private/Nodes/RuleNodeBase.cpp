@@ -45,43 +45,9 @@ URuleNodeBase::URuleNodeBase()
 {
 }
 
-#if false // Subgraph + Blueprint
-void URuleNodeBase::PostPasteNode()
-{
-	Super::PostPasteNode();
-
-	for(UEdGraph* SubGraph : GetSubGraphs())
-	{
-		if(SubGraph)
-		{
-			// Add the new graph as a child of our parent graph
-			UEdGraph* ParentGraph = GetGraph();
-
-			if(ParentGraph->SubGraphs.Find(SubGraph) == INDEX_NONE)
-			{
-				ParentGraph->SubGraphs.Add(SubGraph);
-			}
-
-			//@TODO: CONDUIT: Merge conflict - May no longer be necessary due to other changes?
-	//		FBlueprintEditorUtils::RenameGraphWithSuggestion(SubGraph, NameValidator, GetDesiredNewNodeName());
-			//@ENDTODO
-
-			// Restore transactional flag that is lost during copy/paste process
-			SubGraph->SetFlags(RF_Transactional);
-
-			UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(ParentGraph);
-			FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
-		}
-	}
-}
-#endif
-
-#if false // Subgraph + Blueprint?
 UObject* URuleNodeBase::GetJumpTargetForDoubleClick() const
 {
-	TArray<UEdGraph*> SubGraphs = GetSubGraphs();
-	check(SubGraphs.Num() > 0);
-	return SubGraphs[0];
+	return nullptr;
 }
 
 bool URuleNodeBase::CanJumpToDefinition() const
@@ -96,21 +62,11 @@ void URuleNodeBase::JumpToDefinition() const
 		FKismetEditorUtilities::BringKismetToFocusAttentionOnObject(HyperlinkTarget);
 	}
 }
-#endif
 
 bool URuleNodeBase::CanCreateUnderSpecifiedSchema(const UEdGraphSchema* Schema) const
 {
 	return Schema->IsA(UDungeonRulesSchema::StaticClass());
 }
-
-#if false // Subgraph
-void URuleNodeBase::OnRenameNode(const FString& NewName)
-{
-	TArray<UEdGraph*> SubGraphs = GetSubGraphs();
-	check(SubGraphs.Num() > 0);
-	FBlueprintEditorUtils::RenameGraph(SubGraphs[0], NewName);
-}
-#endif
 
 TSharedPtr<class INameValidatorInterface> URuleNodeBase::MakeNameValidator() const
 {
@@ -188,11 +144,4 @@ void URuleNodeBase::GetTransitionList(TArray<URuleTransitionNode*>& OutTransitio
 #endif
 }
 
-#if false // Blueprint
-UAnimBlueprint* URuleNodeBase::GetAnimBlueprint() const
-{
-	UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNode(this);
-	return CastChecked<UAnimBlueprint>(Blueprint);
-}
-#endif
 
