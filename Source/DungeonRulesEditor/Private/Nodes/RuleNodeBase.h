@@ -57,6 +57,8 @@ public:
 	DUNGEONRULESEDITOR_API UAnimBlueprint* GetAnimBlueprint() const;
 #endif
 
+	virtual void PostCopyNode() {}
+
 protected:
 	// Name used as a seed when pasting nodes
 	virtual FString GetDesiredNewNodeName() const { return TEXT("State"); }

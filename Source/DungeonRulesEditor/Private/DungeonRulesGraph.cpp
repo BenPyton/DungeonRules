@@ -2,6 +2,9 @@
 
 #include "DungeonRulesGraph.h"
 #include "Nodes/RuleNodeBase.h"
+#include "Nodes/RuleNode.h"
+#include "DungeonRules.h"
+#include "DUngeonRulesEdLog.h"
 
 #define LOCTEXT_NAMESPACE "DungeonRulesGraph"
 
@@ -85,6 +88,28 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 
 	CreateATFromGraph(Node);
 #endif
+
+	DungeonEd_LogInfo("Create DungeonRules asset from graph.");
+	UDungeonRules* DungeonRulesAsset = Cast<UDungeonRules>(GetOuter());
+	check(DungeonRulesAsset);
+
+	// Clear previous data in the asset
+	DungeonRulesAsset->Clear();
+
+	for (const UEdGraphNode* Node : Nodes)
+	{
+		const URuleNode* RuleNode = Cast<URuleNode>(Node);
+		if (!RuleNode)
+			continue;
+
+		UDungeonRule* Rule = RuleNode->GetRuleInstance();
+		if (!Rule)
+			continue;
+
+		Rule->Rename(*Rule->GetName(), DungeonRulesAsset);
+		DungeonEd_LogWarning("Rule new outer: %s", *GetNameSafe(Rule->GetOuter()));
+		DungeonRulesAsset->AddRule(Rule);
+	}
 }
 
 void UDungeonRulesGraph::OnCreated()
@@ -92,11 +117,13 @@ void UDungeonRulesGraph::OnCreated()
 	MarkVersion();
 }
 
+#if false
 void UDungeonRulesGraph::OnLoaded()
 {
 	UpdateDeprecatedClasses();
 	UpdateUnknownNodeClasses();
 }
+#endif
 
 void UDungeonRulesGraph::Initialize()
 {
@@ -119,10 +146,11 @@ void UDungeonRulesGraph::MarkVersion()
 	GraphVersion = 1;
 }
 
+#if false
 bool UDungeonRulesGraph::UpdateUnknownNodeClasses()
 {
 	bool bUpdated = false;
-	/*for (int32 NodeIdx = 0; NodeIdx < Nodes.Num(); NodeIdx++)
+	for (int32 NodeIdx = 0; NodeIdx < Nodes.Num(); NodeIdx++)
 	{
 		URuleNodeBase* MyNode = Cast<URuleNodeBase>(Nodes[NodeIdx]);
 		if (MyNode)
@@ -139,15 +167,17 @@ bool UDungeonRulesGraph::UpdateUnknownNodeClasses()
 				}
 			}
 		}
-	}*/
+	}
 
 	return bUpdated;
 }
+#endif
 
+#if false
 void UpdateAIGraphNodeErrorMessage(URuleNodeBase& Node)
 {
 	// Broke out setting error message in to own function so it can be reused when iterating nodes collection.
-	/*if (Node.NodeInstance)
+	if (Node.NodeInstance)
 	{
 		Node.ErrorMessage = FGraphNodeClassHelper::GetDeprecationMessage(Node.NodeInstance->GetClass());
 	}
@@ -168,9 +198,11 @@ void UpdateAIGraphNodeErrorMessage(URuleNodeBase& Node)
 	if (Node.HasErrors())
 	{
 		UE_LOG(LogAIGraph, Error, TEXT("%s"), *Node.ErrorMessage);
-	}*/
+	}
 }
+#endif
 
+#if false
 void UDungeonRulesGraph::UpdateDeprecatedClasses()
 {
 	// This function sets error messages and logs errors about nodes.
@@ -192,19 +224,23 @@ void UDungeonRulesGraph::UpdateDeprecatedClasses()
 		}
 	}
 }
+#endif
 
 void UDungeonRulesGraph::Serialize(FArchive& Ar)
 {
 	// Overridden to flags up errors in the behavior tree while cooking.
 	Super::Serialize(Ar);
 
+#if false
 	if (Ar.IsSaving() || Ar.IsCooking())
 	{
 		// Logging of errors happens in UpdateDeprecatedClasses
 		UpdateDeprecatedClasses();
 	}
+#endif
 }
 
+#if false
 void UDungeonRulesGraph::UpdateClassData()
 {
 	for (int32 Idx = 0; Idx < Nodes.Num(); Idx++)
@@ -212,13 +248,13 @@ void UDungeonRulesGraph::UpdateClassData()
 		URuleNodeBase* Node = Cast<URuleNodeBase>(Nodes[Idx]);
 		if (Node)
 		{
-#if false
 			Node->UpdateNodeClassData();
-#endif
 		}
 	}
 }
+#endif
 
+#if false
 void UDungeonRulesGraph::CollectAllNodeInstances(TSet<UObject*>& NodeInstances)
 {
 	for (int32 Idx = 0; Idx < Nodes.Num(); Idx++)
@@ -226,20 +262,22 @@ void UDungeonRulesGraph::CollectAllNodeInstances(TSet<UObject*>& NodeInstances)
 		URuleNodeBase* MyNode = Cast<URuleNodeBase>(Nodes[Idx]);
 		if (MyNode)
 		{
-#if false
 			NodeInstances.Add(MyNode->NodeInstance);
-#endif
 		}
 	}
 }
+#endif
 
+#if false
 bool UDungeonRulesGraph::CanRemoveNestedObject(UObject* TestObject) const
 {
 	return !TestObject->IsA(UEdGraphNode::StaticClass()) &&
 		!TestObject->IsA(UEdGraph::StaticClass()) &&
 		!TestObject->IsA(UEdGraphSchema::StaticClass());
 }
+#endif
 
+#if false
 void UDungeonRulesGraph::RemoveOrphanedNodes()
 {
 	TSet<UObject*> NodeInstances;
@@ -263,6 +301,7 @@ void UDungeonRulesGraph::RemoveOrphanedNodes()
 		}
 	}
 }
+#endif
 
 void UDungeonRulesGraph::OnNodeInstanceRemoved(UObject* NodeInstance)
 {
@@ -302,7 +341,7 @@ void UDungeonRulesGraph::LockUpdates()
 void UDungeonRulesGraph::UnlockUpdates()
 {
 	bLockUpdates = false;
-	UpdateAsset();
+	//UpdateAsset();
 }
 
 #undef LOCTEXT_NAMESPACE

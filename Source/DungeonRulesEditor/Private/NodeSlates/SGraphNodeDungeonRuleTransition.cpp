@@ -29,7 +29,7 @@
 #include "Misc/AssertionMacros.h"
 #include "Misc/Attribute.h"
 #include "SGraphPanel.h"
-#include "SKismetLinearExpression.h"
+//#include "SKismetLinearExpression.h"
 #include "SlotBase.h"
 #include "Styling/AppStyle.h"
 #include "Templates/Casts.h"

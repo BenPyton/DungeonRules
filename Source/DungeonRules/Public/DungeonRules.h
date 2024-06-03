@@ -35,7 +35,7 @@ class ADungeonGenerator;
 class URoomData;
 
 USTRUCT()
-struct FDungeonRuleTransition
+struct DUNGEONRULES_API FDungeonRuleTransition
 {
 	GENERATED_BODY()
 
@@ -56,7 +56,7 @@ public:
 };
 
 UCLASS()
-class UDungeonRule : public UObject
+class DUNGEONRULES_API UDungeonRule : public UObject
 {
 	GENERATED_BODY()
 
@@ -67,8 +67,9 @@ public:
 	UPROPERTY()
 	TArray<FDungeonRuleTransition> Transitions;
 
+	// Displayed name of the rule
 	UPROPERTY()
-	FString Name;
+	FString RuleName;
 
 public:
 	const UDungeonRule* GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
@@ -85,21 +86,30 @@ class DUNGEONRULES_API UDungeonRules : public UDataAsset
 public:
 	UDungeonRules();
 
-	UPROPERTY()
-	TArray<TObjectPtr<UDungeonRule>> Rules;
-
-	UPROPERTY()
-	TObjectPtr<UDungeonRule> FirstRule;
-
 public:
 	URoomData* GetFirstRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule) const;
 	URoomData* GetNextRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const URoomData* PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const;
 	const UDungeonRule* GetNextRule(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const URoomData* RoomData) const;
 	FORCEINLINE const UDungeonRule* GetFirstRule() const { return FirstRule; }
 
+#if WITH_EDITOR
+public:
+	// Clear FirstRule, Rules and all transitions
+	void Clear();
+	void AddRule(UDungeonRule* Rule);
+	void SetFirstRule(UDungeonRule* Rule);
+#endif
+
 #if WITH_EDITORONLY_DATA
 public:
 	UPROPERTY()
 	class UEdGraph* EdGraph {nullptr};
 #endif
+
+private:
+	UPROPERTY()
+	TArray<TObjectPtr<UDungeonRule>> Rules;
+
+	UPROPERTY()
+	TObjectPtr<UDungeonRule> FirstRule;
 };

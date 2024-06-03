@@ -12,8 +12,10 @@
 #include "EdGraphUtilities.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Nodes/RuleNodeBase.h"
+#include "Nodes/RuleNode.h"
 #include "Editor.h"
 #include "Misc/EngineVersionComparison.h"
+#include "SNodePanel.h" // GetSnapGridSize
 
 #define LOCTEXT_NAMESPACE "DungeonRulesEditor"
 
@@ -363,20 +365,17 @@ void FDungeonRulesToolkit::OnSelectedNodesChanged(const TSet<class UObject*>& Ne
 
 	if (NewSelection.Num())
 	{
-		for (TSet<class UObject*>::TConstIterator SetIt(NewSelection); SetIt; ++SetIt)
+		for (UObject* SelectedObj : NewSelection)
 		{
-#if false
-			if (URuleNodeBase* GraphNode = Cast<URuleNodeBase>(*SetIt))
+			if (URuleNode* GraphNode = Cast<URuleNode>(SelectedObj))
 			{
-				Selection.Add(GraphNode->NodeInstance);
+				Selection.Add(GraphNode->GetRuleInstance());
 			}
 			else
-#endif
 			{
-				Selection.Add(*SetIt);
+				Selection.Add(SelectedObj);
 			}
 		}
-		//Selection = NewSelection.Array();
 	}
 	else
 	{
@@ -387,7 +386,6 @@ void FDungeonRulesToolkit::OnSelectedNodesChanged(const TSet<class UObject*>& Ne
 	{
 		DetailsWidget->SetObjects(Selection);
 	}
-	//SetSelection(Selection);
 }
 
 
@@ -418,9 +416,9 @@ void FDungeonRulesToolkit::DeleteSelectedNodes()
 	const FGraphPanelSelectionSet SelectedNodes = CurrentGraphEditor->GetSelectedNodes();
 	CurrentGraphEditor->ClearSelectionSet();
 
-	for (FGraphPanelSelectionSet::TConstIterator NodeIt(SelectedNodes); NodeIt; ++NodeIt)
+	for (UObject* SelectedObj : SelectedNodes)
 	{
-		if (UEdGraphNode* Node = Cast<UEdGraphNode>(*NodeIt))
+		if (UEdGraphNode* Node = Cast<UEdGraphNode>(SelectedObj))
 		{
 			if (Node->CanUserDeleteNode())
 			{
@@ -458,23 +456,28 @@ void FDungeonRulesToolkit::DeleteSelectedDuplicatableNodes()
 	const FGraphPanelSelectionSet OldSelectedNodes = CurrentGraphEditor->GetSelectedNodes();
 	CurrentGraphEditor->ClearSelectionSet();
 
-	for (FGraphPanelSelectionSet::TConstIterator SelectedIter(OldSelectedNodes); SelectedIter; ++SelectedIter)
+	for (UObject* SelectedObj : OldSelectedNodes)
 	{
-		UEdGraphNode* Node = Cast<UEdGraphNode>(*SelectedIter);
+		UEdGraphNode* Node = Cast<UEdGraphNode>(SelectedObj);
 		if (Node && Node->CanDuplicateNode())
 		{
 			CurrentGraphEditor->SetNodeSelection(Node, true);
 		}
 	}
 
+	const FGraphPanelSelectionSet DeletedNodes = CurrentGraphEditor->GetSelectedNodes();
+
 	// Delete the duplicatable nodes
 	DeleteSelectedNodes();
 
 	CurrentGraphEditor->ClearSelectionSet();
 
-	for (FGraphPanelSelectionSet::TConstIterator SelectedIter(OldSelectedNodes); SelectedIter; ++SelectedIter)
+	for (UObject* SelectedObj : OldSelectedNodes)
 	{
-		if (UEdGraphNode* Node = Cast<UEdGraphNode>(*SelectedIter))
+		if (DeletedNodes.Contains(SelectedObj))
+			continue;
+
+		if (UEdGraphNode* Node = Cast<UEdGraphNode>(SelectedObj))
 		{
 			CurrentGraphEditor->SetNodeSelection(Node, true);
 		}
@@ -494,68 +497,39 @@ bool FDungeonRulesToolkit::CanCutNodes() const
 
 void FDungeonRulesToolkit::CopySelectedNodes()
 {
-#if false
-	// Export the selected nodes and place the text on the clipboard
 	FGraphPanelSelectionSet SelectedNodes = GetSelectedNodes();
-	TArray<UAIGraphNode*> SubNodes;
+	FGraphPanelSelectionSet NodesToCopy;
+
+	for (UObject* SelectedObj : SelectedNodes)
+	{
+		URuleNodeBase* Node = Cast<URuleNodeBase>(SelectedObj);
+		if (Node && Node->CanDuplicateNode())
+		{
+			NodesToCopy.Add(Node);
+			Node->PrepareForCopying();
+		}
+	}
 
 	FString ExportedText;
-
-	int32 CopySubNodeIndex = 0;
-	for (FGraphPanelSelectionSet::TIterator SelectedIter(SelectedNodes); SelectedIter; ++SelectedIter)
-	{
-		UEdGraphNode* Node = Cast<UEdGraphNode>(*SelectedIter);
-		UAIGraphNode* AINode = Cast<UAIGraphNode>(Node);
-		if (Node == nullptr)
-		{
-			SelectedIter.RemoveCurrent();
-			continue;
-		}
-
-		Node->PrepareForCopying();
-
-		if (AINode)
-		{
-			AINode->CopySubNodeIndex = CopySubNodeIndex;
-
-			// append all subnodes for selection
-			for (int32 Idx = 0; Idx < AINode->SubNodes.Num(); Idx++)
-			{
-				AINode->SubNodes[Idx]->CopySubNodeIndex = CopySubNodeIndex;
-				SubNodes.Add(AINode->SubNodes[Idx]);
-			}
-
-			CopySubNodeIndex++;
-		}
-	}
-
-	for (int32 Idx = 0; Idx < SubNodes.Num(); Idx++)
-	{
-		SelectedNodes.Add(SubNodes[Idx]);
-		SubNodes[Idx]->PrepareForCopying();
-	}
-
-	FEdGraphUtilities::ExportNodesToText(SelectedNodes, ExportedText);
+	FEdGraphUtilities::ExportNodesToText(NodesToCopy, ExportedText);
 	FPlatformApplicationMisc::ClipboardCopy(*ExportedText);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *ExportedText);
 
-	for (FGraphPanelSelectionSet::TIterator SelectedIter(SelectedNodes); SelectedIter; ++SelectedIter)
+	for (UObject* CopiedNode : NodesToCopy)
 	{
-		UAIGraphNode* Node = Cast<UAIGraphNode>(*SelectedIter);
+		URuleNodeBase* Node = Cast<URuleNodeBase>(CopiedNode);
 		if (Node)
-		{
 			Node->PostCopyNode();
-		}
 	}
-#endif
 }
 
 bool FDungeonRulesToolkit::CanCopyNodes() const
 {
 	// If any of the nodes can be duplicated then we should allow copying
 	const FGraphPanelSelectionSet SelectedNodes = GetSelectedNodes();
-	for (FGraphPanelSelectionSet::TConstIterator SelectedIter(SelectedNodes); SelectedIter; ++SelectedIter)
+	for (UObject* SelectedObj : SelectedNodes)
 	{
-		UEdGraphNode* Node = Cast<UEdGraphNode>(*SelectedIter);
+		UEdGraphNode* Node = Cast<UEdGraphNode>(SelectedObj);
 		if (Node && Node->CanDuplicateNode())
 		{
 			return true;
@@ -575,7 +549,6 @@ void FDungeonRulesToolkit::PasteNodes()
 
 void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 {
-#if false
 	TSharedPtr<SGraphEditor> CurrentGraphEditor = UpdateGraphEdPtr.Pin();
 	if (!CurrentGraphEditor.IsValid())
 	{
@@ -585,26 +558,20 @@ void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 	// Undo/Redo support
 	const FScopedTransaction Transaction(FGenericCommands::Get().Paste->GetDescription());
 	UEdGraph* EdGraph = CurrentGraphEditor->GetCurrentGraph();
-	UAIGraph* AIGraph = Cast<UAIGraph>(EdGraph);
+	UDungeonRulesGraph* RulesGraph = Cast<UDungeonRulesGraph>(EdGraph);
 
 	EdGraph->Modify();
-	if (AIGraph)
-	{
-		AIGraph->LockUpdates();
-	}
+	if (RulesGraph)
+		RulesGraph->LockUpdates();
 
+#if false
 	UAIGraphNode* SelectedParent = NULL;
 	bool bHasMultipleNodesSelected = false;
 
 	const FGraphPanelSelectionSet SelectedNodes = GetSelectedNodes();
-	for (FGraphPanelSelectionSet::TConstIterator SelectedIter(SelectedNodes); SelectedIter; ++SelectedIter)
+	for (UObject* SelectedObj : SelectedNodes)
 	{
-		UAIGraphNode* Node = Cast<UAIGraphNode>(*SelectedIter);
-		if (Node && Node->IsSubNode())
-		{
-			Node = Node->ParentNode;
-		}
-
+		URuleNodeBase* Node = Cast<URuleNodeBase>(SelectedObj);
 		if (Node)
 		{
 			if (SelectedParent == nullptr)
@@ -618,6 +585,7 @@ void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 			}
 		}
 	}
+#endif
 
 	// Clear the selection set (newly pasted stuff will be selected)
 	CurrentGraphEditor->ClearSelectionSet();
@@ -635,15 +603,12 @@ void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 
 	// Number of nodes used to calculate AvgNodePosition
 	int32 AvgCount = 0;
-
-	for (TSet<UEdGraphNode*>::TIterator It(PastedNodes); It; ++It)
+	for (UEdGraphNode* Node : PastedNodes)
 	{
-		UEdGraphNode* EdNode = *It;
-		UAIGraphNode* AINode = Cast<UAIGraphNode>(EdNode);
-		if (EdNode && (AINode == nullptr || !AINode->IsSubNode()))
+		if (Node)
 		{
-			AvgNodePosition.X += EdNode->NodePosX;
-			AvgNodePosition.Y += EdNode->NodePosY;
+			AvgNodePosition.X += Node->NodePosX;
+			AvgNodePosition.Y += Node->NodePosY;
 			++AvgCount;
 		}
 	}
@@ -655,6 +620,7 @@ void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 		AvgNodePosition.Y *= InvNumNodes;
 	}
 
+#if false
 	bool bPastedParentNode = false;
 
 	TMap<FGuid/*New*/, FGuid/*Old*/> NewToOldNodeMapping;
@@ -697,37 +663,32 @@ void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 		}
 	}
 
-	for (TSet<UEdGraphNode*>::TIterator It(PastedNodes); It; ++It)
-	{
-		UAIGraphNode* PasteNode = Cast<UAIGraphNode>(*It);
-		if (PasteNode && PasteNode->IsSubNode())
-		{
-			PasteNode->NodePosX = 0;
-			PasteNode->NodePosY = 0;
-
-			// remove subnode from graph, it will be referenced from parent node
-			PasteNode->DestroyNode();
-
-			PasteNode->ParentNode = ParentMap.FindRef(PasteNode->CopySubNodeIndex);
-			if (PasteNode->ParentNode)
-			{
-				PasteNode->ParentNode->AddSubNode(PasteNode, EdGraph);
-			}
-			else if (!bHasMultipleNodesSelected && !bPastedParentNode && SelectedParent)
-			{
-				PasteNode->ParentNode = SelectedParent;
-				SelectedParent->AddSubNode(PasteNode, EdGraph);
-			}
-		}
-	}
-
 	FixupPastedNodes(PastedNodes, NewToOldNodeMapping);
-
-	if (AIGraph)
+#else
+	for (UEdGraphNode* PastedNode : PastedNodes)
 	{
-		AIGraph->UpdateClassData();
-		AIGraph->OnNodesPasted(TextToImport);
-		AIGraph->UnlockUpdates();
+		if (!PastedNode)
+			continue;
+
+		CurrentGraphEditor->SetNodeSelection(PastedNode, true);
+
+		PastedNode->NodePosX = (PastedNode->NodePosX - AvgNodePosition.X) + Location.X;
+		PastedNode->NodePosY = (PastedNode->NodePosY - AvgNodePosition.Y) + Location.Y;
+
+		PastedNode->SnapToGrid(SNodePanel::GetSnapGridSize());
+
+		// Give new node a different Guid from the old one
+		PastedNode->CreateNewGuid();
+	}
+#endif
+
+	if (RulesGraph)
+	{
+#if false
+		RulesGraph->UpdateClassData();
+#endif
+		RulesGraph->OnNodesPasted(TextToImport);
+		RulesGraph->UnlockUpdates();
 	}
 
 	// Update UI
@@ -739,7 +700,6 @@ void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 		GraphOwner->PostEditChange();
 		GraphOwner->MarkPackageDirty();
 	}
-#endif
 }
 
 #if false

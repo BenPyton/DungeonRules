@@ -10,6 +10,7 @@
 
 class UEdGraph;
 class UEdGraphPin;
+class UDungeonRule;
 
 UCLASS(MinimalAPI)
 class URuleNode : public URuleNodeBase
@@ -32,6 +33,7 @@ public:
 	virtual bool CanDuplicateNode() const override { return true; }
 	virtual void PostPasteNode() override;
 	virtual void PostPlacedNewNode() override;
+	virtual void PrepareForCopying() override;
 	virtual void DestroyNode() override;
 #if false
 	virtual TArray<UEdGraph*> GetSubGraphs() const override { return TArray<UEdGraph*>( { BoundGraph } ); }
@@ -45,6 +47,19 @@ public:
 	virtual FString GetStateName() const override;
 	//~ End URuleNodeBase Interface
 
+	//~ Begin UObject Interface
+#if WITH_EDITOR
+	virtual void PostEditImport() override;
+	virtual void PostEditUndo() override;
+#endif
+	//~ End UObject Interface
+
+public:
+	FORCEINLINE UDungeonRule* GetRuleInstance() const { return RuleInstance; }
+
+	virtual void PostCopyNode() override;
+	void ResetInstanceOwner();
+
 #if false
 public:
 	virtual UEdGraph* GetBoundGraph() const override { return BoundGraph; }
@@ -52,9 +67,9 @@ public:
 #endif
 
 private:
-	UPROPERTY()
-	FString NodeName;
+	void CreateInstance(const UDungeonRule* Template = nullptr);
 
-	UPROPERTY(EditAnywhere, Instanced)
-	TObjectPtr<class UDungeonRoomChooser> RoomChooser {nullptr};
+private:
+	UPROPERTY()
+	TObjectPtr<UDungeonRule> RuleInstance {nullptr};
 };

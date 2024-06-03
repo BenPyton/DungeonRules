@@ -118,3 +118,21 @@ const UDungeonRule* UDungeonRules::GetNextRule(ADungeonGenerator* Generator, con
 
 	return CurrentRule->GetNextRule(Generator, Room);
 }
+
+#if WITH_EDITOR
+void UDungeonRules::Clear()
+{
+	Rules.Empty();
+	FirstRule = nullptr;
+}
+
+void UDungeonRules::AddRule(UDungeonRule* Rule)
+{
+	Rules.AddUnique(Rule);
+}
+
+void UDungeonRules::SetFirstRule(UDungeonRule* Rule)
+{
+	FirstRule = Rule;
+}
+#endif

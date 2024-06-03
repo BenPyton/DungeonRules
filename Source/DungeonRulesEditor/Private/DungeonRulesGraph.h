@@ -38,7 +38,9 @@ public:
 	int32 GraphVersion;
 
 	virtual void OnCreated();
+#if false
 	virtual void OnLoaded();
+#endif
 	virtual void Initialize();
 
 	virtual void UpdateAsset(int32 UpdateFlags = 0);
@@ -47,10 +49,12 @@ public:
 
 	virtual void OnNodesPasted(const FString& ImportStr);
 
+#if false
 	bool UpdateUnknownNodeClasses();
 	void UpdateDeprecatedClasses();
 	void RemoveOrphanedNodes();
 	void UpdateClassData();
+#endif
 
 	bool IsLocked() const;
 	void LockUpdates();
@@ -67,8 +71,10 @@ protected:
 	 */
 	uint32 bLockUpdates : 1;
 
+#if false
 	virtual void CollectAllNodeInstances(TSet<UObject*>& NodeInstances);
 	virtual bool CanRemoveNestedObject(UObject* TestObject) const;
+#endif
 	virtual void OnNodeInstanceRemoved(UObject* NodeInstance);
 
 	UEdGraphPin* FindGraphNodePin(UEdGraphNode* Node, EEdGraphPinDirection Dir);

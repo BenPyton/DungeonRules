@@ -47,40 +47,38 @@ TSharedPtr<FDungeonRulesGraphSchemaAction_NewStateNode> AddNewStateNodeAction(FG
 
 UEdGraphNode* FDungeonRulesGraphSchemaAction_NewStateNode::PerformAction(class UEdGraph* ParentGraph, UEdGraphPin* FromPin, const FVector2D Location, bool bSelectNewNode/* = true*/)
 {
-	UEdGraphNode* ResultNode = NULL;
+	// No action to perform if no template
+	if (!NodeTemplate)
+		return nullptr;
 
-	// If there is a template, we actually use it
-	if (NodeTemplate != NULL)
+	const FScopedTransaction Transaction( NSLOCTEXT("UnrealEd", "K2_AddNode", "Add Node") );
+	ParentGraph->Modify();
+	if (FromPin)
 	{
-		const FScopedTransaction Transaction( NSLOCTEXT("UnrealEd", "K2_AddNode", "Add Node") );
-		ParentGraph->Modify();
-		if (FromPin)
-		{
-			FromPin->Modify();
-		}
-
-		// set outer to be the graph so it doesn't go away
-		NodeTemplate->Rename(NULL, ParentGraph);
-		ParentGraph->AddNode(NodeTemplate, true, bSelectNewNode);
-
-		NodeTemplate->CreateNewGuid();
-		NodeTemplate->PostPlacedNewNode();
-		NodeTemplate->AllocateDefaultPins();
-		NodeTemplate->AutowireNewNode(FromPin);
-
-		NodeTemplate->NodePosX = static_cast<int32>(Location.X);
-		NodeTemplate->NodePosY = static_cast<int32>(Location.Y);
-		NodeTemplate->SnapToGrid(GetDefault<UEditorStyleSettings>()->GridSnapSize);
-
-		ResultNode = NodeTemplate;
-
-		ResultNode->SetFlags(RF_Transactional);
-
-		//UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(ParentGraph);
-		//FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
+		FromPin->Modify();
 	}
 
-	return ResultNode;
+	NodeTemplate->SetFlags(RF_Transactional);
+
+	// set outer to be the graph so it doesn't go away
+	NodeTemplate->Rename(nullptr, ParentGraph, REN_NonTransactional);
+	ParentGraph->AddNode(NodeTemplate, true, bSelectNewNode);
+
+	NodeTemplate->CreateNewGuid();
+	NodeTemplate->PostPlacedNewNode();
+	NodeTemplate->NodePosX = static_cast<int32>(Location.X);
+	NodeTemplate->NodePosY = static_cast<int32>(Location.Y);
+	NodeTemplate->SnapToGrid(GetDefault<UEditorStyleSettings>()->GridSnapSize);
+
+	NodeTemplate->AllocateDefaultPins();
+	NodeTemplate->AutowireNewNode(FromPin);
+
+#if false
+	UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(ParentGraph);
+	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
+#endif
+
+	return NodeTemplate;
 }
 
 void FDungeonRulesGraphSchemaAction_NewStateNode::AddReferencedObjects( FReferenceCollector& Collector )
