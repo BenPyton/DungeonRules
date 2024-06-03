@@ -50,7 +50,7 @@ FText URuleConduitNode::GetTooltipText() const
 	return LOCTEXT("ConduitNodeTooltip", "This is a conduit, which allows specification of a predicate condition for an entire group of transitions");
 }
 
-#if false
+#if false // Blueprint
 void URuleConduitNode::PostPasteNode()
 {
 	// Find an interesting name, but try to keep the same if possible
@@ -134,7 +134,7 @@ UEdGraphPin* URuleConduitNode::GetOutputPin() const
 
 FString URuleConduitNode::GetStateName() const
 {
-#if false
+#if false // Subgraph
 	return (BoundGraph != NULL) ? *(BoundGraph->GetName()) : TEXT("(null)");
 #else
 	return TEXT("(null)");

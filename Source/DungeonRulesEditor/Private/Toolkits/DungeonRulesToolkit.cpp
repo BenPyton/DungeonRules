@@ -569,7 +569,7 @@ void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 	if (RulesGraph)
 		RulesGraph->LockUpdates();
 
-#if false
+#if false // TODO: Copied from AIGraph
 	UAIGraphNode* SelectedParent = NULL;
 	bool bHasMultipleNodesSelected = false;
 
@@ -625,7 +625,7 @@ void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 		AvgNodePosition.Y *= InvNumNodes;
 	}
 
-#if false
+#if false // TODO: Copied from AIGraph
 	bool bPastedParentNode = false;
 
 	TMap<FGuid/*New*/, FGuid/*Old*/> NewToOldNodeMapping;
@@ -689,7 +689,7 @@ void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 
 	if (RulesGraph)
 	{
-#if false
+#if false // TODO: Copied from AIGraph
 		RulesGraph->UpdateClassData();
 #endif
 		RulesGraph->OnNodesPasted(TextToImport);
@@ -707,7 +707,7 @@ void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 	}
 }
 
-#if false
+#if false // TODO: copied from AIGraph
 void FDungeonRulesToolkit::FixupPastedNodes(const TSet<UEdGraphNode*>& PastedGraphNodes, const TMap<FGuid/*New*/, FGuid/*Old*/>& NewToOldNodeMapping)
 {
 
@@ -783,7 +783,7 @@ bool FDungeonRulesToolkit::CanRenameNodes() const
 	if (!EditingGraph || !EditingGraph->bEditable)
 		return false;
 
-#if false
+#if false // TODO: remove
 	if (const UEdGraphNode* SelectedNode = GetSingleSelectedNode())
 	{
 		return SelectedNode->GetCanRenameNode();

@@ -303,7 +303,7 @@ void SGraphNodeDungeonRule::UpdateGraphNode()
 							.BackgroundColor( this, &SGraphNodeDungeonRule::GetErrorColor )
 							.ToolTipText( this, &SGraphNodeDungeonRule::GetErrorMsgToolTip )
 						]
-#if false
+#if false // TODO: should be kept or removed?
 						+SHorizontalBox::Slot()
 						.AutoWidth()
 						.VAlign(VAlign_Center)
@@ -371,7 +371,7 @@ void SGraphNodeDungeonRule::AddPin(const TSharedRef<SGraphPin>& PinToAdd)
 
 TSharedPtr<SToolTip> SGraphNodeDungeonRule::GetComplexTooltip()
 {
-#if false
+#if false // TODO: documentation
 	URuleNodeBase* StateNode = CastChecked<URuleNodeBase>(GraphNode);
 
 	return SNew(SToolTip)

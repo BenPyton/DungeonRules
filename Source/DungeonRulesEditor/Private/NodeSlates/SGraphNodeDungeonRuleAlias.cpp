@@ -39,14 +39,16 @@ void SGraphNodeDungeonRuleAlias::Construct(const FArguments& InArgs, URuleAliasN
 	SGraphNodeDungeonRule::Construct(SGraphNodeDungeonRule::FArguments(), InNode);
 }
 
+#if false // Blueprint
 void SGraphNodeDungeonRuleAlias::GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const
 {
 	GetStateInfoPopup(GraphNode, Popups);
 }
+#endif
 
 FSlateColor SGraphNodeDungeonRuleAlias::GetBorderBackgroundColor_Internal(FLinearColor InactiveStateColor, FLinearColor ActiveStateColorDim, FLinearColor ActiveStateColorBright) const
 {
-#if false
+#if false // Blueprint
 	UAnimBlueprint* AnimBlueprint = Cast<UAnimBlueprint>(FBlueprintEditorUtils::FindBlueprintForNode(GraphNode));
 	if (AnimBlueprint)
 	{
@@ -124,9 +126,9 @@ TSharedPtr<SToolTip> SGraphNodeDungeonRuleAlias::GetComplexTooltip()
 	return nullptr;
 }
 
+#if false // Blueprint
 void SGraphNodeDungeonRuleAlias::GetStateInfoPopup(UEdGraphNode* GraphNode, TArray<FGraphInformationPopupInfo>& Popups)
 {
-#if false
 	UAnimBlueprint* AnimBlueprint = Cast<UAnimBlueprint>(FBlueprintEditorUtils::FindBlueprintForNode(GraphNode));
 	if (AnimBlueprint)
 	{
@@ -188,7 +190,7 @@ void SGraphNodeDungeonRuleAlias::GetStateInfoPopup(UEdGraphNode* GraphNode, TArr
 			}
 		}
 	}
-#endif
 }
+#endif
 
 #undef LOCTEXT_NAMESPACE

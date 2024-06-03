@@ -26,7 +26,7 @@
 
 #define LOCTEXT_NAMESPACE "A3Nodes"
 
-#if false
+#if false // Shared Transitions
 class PROCEDURALDUNGEONEDITOR_API IRuleTransitionNodeSharedDataHelper
 {
 public:
@@ -61,7 +61,7 @@ protected:
 URuleTransitionNode::URuleTransitionNode()
 	: Super()
 {
-#if false
+#if false // Shared Transitions
 	bSharedRules = false;
 	SharedRulesGuid.Invalidate();
 #endif
@@ -77,7 +77,7 @@ void URuleTransitionNode::AllocateDefaultPins()
 
 void URuleTransitionNode::PostPlacedNewNode()
 {
-#if false
+#if false // Subgraph
 	CreateBoundGraph();
 #else
 	if (NodeInstance)
@@ -91,7 +91,7 @@ void URuleTransitionNode::PostLoad()
 {
 	Super::PostLoad();
 
-#if false
+#if false // Shared Transitions
 	// make sure we have guid for shared rules 
 	if (bSharedRules && !SharedRulesGuid.IsValid())
 	{
@@ -102,7 +102,7 @@ void URuleTransitionNode::PostLoad()
 
 void URuleTransitionNode::PostPasteNode()
 {
-#if false
+#if false // Shared Transitions + Subgraph
 	if (bSharedRules)
 	{
 		FRuleTransitionNodeSharedRulesHelper().UpdateSharedData(this, MakeShareable(new FRuleTransitionNodeSharedRulesNameValidator(this)));
@@ -147,7 +147,7 @@ void URuleTransitionNode::PostPasteNode()
 void URuleTransitionNode::PostEditImport()
 {
 	ResetInstanceOwner();
-#if false
+#if false // TODO: move to URuleNodeBase
 	if (NodeInstance)
 	{
 		InitializeInstance();
@@ -185,7 +185,7 @@ FText URuleTransitionNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 	URuleNodeBase* PrevState = GetPreviousState();
 	URuleNodeBase* NextState = GetNextState();
 
-#if false
+#if false // Shared Transitions
 	if (!SharedRulesName.IsEmpty())
 	{
 		return FText::FromString(SharedRulesName);
@@ -200,7 +200,7 @@ FText URuleTransitionNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 
 		return FText::Format(LOCTEXT("PrevStateToNewState", "{PrevState} to {NextState}"), Args);
 	}
-#if false
+#if false // Subgraph
 	else
 	{
 		FFormatNamedArguments Args;
@@ -357,7 +357,7 @@ TArray<URuleTransitionNode*> URuleTransitionNode::GetListTransitionNodesToRelink
 void URuleTransitionNode::PrepareForCopying()
 {
 	Super::PrepareForCopying();
-#if false
+#if false // Subgraph
 	// move bound graph node here, so during copying it will be referenced
 	// for shared nodes at least one of them has to be referencing it, so we will be fine
 	BoundGraph->Rename(NULL, this, REN_DoNotDirty | REN_DontCreateRedirectors);
@@ -372,7 +372,7 @@ void URuleTransitionNode::PrepareForCopying()
 
 void URuleTransitionNode::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
-#if false
+#if false // Useless for my case
 	FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
 
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(URuleTransitionNode, CrossfadeDuration) || 
@@ -408,7 +408,7 @@ void URuleTransitionNode::PostEditChangeProperty(struct FPropertyChangedEvent& P
 
 FString URuleTransitionNode::GetStateName() const
 {
-#if false
+#if false // Subgraph
 	return (BoundGraph != NULL) ? *(BoundGraph->GetName()) : TEXT("(null)");
 #else
 	return TEXT("(null)");
@@ -418,7 +418,7 @@ FString URuleTransitionNode::GetStateName() const
 FText URuleTransitionNode::GetConditionDescription() const
 {
 	return FText::FromString(TEXT("TODO"));
-#if false
+#if false // TODO: Node tooltips
 	if (!Condition)
 		return NSLOCTEXT("DungeonRules", "URuleTransitionNode_NoCondition", "Always true.");
 
@@ -426,7 +426,7 @@ FText URuleTransitionNode::GetConditionDescription() const
 #endif
 }
 
-#if false
+#if false // Shared Transitions
 void URuleTransitionNode::MakeRulesShareable(FString ShareName)
 {
 	bSharedRules = true;
@@ -480,7 +480,7 @@ void URuleTransitionNode::UseSharedRules(const URuleTransitionNode* Node)
 }
 #endif
 
-#if false
+#if false // Subgraph
 void URuleTransitionNode::CreateBoundGraph()
 {
 	// Create a new animation graph
@@ -512,26 +512,25 @@ void URuleTransitionNode::Serialize(FArchive& Ar)
 	Ar.UsingCustomVersion(FUE5MainStreamObjectVersion::GUID);
 }
 
+#if false // SubGraph + Blueprint
 void URuleTransitionNode::DestroyNode()
 {
-#if false
 	// BoundGraph may be shared with another graph, if so, don't remove it here
 	UEdGraph* GraphToRemove = IsBoundGraphShared() ? NULL : GetBoundGraph();
 
 	BoundGraph = NULL;
-#endif
+
 	Super::DestroyNode();
 
-#if false
 	if (GraphToRemove)
 	{
 		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNodeChecked(this);
 		FBlueprintEditorUtils::RemoveGraph(Blueprint, GraphToRemove, EGraphRemoveFlags::Recompile);
 	}
-#endif
 }
+#endif
 
-#if false
+#if false // Subgraph
 /** Returns true if this nodes BoundGraph is shared with another node in the parent graph */
 bool URuleTransitionNode::IsBoundGraphShared() const
 {
@@ -557,7 +556,7 @@ bool URuleTransitionNode::IsBoundGraphShared() const
 }
 #endif
 
-#if false
+#if false // Blueprint
 void URuleTransitionNode::ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const
 {
 	Super::ValidateNodeDuringCompilation(MessageLog);
@@ -658,7 +657,7 @@ TArray<UEdGraph*> URuleTransitionNode::GetSubGraphs() const
 }
 #endif
 
-#if false
+#if false // Shared Transitions
 //////////////////////////////////////////////////////////////////////////
 // IRuleTransitionNodeSharedDataHelper
 

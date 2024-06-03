@@ -25,13 +25,13 @@ class URuleTransitionNode : public URuleNodeBase
 public:
 	URuleTransitionNode();
 
-#if false
+#if false // Subgraph
 	// The transition logic graph for this transition (returning a boolean)
 	//UPROPERTY()
 	TObjectPtr<class UEdGraph> BoundGraph;
 #endif
 
-#if false
+#if false // Shared Transitions
 	/** The rules for this transition may be shared with other transition nodes */
 	//UPROPERTY()
 	bool bSharedRules;
@@ -65,8 +65,8 @@ public:
 	virtual void PrepareForCopying() override;
 	virtual void PostPasteNode() override;
 	virtual void PostPlacedNewNode() override;
+#if false // Subgraph + Blueprint
 	virtual void DestroyNode() override;
-#if false
 	virtual void ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const override;
 	virtual UObject* GetJumpTargetForDoubleClick() const override;
 	virtual TArray<UEdGraph*> GetSubGraphs() const override;
@@ -74,7 +74,7 @@ public:
 	//~ End UEdGraphNode Interface
 
 	//~ Begin URuleNodeBase Interface
-#if false
+#if false // Subgraph
 	virtual UEdGraph* GetBoundGraph() const override { return BoundGraph; }
 	virtual void ClearBoundGraph() override { BoundGraph = nullptr; }
 #endif
@@ -116,7 +116,7 @@ public:
 
 	UDungeonRuleTransition* GetNodeInstance() const { return NodeInstance; }
 
-#if false
+#if false // Shared Transitions
 	DUNGEONRULESEDITOR_API bool IsBoundGraphShared() const;
 
 	DUNGEONRULESEDITOR_API void MakeRulesShareable(FString ShareName);
@@ -126,7 +126,7 @@ public:
 #endif
 
 protected:
-#if false
+#if false // Subgraph
 	void CreateBoundGraph();
 #endif
 

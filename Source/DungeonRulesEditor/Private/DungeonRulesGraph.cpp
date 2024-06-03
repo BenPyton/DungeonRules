@@ -33,7 +33,7 @@ void UDungeonRulesGraph::OnSave()
 	UpdateAsset();
 }
 
-#if false
+#if false // TODO: should be removed
 void UDungeonRulesGraph::RefreshNodes()
 {
 	for (UEdGraphNode* Node : Nodes)
@@ -51,7 +51,7 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 		return;
 	}
 
-#if false
+#if false // TODO: cherry pick what could be useful here too
 	ActionTreeEd_LogInfo("Starting to link all asset nodes from the editor graph links.");
 
 	// initial cleanup & root node search
@@ -181,7 +181,7 @@ void UDungeonRulesGraph::OnCreated()
 	MarkVersion();
 }
 
-#if false
+#if false // TODO: Copied from AIGraph
 void UDungeonRulesGraph::OnLoaded()
 {
 	UpdateDeprecatedClasses();
@@ -210,7 +210,7 @@ void UDungeonRulesGraph::MarkVersion()
 	GraphVersion = DungeonRulesVersion::Latest;
 }
 
-#if false
+#if false // TODO: Copied from AIGraph
 bool UDungeonRulesGraph::UpdateUnknownNodeClasses()
 {
 	bool bUpdated = false;
@@ -237,7 +237,7 @@ bool UDungeonRulesGraph::UpdateUnknownNodeClasses()
 }
 #endif
 
-#if false
+#if false // TODO: Copied from AIGraph
 void UpdateAIGraphNodeErrorMessage(URuleNodeBase& Node)
 {
 	// Broke out setting error message in to own function so it can be reused when iterating nodes collection.
@@ -266,7 +266,7 @@ void UpdateAIGraphNodeErrorMessage(URuleNodeBase& Node)
 }
 #endif
 
-#if false
+#if false // TODO: Copied from AIGraph
 void UDungeonRulesGraph::UpdateDeprecatedClasses()
 {
 	// This function sets error messages and logs errors about nodes.
@@ -295,7 +295,7 @@ void UDungeonRulesGraph::Serialize(FArchive& Ar)
 	// Overridden to flags up errors in the behavior tree while cooking.
 	Super::Serialize(Ar);
 
-#if false
+#if false // TODO: Copied from AIGraph
 	if (Ar.IsSaving() || Ar.IsCooking())
 	{
 		// Logging of errors happens in UpdateDeprecatedClasses
@@ -304,7 +304,7 @@ void UDungeonRulesGraph::Serialize(FArchive& Ar)
 #endif
 }
 
-#if false
+#if false // TODO: Copied from AIGraph
 void UDungeonRulesGraph::UpdateClassData()
 {
 	for (int32 Idx = 0; Idx < Nodes.Num(); Idx++)
@@ -318,7 +318,7 @@ void UDungeonRulesGraph::UpdateClassData()
 }
 #endif
 
-#if false
+#if false // TODO: Copied from AIGraph
 void UDungeonRulesGraph::CollectAllNodeInstances(TSet<UObject*>& NodeInstances)
 {
 	for (int32 Idx = 0; Idx < Nodes.Num(); Idx++)
@@ -332,7 +332,7 @@ void UDungeonRulesGraph::CollectAllNodeInstances(TSet<UObject*>& NodeInstances)
 }
 #endif
 
-#if false
+#if false // TODO: Copied from AIGraph
 bool UDungeonRulesGraph::CanRemoveNestedObject(UObject* TestObject) const
 {
 	return !TestObject->IsA(UEdGraphNode::StaticClass()) &&
@@ -341,7 +341,7 @@ bool UDungeonRulesGraph::CanRemoveNestedObject(UObject* TestObject) const
 }
 #endif
 
-#if false
+#if false // TODO: Copied from AIGraph
 void UDungeonRulesGraph::RemoveOrphanedNodes()
 {
 	TSet<UObject*> NodeInstances;

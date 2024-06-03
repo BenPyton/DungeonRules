@@ -19,7 +19,7 @@ class URuleNode : public URuleNodeBase
 public:
 	URuleNode();
 
-#if false
+#if false // Subgraph
 	// The animation graph for this state
 	//UPROPERTY()
 	TObjectPtr<class UEdGraph> BoundGraph;
@@ -35,7 +35,7 @@ public:
 	virtual void PostPlacedNewNode() override;
 	virtual void PrepareForCopying() override;
 	virtual void DestroyNode() override;
-#if false
+#if false // Subgraph
 	virtual TArray<UEdGraph*> GetSubGraphs() const override { return TArray<UEdGraph*>( { BoundGraph } ); }
 #endif
 	virtual void OnRenameNode(const FString& NewName) override;
@@ -60,7 +60,7 @@ public:
 	virtual void PostCopyNode() override;
 	void ResetInstanceOwner();
 
-#if false
+#if false // Subgraph
 public:
 	virtual UEdGraph* GetBoundGraph() const override { return BoundGraph; }
 	virtual void ClearBoundGraph() override { BoundGraph = nullptr; }

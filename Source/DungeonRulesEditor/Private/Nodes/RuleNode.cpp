@@ -73,7 +73,7 @@ FText URuleNode::GetTooltipText() const
 
 FString URuleNode::GetStateName() const
 {
-#if false
+#if false // Subgraph
 	return (BoundGraph != NULL) ? *(BoundGraph->GetName()) : TEXT("(null)");
 #else
 	return RuleInstance ? RuleInstance->RuleName : TEXT("NULL");
@@ -90,7 +90,7 @@ void URuleNode::PostCopyNode()
 void URuleNode::PostEditImport()
 {
 	ResetInstanceOwner();
-#if false
+#if false // TODO: move to URuleNodeBase
 	if (NodeInstance)
 	{
 		InitializeInstance();
@@ -131,7 +131,7 @@ UEdGraphPin* URuleNode::GetOutputPin() const
 
 void URuleNode::PostPasteNode()
 {
-#if false
+#if false // Subgraph
 	// Find an interesting name, but try to keep the same if possible
 	TSharedPtr<INameValidatorInterface> NameValidator = FNameValidatorFactory::MakeValidator(this);
 	FBlueprintEditorUtils::RenameGraphWithSuggestion(BoundGraph, NameValidator, GetStateName());
@@ -154,7 +154,7 @@ void URuleNode::PostPasteNode()
 
 void URuleNode::PostPlacedNewNode()
 {
-#if false
+#if false // Subgraph
 	// Create a new animation graph
 	check(BoundGraph == NULL);
 	BoundGraph = FBlueprintEditorUtils::CreateNewGraph(
@@ -198,7 +198,7 @@ void URuleNode::PrepareForCopying()
 
 void URuleNode::DestroyNode()
 {
-#if false
+#if false // Subgraph + Blueprint
 	UEdGraph* GraphToRemove = BoundGraph;
 
 	BoundGraph = NULL;

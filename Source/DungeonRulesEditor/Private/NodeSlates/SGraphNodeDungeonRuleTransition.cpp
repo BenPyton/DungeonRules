@@ -124,7 +124,7 @@ TSharedRef<SWidget> SGraphNodeDungeonRuleTransition::GenerateRichTooltip()
 {
 	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
 
-#if false
+#if false // Subgraph
 	if (TransNode->BoundGraph == NULL)
 	{
 		return SNew(STextBlock).Text(LOCTEXT("NoAnimGraphBoundToNodeMessage", "Error: No graph"));
@@ -167,7 +167,7 @@ TSharedRef<SWidget> SGraphNodeDungeonRuleTransition::GenerateRichTooltip()
 				.Text(TooltipDesc)
 		];
 
-#if false
+#if false // Subgraph
 	// Transition rule linearized
 	{
 		Widget->AddSlot()
@@ -186,7 +186,8 @@ TSharedRef<SWidget> SGraphNodeDungeonRuleTransition::GenerateRichTooltip()
 				SNew(SKismetLinearExpression, CanExecPin)
 			];
 	}
-
+#endif
+#if false // TODO: documentation
 	Widget->AddSlot()
 		.AutoHeight()
 		.Padding( 2.0f )
@@ -227,7 +228,7 @@ void SGraphNodeDungeonRuleTransition::UpdateGraphNode()
 				.Image( FAppStyle::GetBrush("Graph.TransitionNode.ColorSpill") )
 				.ColorAndOpacity( this, &SGraphNodeDungeonRuleTransition::GetTransitionColor )
 			]
-#if false
+#if false // TODO: should be kept or removed?
 			+SOverlay::Slot()
 			[
 				// TODO: remove icon and write the priority number instead
@@ -315,7 +316,7 @@ FLinearColor SGraphNodeDungeonRuleTransition::StaticGetTransitionColor(URuleTran
 	const FLinearColor HoverColor(0.724f, 0.256f, 0.0f, 1.0f);
 	FLinearColor BaseColor(0.9f, 0.9f, 0.9f, 1.0f);
 
-#if false
+#if false // Blueprint
 	// Display various types of debug data
 	UAnimBlueprint* AnimBlueprint = Cast<UAnimBlueprint>(FBlueprintEditorUtils::FindBlueprintForNodeChecked(TransNode));
 	check(AnimBlueprint);
@@ -366,7 +367,7 @@ FLinearColor SGraphNodeDungeonRuleTransition::StaticGetTransitionColor(URuleTran
 	// 				WireColor.B = (TransNode->SharedCrossfadeIdx & 4 ? 1.0f : 0.15f);
 	// 			}
 
-#if false
+#if false // Shared Transitions
 	// If shared transition, show different color
 	if (TransNode->bSharedRules)
 	{
@@ -381,7 +382,7 @@ bool SGraphNodeDungeonRuleTransition::IsTransitionActive(int32 TransitionIndex, 
 {
 	if (AnimClass.GetAnimNodeProperties().Num())
 	{
-#if false
+#if false // Subgraph
 		if (FAnimNode_StateMachine* CurrentInstance = AnimClass.GetPropertyInstance<FAnimNode_StateMachine>(&AnimInstance, StateMachineGraph.OwnerAnimGraphNode))
 		{
 			if (CurrentInstance->IsTransitionActive(TransitionIndex))

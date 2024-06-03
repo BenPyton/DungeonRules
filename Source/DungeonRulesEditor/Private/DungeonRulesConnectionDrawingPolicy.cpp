@@ -51,7 +51,7 @@ void FDungeonRulesConnectionDrawingPolicy::DetermineWiringStyle(UEdGraphPin* Out
 		{
 			const bool IsInputPinHovered = HoveredPins.Contains(InputPin);
 			Params.WireColor = SGraphNodeDungeonRuleTransition::StaticGetTransitionColor(TransNode, IsInputPinHovered);
-#if false
+#if false // Anim Graph Specific
 			Params.bUserFlag1 = TransNode->Bidirectional;
 #endif
 		}
@@ -173,7 +173,7 @@ void FDungeonRulesConnectionDrawingPolicy::DrawPreviewConnector(const FGeometry&
 void FDungeonRulesConnectionDrawingPolicy::DrawSplineWithArrow(const FVector2D& StartAnchorPoint, const FVector2D& EndAnchorPoint, const FConnectionParams& Params)
 {
 	Internal_DrawLineWithArrow(StartAnchorPoint, EndAnchorPoint, Params);
-#if false
+#if false // Anim Graph Specific
 	// Is the connection bidirectional?
 	if (Params.bUserFlag1)
 	{

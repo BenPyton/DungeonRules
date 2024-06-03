@@ -22,7 +22,7 @@ public:
 
 	void Construct(const FArguments& InArgs, URuleExitNode* InNode);
 
-#if false
+#if false // Blueprint
 	//~ Begin SNodePanel::SNode Interface
 	virtual void GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const override;
 	//~ End SNodePanel::SNode Interface

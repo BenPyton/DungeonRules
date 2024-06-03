@@ -45,7 +45,7 @@ URuleNodeBase::URuleNodeBase()
 {
 }
 
-#if false
+#if false // Subgraph + Blueprint
 void URuleNodeBase::PostPasteNode()
 {
 	Super::PostPasteNode();
@@ -76,7 +76,7 @@ void URuleNodeBase::PostPasteNode()
 }
 #endif
 
-#if false
+#if false // Subgraph + Blueprint?
 UObject* URuleNodeBase::GetJumpTargetForDoubleClick() const
 {
 	TArray<UEdGraph*> SubGraphs = GetSubGraphs();
@@ -103,7 +103,7 @@ bool URuleNodeBase::CanCreateUnderSpecifiedSchema(const UEdGraphSchema* Schema) 
 	return Schema->IsA(UDungeonRulesSchema::StaticClass());
 }
 
-#if false
+#if false // Subgraph
 void URuleNodeBase::OnRenameNode(const FString& NewName)
 {
 	TArray<UEdGraph*> SubGraphs = GetSubGraphs();
@@ -117,7 +117,7 @@ TSharedPtr<class INameValidatorInterface> URuleNodeBase::MakeNameValidator() con
 	return MakeShareable(new FDungeonRuleNodeNameValidator(this));
 }
 
-#if false
+#if false // TODO: documentation
 FString URuleNodeBase::GetDocumentationLink() const
 {
 	return TEXT("Shared/GraphNodes/AnimationStateMachine");
@@ -188,7 +188,7 @@ void URuleNodeBase::GetTransitionList(TArray<URuleTransitionNode*>& OutTransitio
 #endif
 }
 
-#if false
+#if false // Blueprint
 UAnimBlueprint* URuleNodeBase::GetAnimBlueprint() const
 {
 	UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNode(this);

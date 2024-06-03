@@ -17,7 +17,7 @@ class URuleConduitNode : public URuleNodeBase
 public:
 	URuleConduitNode();
 
-#if false
+#if false // Subgraph
 	// The transition graph for this conduit; it's a logic graph, not an animation graph
 	//UPROPERTY()
 	TObjectPtr<class UEdGraph> BoundGraph;
@@ -29,7 +29,7 @@ public:
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 	virtual FText GetTooltipText() const override;
 	virtual bool CanDuplicateNode() const override { return true; }
-#if false
+#if false // Subgraph
 	virtual void PostPasteNode() override;
 	virtual void PostPlacedNewNode() override;
 	virtual void DestroyNode() override;
@@ -43,7 +43,7 @@ public:
 	virtual UEdGraphPin* GetOutputPin() const override;
 	virtual FString GetStateName() const override;
 	virtual FString GetDesiredNewNodeName() const override;
-#if false
+#if false // Subgraph
 	virtual UEdGraph* GetBoundGraph() const override { return BoundGraph; }
 	virtual void ClearBoundGraph() override { BoundGraph = nullptr; }
 #endif

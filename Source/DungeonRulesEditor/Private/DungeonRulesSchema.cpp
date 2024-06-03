@@ -73,7 +73,7 @@ UEdGraphNode* FDungeonRulesGraphSchemaAction_NewStateNode::PerformAction(class U
 	NodeTemplate->AllocateDefaultPins();
 	NodeTemplate->AutowireNewNode(FromPin);
 
-#if false
+#if false // Blueprint
 	UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(ParentGraph);
 	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
 #endif
@@ -217,7 +217,7 @@ bool UDungeonRulesSchema::TryCreateConnection(UEdGraphPin* PinA, UEdGraphPin* Pi
 
 	const bool bModified = UEdGraphSchema::TryCreateConnection(PinA, PinB);
 
-#if false
+#if false // Blueprint
 	if (bModified)
 	{
 		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNodeChecked(PinA->GetOwningNode());
@@ -243,7 +243,7 @@ bool UDungeonRulesSchema::CreateAutomaticConversionNodeAndConnections(UEdGraphPi
 		URuleTransitionNode* TransitionNode = FDungeonRulesGraphSchemaAction_NewStateNode::SpawnNodeFromTemplate<URuleTransitionNode>(NodeFrom->GetGraph(), NewObject<URuleTransitionNode>(), FVector2D(0.0f, 0.0f), false);
 		TransitionNode->CreateConnections(NodeFrom, NodeTo);
 
-#if false
+#if false // Blueprint
 		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(TransitionNode->GetBoundGraph());
 		FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
 #endif
@@ -274,7 +274,7 @@ bool UDungeonRulesSchema::TryRelinkConnectionTarget(UEdGraphPin* SourcePin, UEdG
 		// Add the new incoming transition to the new target state
 		TryCreateConnection(SourcePin, NewTargetPin);
 
-#if false
+#if false // Blueprint
 		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(EntryState->GetGraph());
 		FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
 #endif
@@ -293,7 +293,7 @@ bool UDungeonRulesSchema::TryRelinkConnectionTarget(UEdGraphPin* SourcePin, UEdG
 #if WITH_EDITOR
 	if (!TransitionNodes.IsEmpty())
 	{
-#if false
+#if false // Blueprint
 		//UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(OneRelinkedTransition->GetBoundGraph());
 		UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(TransitionNodes[0]->GetBoundGraph());
 		FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
@@ -343,7 +343,7 @@ void UDungeonRulesSchema::GetGraphContextActions(FGraphContextMenuBuilder& Conte
 		Action->NodeTemplate = NewObject<URuleNode>(ContextMenuBuilder.OwnerOfTemporaries);
 	}
 
-#if false
+#if false // TODO: alias and conduit nodes
 	// Add state alias node
 	{
 		TSharedPtr<FDungeonRulesGraphSchemaAction_NewStateNode> Action = AddNewStateNodeAction(ContextMenuBuilder, FText::GetEmpty(), LOCTEXT("AddStateAlias", "Add State Alias"), LOCTEXT("AddStateAliasTooltip", "A new state alias"));
@@ -380,7 +380,7 @@ void UDungeonRulesSchema::GetGraphContextActions(FGraphContextMenuBuilder& Conte
 	// Add Comment
 	if (!ContextMenuBuilder.FromPin)
 	{
-#if false
+#if false // Blueprint
 		UBlueprint* OwnerBlueprint = FBlueprintEditorUtils::FindBlueprintForGraphChecked(ContextMenuBuilder.CurrentGraph);
 		const bool bIsManyNodesSelected = (FKismetEditorUtilities::GetNumberOfSelectedNodes(OwnerBlueprint) > 0);
 #else
@@ -443,7 +443,7 @@ void UDungeonRulesSchema::GetGraphDisplayInformation(const UEdGraph& Graph, /*ou
 	DisplayInfo.Tooltip = LOCTEXT("GraphTooltip_StateMachineSchema", "Graph used to transition between different states each with separate animation graphs");
 }
 
-#if false
+#if false // TODO: asset drop on graph
 void UDungeonRulesSchema::DroppedAssetsOnGraph(const TArray<FAssetData>& Assets, const FVector2D& GraphPosition, UEdGraph* Graph) const
 {
 	UAnimationAsset* Asset = FAssetData::GetFirstAsset<UAnimationAsset>(Assets);
@@ -462,7 +462,7 @@ void UDungeonRulesSchema::DroppedAssetsOnGraph(const TArray<FAssetData>& Assets,
 }
 #endif
 
-#if false
+#if false // TODO: asset drop on graph
 void UDungeonRulesSchema::DroppedAssetsOnNode(const TArray<FAssetData>& Assets, const FVector2D& GraphPosition, UEdGraphNode* Node) const
 {
 	UAnimationAsset* Asset = FAssetData::GetFirstAsset<UAnimationAsset>(Assets);

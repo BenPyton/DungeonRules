@@ -49,7 +49,7 @@ public:
 
 	virtual void OnNodesPasted(const FString& ImportStr);
 
-#if false
+#if false // TODO: Copied from AIGraph
 	bool UpdateUnknownNodeClasses();
 	void UpdateDeprecatedClasses();
 	void RemoveOrphanedNodes();
@@ -71,7 +71,7 @@ protected:
 	 */
 	uint32 bLockUpdates : 1;
 
-#if false
+#if false // TODO: Copied from AIGraph
 	virtual void CollectAllNodeInstances(TSet<UObject*>& NodeInstances);
 	virtual bool CanRemoveNestedObject(UObject* TestObject) const;
 #endif

@@ -25,14 +25,14 @@ public:
 	virtual void PostLoad() override;
 
 	// UEdGraphNode interface
-#if false
+#if false // Subgraph
 	virtual void PostPasteNode() override;
 	virtual UObject* GetJumpTargetForDoubleClick() const override;
 	virtual bool CanJumpToDefinition() const override;
 	virtual void JumpToDefinition() const override;
 #endif
 	virtual bool CanCreateUnderSpecifiedSchema(const UEdGraphSchema* Schema) const override;
-#if false
+#if false // Subgraph
 	virtual void OnRenameNode(const FString& NewName) override;
 #endif
 	virtual TSharedPtr<class INameValidatorInterface> MakeNameValidator() const override;
@@ -50,7 +50,7 @@ public:
 	// Populates the OutTransitions array with a list of transition nodes connected to this state
 	DUNGEONRULESEDITOR_API virtual void GetTransitionList(TArray<class URuleTransitionNode*>& OutTransitions, bool bWantSortedList = false) const;
 
-#if false
+#if false // Subgraph + Blueprint
 	virtual UEdGraph* GetBoundGraph() const { return NULL; }
 	virtual void ClearBoundGraph() {}
 
@@ -63,7 +63,7 @@ protected:
 	// Name used as a seed when pasting nodes
 	virtual FString GetDesiredNewNodeName() const { return TEXT("State"); }
 
-#if false
+#if false // TODO: documentation
 public:
 	// Gets the animation state node documentation link
 	virtual FString GetDocumentationLink() const override;

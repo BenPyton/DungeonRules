@@ -34,7 +34,7 @@ void SGraphNodeDungeonRuleEntry::Construct(const FArguments& InArgs, URuleEntryN
 	this->UpdateGraphNode();
 }
 
-#if false
+#if false // Blueprint
 void SGraphNodeDungeonRuleEntry::GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const
 {
 }
