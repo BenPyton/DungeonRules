@@ -117,7 +117,7 @@ TSharedRef<SWidget> SGraphNodeDungeonRuleTransition::GenerateRichTooltip()
 	TSharedRef<SVerticalBox> Widget = SNew(SVerticalBox);
 
 	const FText TooltipName = GetPreviewCornerText(false);
-	const FText TooltipDesc = GetTransitionDescription();
+	const FText TooltipDesc = GraphNode->GetTooltipText();
 
 	Widget->AddSlot()
 		.AutoHeight()
@@ -214,7 +214,7 @@ FText SGraphNodeDungeonRuleTransition::GetPreviewCornerText(bool bReverse) const
 	{
 		if (NextState != NULL)
 		{
-			const UDungeonRuleTransition* TransitionInstance = TransNode->GetNodeInstance();
+			const UDungeonRuleTransition* TransitionInstance = TransNode->GetNodeInstance<UDungeonRuleTransition>();
 			int32 ThisPriorityOrder = TransitionInstance->PriorityOrder;
 
 			TArray<URuleTransitionNode*> TransitionFromSource;
@@ -226,7 +226,7 @@ FText SGraphNodeDungeonRuleTransition::GetPreviewCornerText(bool bReverse) const
 				// See if the priorities differ
 				for (int32 Index = 0; (Index < TransitionFromSource.Num()) && !bMultiplePriorities; ++Index)
 				{
-					const UDungeonRuleTransition* OtherTransition = TransitionFromSource[Index]->GetNodeInstance();
+					const UDungeonRuleTransition* OtherTransition = TransitionFromSource[Index]->GetNodeInstance<UDungeonRuleTransition>();
 					if (!OtherTransition)
 						continue;
 
@@ -247,16 +247,6 @@ FText SGraphNodeDungeonRuleTransition::GetPreviewCornerText(bool bReverse) const
 	}
 
 	return Result;
-}
-
-
-FText SGraphNodeDungeonRuleTransition::GetTransitionDescription() const
-{
-	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
-	if (!TransNode)
-		return FText::FromString("ERROR");
-
-	return TransNode->GetConditionDescription();
 }
 
 FLinearColor SGraphNodeDungeonRuleTransition::StaticGetTransitionColor(URuleTransitionNode* TransNode, bool bIsHovered)
@@ -283,7 +273,7 @@ const FSlateBrush* SGraphNodeDungeonRuleTransition::GetTransitionIconImage() con
 FText SGraphNodeDungeonRuleTransition::GetTransitionPriorityOrder() const
 {
 	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
-	const UDungeonRuleTransition* TransInstance = TransNode->GetNodeInstance();
+	const UDungeonRuleTransition* TransInstance = TransNode->GetNodeInstance<UDungeonRuleTransition>();
 	return TransInstance ? FText::AsNumber(TransInstance->PriorityOrder) : FText::FromString("?");
 }
 

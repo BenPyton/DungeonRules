@@ -37,6 +37,14 @@ bool UDungeonRuleTransition::CheckCondition(ADungeonGenerator* Generator, const 
 	return Condition->Check(Generator, PreviousRoom);
 }
 
+FText UDungeonRuleTransition::GetNodeTooltip() const
+{
+	if (!IsValid(Condition))
+		return NSLOCTEXT("UDungeonRuleTransition", "TransitionNoCondition", "Always true.");
+
+	return Condition->GetDescription();
+}
+
 const UDungeonRule* UDungeonRule::GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
 {
 	const UDungeonRule* NextRule = this;
@@ -61,6 +69,14 @@ const UDungeonRule* UDungeonRule::GetNextRule(ADungeonGenerator* Generator, cons
 	}
 
 	return NextRule;
+}
+
+FText UDungeonRule::GetNodeTooltip() const
+{
+	if (!IsValid(RoomChooser))
+		return NSLOCTEXT("UDungeonRule", "NoRoomChooser", "Return None");
+
+	return RoomChooser->GetDescription();
 }
 
 #if WITH_EDITOR

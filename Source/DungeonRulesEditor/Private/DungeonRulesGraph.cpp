@@ -115,7 +115,7 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 		if (!RuleNode)
 			continue;
 
-		UDungeonRule* Rule = RuleNode->GetRuleInstance();
+		UDungeonRule* Rule = RuleNode->GetNodeInstance<UDungeonRule>();
 		if (!Rule)
 			continue;
 
@@ -137,7 +137,7 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 		if (!TransitionNode)
 			continue;
 
-		UDungeonRuleTransition* Transition = TransitionNode->GetNodeInstance();
+		UDungeonRuleTransition* Transition = TransitionNode->GetNodeInstance<UDungeonRuleTransition>();
 		if (!Transition)
 			continue;
 
@@ -154,7 +154,7 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 		// Add the transition into the list of the previous rule
 		if (URuleNode* PrevRuleNode = Cast<URuleNode>(TransitionNode->GetPreviousState()))
 		{
-			UDungeonRule* Rule = PrevRuleNode->GetRuleInstance();
+			UDungeonRule* Rule = PrevRuleNode->GetNodeInstance<UDungeonRule>();
 			if (Rule)
 				Rule->AddTransition(Transition);
 		}
@@ -162,7 +162,7 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 		Transition->NextRule = nullptr;
 		if (URuleNode* NextRuleNode = Cast<URuleNode>(TransitionNode->GetNextState()))
 		{
-			Transition->NextRule = NextRuleNode->GetRuleInstance();
+			Transition->NextRule = NextRuleNode->GetNodeInstance<UDungeonRule>();
 			if (!Transition->NextRule.IsValid())
 			{
 				DungeonEd_LogWarning("The next rule node of %s has no rule instance!", *Transition->GetName());
@@ -172,7 +172,7 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 
 	// Set the first rule
 	URuleNode* FirstNode = Cast<URuleNode>(EntryNode->GetOutputNode());
-	UDungeonRule* FirstRule = (FirstNode) ? FirstNode->GetRuleInstance() : nullptr;
+	UDungeonRule* FirstRule = (FirstNode) ? FirstNode->GetNodeInstance<UDungeonRule>() : nullptr;
 	DungeonRulesAsset->SetFirstRule(FirstRule);
 }
 

@@ -5,11 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
 #include "Misc/Guid.h"
-//#include "Animation/AnimTypes.h"
-//#include "Animation/RuleMachineTypes.h"
-//#include "Animation/BlendProfile.h"
 #include "RuleNodeBase.h"
-//#include "RuleTransitionCondition.h"
 #include "RuleTransitionNode.generated.h"
 
 class UCurveFloat;
@@ -32,35 +28,18 @@ public:
 	//~ Begin UEdGraphNode Interface
 	virtual void AllocateDefaultPins() override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
-	virtual FText GetTooltipText() const override;
 	virtual FLinearColor GetNodeTitleColor() const override;
 	virtual void PinConnectionListChanged(UEdGraphPin* Pin) override;
 	virtual bool CanDuplicateNode() const override { return true; }
-	virtual void PrepareForCopying() override;
 	virtual void PostPasteNode() override;
-	virtual void PostPlacedNewNode() override;
 	//~ End UEdGraphNode Interface
 
 	//~ Begin URuleNodeBase Interface
-	virtual UEdGraphPin* GetInputPin() const override { return Pins[0]; }
-	virtual UEdGraphPin* GetOutputPin() const override { return Pins[1]; }
+	DUNGEONRULESEDITOR_API virtual const UClass* GetInstanceClass() const override;
+	DUNGEONRULESEDITOR_API virtual FString GetStateName() const override;
+	DUNGEONRULESEDITOR_API virtual UEdGraphPin* GetInputPin() const override { return Pins[0]; }
+	DUNGEONRULESEDITOR_API virtual UEdGraphPin* GetOutputPin() const override { return Pins[1]; }
 	//~ End URuleNodeBase Interface
-
-	//~ Begin UObject Interface
-#if WITH_EDITOR
-	virtual void PostEditImport() override;
-	virtual void PostEditUndo() override;
-#endif
-	//~ End UObject Interface
-
-	virtual void PostCopyNode() override;
-	void ResetInstanceOwner();
-
-	// @return the name of this state
-	DUNGEONRULESEDITOR_API FString GetStateName() const override;
-
-	// @return The description of the condition
-	FText GetConditionDescription() const;
 
 	DUNGEONRULESEDITOR_API URuleNodeBase* GetPreviousState() const;
 	DUNGEONRULESEDITOR_API URuleNodeBase* GetNextState() const;
@@ -77,13 +56,4 @@ public:
 	 * For example when relinking a transition holding several transition nodes but only a few are selected to be relinked.
 	 */
 	DUNGEONRULESEDITOR_API static TArray<URuleTransitionNode*> GetListTransitionNodesToRelink(UEdGraphPin* SourcePin, UEdGraphPin* OldTargetPin, const TArray<UEdGraphNode*>& InSelectedGraphNodes);
-
-	UDungeonRuleTransition* GetNodeInstance() const { return NodeInstance; }
-
-private:
-	void CreateInstance(const UDungeonRuleTransition* Template = nullptr);
-
-private:
-	UPROPERTY()
-	TObjectPtr<UDungeonRuleTransition> NodeInstance {nullptr};
 };

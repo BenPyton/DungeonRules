@@ -371,23 +371,29 @@ void SGraphNodeDungeonRule::AddPin(const TSharedRef<SGraphPin>& PinToAdd)
 
 TSharedPtr<SToolTip> SGraphNodeDungeonRule::GetComplexTooltip()
 {
-#if false // TODO: documentation
 	URuleNodeBase* StateNode = CastChecked<URuleNodeBase>(GraphNode);
+	FText TooltipDesc = StateNode->GetTooltipText();
 
 	return SNew(SToolTip)
 		[
 			SNew(SVerticalBox)
 			+SVerticalBox::Slot()
 			.AutoHeight()
+			.Padding(2.0f)
+			[
+				SNew(STextBlock)
+					.TextStyle(FAppStyle::Get(), TEXT("Graph.TransitionNode.TooltipName"))
+					.Text(TooltipDesc)
+			]
+#if false // TODO: documentation
+			+SVerticalBox::Slot()
+			.AutoHeight()
 			.Padding(FMargin(0.0f, 5.0f, 0.0f, 0.0f))
 			[
 				IDocumentation::Get()->CreateToolTip(FText::FromString("Documentation"), NULL, StateNode->GetDocumentationLink(), StateNode->GetDocumentationExcerptName())
 			]
-
-		];
-#else
-	return SGraphNode::GetComplexTooltip();
 #endif
+		];
 }
 
 FText SGraphNodeDungeonRule::GetPreviewCornerText() const

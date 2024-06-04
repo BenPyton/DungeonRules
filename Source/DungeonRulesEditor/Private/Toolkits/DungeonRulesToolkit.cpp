@@ -368,13 +368,9 @@ void FDungeonRulesToolkit::OnSelectedNodesChanged(const TSet<class UObject*>& Ne
 	{
 		for (UObject* SelectedObj : NewSelection)
 		{
-			if (URuleNode* GraphNode = Cast<URuleNode>(SelectedObj))
+			if (URuleNodeBase* GraphNode = Cast<URuleNodeBase>(SelectedObj))
 			{
-				Selection.Add(GraphNode->GetRuleInstance());
-			}
-			else if(URuleTransitionNode * TransNode = Cast<URuleTransitionNode>(SelectedObj))
-			{
-				Selection.Add(TransNode->GetNodeInstance());
+				Selection.Add(GraphNode->GetNodeInstance());
 			}
 			else
 			{
@@ -384,7 +380,8 @@ void FDungeonRulesToolkit::OnSelectedNodesChanged(const TSet<class UObject*>& Ne
 	}
 	else
 	{
-		Selection.Add(DungeonRules);
+		// No need for now
+		//Selection.Add(DungeonRules);
 	}
 
 	if (DetailsWidget.IsValid())

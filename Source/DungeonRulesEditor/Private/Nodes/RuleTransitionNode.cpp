@@ -33,22 +33,8 @@ void URuleTransitionNode::AllocateDefaultPins()
 	Outputs->bHidden = true;
 }
 
-void URuleTransitionNode::PostPlacedNewNode()
-{
-	if (NodeInstance)
-		return;
-
-	CreateInstance();
-}
-
 void URuleTransitionNode::PostPasteNode()
 {
-	if (NodeInstance)
-	{
-		// Deep copy the pasted node instance
-		CreateInstance(NodeInstance);
-	}
-
 	Super::PostPasteNode();
 
 	// We don't want to paste nodes in that aren't fully linked (transition nodes have fixed pins as they
@@ -60,44 +46,6 @@ void URuleTransitionNode::PostPasteNode()
 			DestroyNode();
 			break;
 		}
-	}
-}
-
-#if WITH_EDITOR
-
-void URuleTransitionNode::PostEditImport()
-{
-	ResetInstanceOwner();
-#if false // TODO: move to URuleNodeBase
-	if (NodeInstance)
-	{
-		InitializeInstance();
-	}
-#endif
-}
-
-void URuleTransitionNode::PostEditUndo()
-{
-	UEdGraphNode::PostEditUndo();
-	ResetInstanceOwner();
-}
-
-#endif
-
-void URuleTransitionNode::PostCopyNode()
-{
-	ResetInstanceOwner();
-}
-
-void URuleTransitionNode::ResetInstanceOwner()
-{
-	if (NodeInstance)
-	{
-		UEdGraph* MyGraph = GetGraph();
-		UObject* GraphOwner = MyGraph ? MyGraph->GetOuter() : nullptr;
-
-		NodeInstance->Rename(nullptr, GraphOwner, REN_DontCreateRedirectors | REN_DoNotDirty);
-		NodeInstance->ClearFlags(RF_Transient);
 	}
 }
 
@@ -117,9 +65,14 @@ FText URuleTransitionNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 	return FText::FromString(TEXT("NULL"));
 }
 
-FText URuleTransitionNode::GetTooltipText() const
+const UClass* URuleTransitionNode::GetInstanceClass() const
 {
-	return LOCTEXT("StateTransitionTooltip", "This is a state transition");
+	return UDungeonRuleTransition::StaticClass();
+}
+
+FString URuleTransitionNode::GetStateName() const
+{
+	return TEXT("(null)");
 }
 
 URuleNodeBase* URuleTransitionNode::GetPreviousState() const
@@ -256,55 +209,11 @@ TArray<URuleTransitionNode*> URuleTransitionNode::GetListTransitionNodesToRelink
 	return Result;
 }
 
-void URuleTransitionNode::PrepareForCopying()
-{
-	Super::PrepareForCopying();
-	if (NodeInstance)
-	{
-		// Temporarily take ownership of the node instance, so that it is not deleted when cutting
-		NodeInstance->Rename(nullptr, this, REN_DontCreateRedirectors | REN_DoNotDirty);
-	}
-}
-
-FString URuleTransitionNode::GetStateName() const
-{
-	return TEXT("(null)");
-}
-
-FText URuleTransitionNode::GetConditionDescription() const
-{
-	return FText::FromString(TEXT("TODO"));
-#if false // TODO: Node tooltips
-	if (!Condition)
-		return NSLOCTEXT("DungeonRules", "URuleTransitionNode_NoCondition", "Always true.");
-
-	return Condition->GetDescription();
-#endif
-}
-
 void URuleTransitionNode::Serialize(FArchive& Ar)
 {
 	Super::Serialize(Ar);
 	Ar.UsingCustomVersion(FAnimPhysObjectVersion::GUID);
 	Ar.UsingCustomVersion(FUE5MainStreamObjectVersion::GUID);
-}
-
-void URuleTransitionNode::CreateInstance(const UDungeonRuleTransition* Template)
-{
-	UEdGraph* Graph = GetGraph();
-	UObject* GraphOwner = Graph ? Graph->GetOuter() : nullptr;
-	if (!GraphOwner)
-		return;
-
-	if (!Template)
-	{
-		NodeInstance = NewObject<UDungeonRuleTransition>(GraphOwner);
-		NodeInstance->SetFlags(RF_Transactional);
-	}
-	else
-	{
-		NodeInstance = DuplicateObject(Template, GraphOwner);
-	}
 }
 
 #undef LOCTEXT_NAMESPACE

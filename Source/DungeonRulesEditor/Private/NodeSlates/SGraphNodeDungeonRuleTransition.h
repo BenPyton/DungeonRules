@@ -62,7 +62,6 @@ private:
 
 private:
 	FText GetPreviewCornerText(bool reverse) const;
-	FText GetTransitionDescription() const;
 	FSlateColor GetTransitionColor() const;
 	const FSlateBrush* GetTransitionIconImage() const;
 	FText GetTransitionPriorityOrder() const;

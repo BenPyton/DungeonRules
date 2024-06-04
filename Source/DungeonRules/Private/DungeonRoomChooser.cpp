@@ -36,3 +36,12 @@ URoomData* UDungeonRoomChooser::ChooseNextRoomData_Implementation(ADungeonGenera
 	RulesLog_Error("Choose Next Room is not implemented in %s.", *GetNameSafe(this));
 	return nullptr;
 }
+
+FText UDungeonRoomChooser::GetDescription_Implementation() const
+{
+#if WITH_EDITOR
+	return FText::Format(NSLOCTEXT("DungeonRules", "NoRoomChooserDescription", "No description provided.\nOverride 'Get Description' in '{0}'."), GetClass()->GetDisplayNameText());
+#else
+	return FText();
+#endif
+}

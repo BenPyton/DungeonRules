@@ -43,4 +43,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Dungeon Rules", meta = (DisplayName = "Choose Next Room", ReturnDisplayName = "Room Data", AutoCreateRefTerm = "DoorIndex"))
 	URoomData* ChooseNextRoomData(ADungeonGenerator* Generator, const URoomData* PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Dungeon Rules")
+	FText GetDescription() const;
 };

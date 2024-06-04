@@ -34,8 +34,35 @@ class URuleTransitionCondition;
 class ADungeonGenerator;
 class URoomData;
 
+UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
+class UNodeName : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class DUNGEONRULES_API INodeName
+{
+	GENERATED_BODY()
+public:
+	virtual FString GetNodeName() const = 0;
+	virtual void OnNodeRename(FString NewName) = 0;
+};
+
+UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
+class UNodeTooltip : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class DUNGEONRULES_API INodeTooltip
+{
+	GENERATED_BODY()
+public:
+	virtual FText GetNodeTooltip() const = 0;
+};
+
 UCLASS()
-class DUNGEONRULES_API UDungeonRuleTransition : public UObject
+class DUNGEONRULES_API UDungeonRuleTransition : public UObject, public INodeTooltip
 {
 	GENERATED_BODY()
 
@@ -53,10 +80,14 @@ public:
 
 public:
 	bool CheckCondition(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
+
+	//~ Begin INodeTooltip Interface
+	virtual FText GetNodeTooltip() const override;
+	//~ End INodeTooltip Interface
 };
 
 UCLASS()
-class DUNGEONRULES_API UDungeonRule : public UObject
+class DUNGEONRULES_API UDungeonRule : public UObject, public INodeName, public INodeTooltip
 {
 	GENERATED_BODY()
 
@@ -70,6 +101,15 @@ public:
 	// Displayed name of the rule
 	UPROPERTY()
 	FString RuleName;
+
+	//~ Begin INodeName Interface
+	virtual FString GetNodeName() const { return RuleName; }
+	virtual void OnNodeRename(FString NewName) { RuleName = NewName; }
+	//~ End INodeName Interface
+
+	//~ Begin INodeTooltip Interface
+	virtual FText GetNodeTooltip() const override;
+	//~ End INodeTooltip Interface
 
 public:
 	const UDungeonRule* GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;

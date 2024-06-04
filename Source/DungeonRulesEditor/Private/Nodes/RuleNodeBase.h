@@ -24,13 +24,27 @@ public:
 	virtual void Serialize(FArchive& Ar) override;
 	virtual void PostLoad() override;
 
-	// UEdGraphNode interface
+	//~ Begin UEdGraphNode Interface
 	virtual UObject* GetJumpTargetForDoubleClick() const override;
 	virtual bool CanJumpToDefinition() const override;
 	virtual void JumpToDefinition() const override;
 	virtual bool CanCreateUnderSpecifiedSchema(const UEdGraphSchema* Schema) const override;
 	virtual TSharedPtr<class INameValidatorInterface> MakeNameValidator() const override;
-	// End of UEdGraphNode interface
+	virtual FText GetTooltipText() const override;
+	virtual void PrepareForCopying() override;
+	virtual void PostPasteNode() override;
+	virtual void PostPlacedNewNode() override;
+	virtual void OnRenameNode(const FString& NewName) override;
+	//~ End UEdGraphNode Interface
+
+	//~ Begin UObject Interface
+#if WITH_EDITOR
+	virtual void PostEditImport() override;
+	virtual void PostEditUndo() override;
+#endif
+	//~ End UObject Interface
+
+	DUNGEONRULESEDITOR_API virtual const UClass* GetInstanceClass() const { return nullptr; }
 
 	// @return the input pin for this state
 	DUNGEONRULESEDITOR_API virtual UEdGraphPin* GetInputPin() const { return nullptr; }
@@ -44,15 +58,31 @@ public:
 	// Populates the OutTransitions array with a list of transition nodes connected to this state
 	DUNGEONRULESEDITOR_API virtual void GetTransitionList(TArray<class URuleTransitionNode*>& OutTransitions, bool bWantSortedList = false) const;
 
-	virtual void PostCopyNode() {}
+	DUNGEONRULESEDITOR_API virtual void PostCopyNode();
+
+	FORCEINLINE UObject* GetNodeInstance() const { return NodeInstance; }
+
+	template<class T>
+	T* GetNodeInstance() const
+	{
+		return Cast<T>(GetNodeInstance());
+	}
 
 protected:
-	// Name used as a seed when pasting nodes
-	virtual FString GetDesiredNewNodeName() const { return TEXT("State"); }
+	DUNGEONRULESEDITOR_API virtual FString GetDesiredNewNodeName() const { return TEXT("Base"); }
+	DUNGEONRULESEDITOR_API virtual void InitializeInstance() const {}
 
 #if false // TODO: documentation
 public:
 	// Gets the animation state node documentation link
 	virtual FString GetDocumentationLink() const override;
 #endif
+
+private:
+	void CreateInstance(const UObject* Template = nullptr);
+	void ResetInstanceOwner();
+
+protected:
+	UPROPERTY()
+	TObjectPtr<UObject> NodeInstance {nullptr};
 };

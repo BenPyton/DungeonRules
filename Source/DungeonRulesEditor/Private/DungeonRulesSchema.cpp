@@ -143,6 +143,9 @@ void UDungeonRulesSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 
 const FPinConnectionResponse UDungeonRulesSchema::CanCreateConnection(const UEdGraphPin* PinA, const UEdGraphPin* PinB) const
 {
+	if (!PinA || !PinB)
+		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("One pin is invalid"));
+
 	// Make sure the pins are not on the same node
 	if (PinA->GetOwningNode() == PinB->GetOwningNode())
 	{
