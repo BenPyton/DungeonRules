@@ -24,6 +24,7 @@ public class DungeonRulesEditor : ModuleRules
 				"Engine",
 				"AssetDefinition",
 				"GraphEditor",
+				"PropertyEditor",
 				//"KismetWidgets", // for SKismetLinearExpression
 				"BlueprintGraph", // UEdGraphSchema_K2
 				"ToolMenus",

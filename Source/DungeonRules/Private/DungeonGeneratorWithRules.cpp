@@ -41,7 +41,6 @@ URoomData* ADungeonGeneratorWithRules::ChooseFirstRoomData_Implementation()
 	}
 
 	URoomData* FirstRoom = DungeonRules->GetFirstRoomData(this, CurrentRule);
-	CurrentRule = DungeonRules->GetNextRule(this, CurrentRule, FirstRoom);
 	return FirstRoom;
 }
 
@@ -60,7 +59,6 @@ URoomData* ADungeonGeneratorWithRules::ChooseNextRoomData_Implementation(const U
 	}
 
 	URoomData* NextRoom = DungeonRules->GetNextRoomData(this, CurrentRule, CurrentRoom, DoorData, DoorIndex);
-	CurrentRule = DungeonRules->GetNextRule(this, CurrentRule, NextRoom);
 	return NextRoom;
 }
 
@@ -92,4 +90,15 @@ void ADungeonGeneratorWithRules::OnGenerationInit_Implementation()
 	}
 
 	CurrentRule = DungeonRules->GetFirstRule();
+}
+
+void ADungeonGeneratorWithRules::OnRoomAdded_Implementation(const URoomData* NewRoom)
+{
+	if (!DungeonRules)
+	{
+		RulesLog_Error("Missing DungeonRules data in the Dungeon Generator '%s'", *GetNameSafe(this));
+		return;
+	}
+
+	CurrentRule = DungeonRules->GetNextRule(this, CurrentRule, NewRoom);
 }

@@ -5,6 +5,7 @@
 #include "Nodes/RuleNode.h"
 #include "Nodes/RuleTransitionNode.h"
 #include "Nodes/RuleEntryNode.h"
+#include "Nodes/RuleAliasNode.h"
 #include "DungeonRules.h"
 #include "DUngeonRulesEdLog.h"
 
@@ -119,9 +120,6 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 		if (!Rule)
 			continue;
 
-		//DungeonEd_LogWarning("Rule %s old outer: %s", *Rule->RuleName, *GetNameSafe(Rule->GetOuter()));
-		//Rule->Rename(*Rule->GetName(), DungeonRulesAsset);
-		//DungeonEd_LogWarning("Rule %s new outer: %s", *Rule->RuleName, *GetNameSafe(Rule->GetOuter()));
 		if (Rule->GetOuter() != DungeonRulesAsset)
 		{
 			DungeonEd_LogWarning("Rule %s has not the asset %s as outer!", *Rule->RuleName, *DungeonRulesAsset->GetName());
@@ -129,6 +127,11 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 
 		DungeonRulesAsset->AddRule(Rule);
 	}
+
+	// Set the first rule
+	URuleNode* FirstNode = Cast<URuleNode>(EntryNode->GetOutputNode());
+	UDungeonRule* FirstRule = (FirstNode) ? FirstNode->GetNodeInstance<UDungeonRule>() : nullptr;
+	DungeonRulesAsset->SetFirstRule(FirstRule);
 
 	// Add transition instances to the asset + in the rule instances too
 	for (const UEdGraphNode* Node : Nodes)
@@ -141,9 +144,6 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 		if (!Transition)
 			continue;
 
-		//DungeonEd_LogWarning("Transition %s old outer: %s", *Transition->GetName(), *GetNameSafe(Transition->GetOuter()));
-		//Transition->Rename(*Transition->GetName(), DungeonRulesAsset);
-		//DungeonEd_LogWarning("Transition %s new outer: %s", *Transition->GetName(), *GetNameSafe(Transition->GetOuter()));
 		if (Transition->GetOuter() != DungeonRulesAsset)
 		{
 			DungeonEd_LogWarning("Transition %s has not the asset %s as outer!", *Transition->GetName(), *DungeonRulesAsset->GetName());
@@ -152,28 +152,34 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 		DungeonRulesAsset->AddTransition(Transition);
 
 		// Add the transition into the list of the previous rule
-		if (URuleNode* PrevRuleNode = Cast<URuleNode>(TransitionNode->GetPreviousState()))
+		if (const URuleNodeBase* PrevRuleNode = TransitionNode->GetPreviousState())
 		{
-			UDungeonRule* Rule = PrevRuleNode->GetNodeInstance<UDungeonRule>();
-			if (Rule)
+			if(UDungeonRule* Rule = PrevRuleNode->GetNodeInstance<UDungeonRule>())
 				Rule->AddTransition(Transition);
-		}
-
-		Transition->NextRule = nullptr;
-		if (URuleNode* NextRuleNode = Cast<URuleNode>(TransitionNode->GetNextState()))
-		{
-			Transition->NextRule = NextRuleNode->GetNodeInstance<UDungeonRule>();
-			if (!Transition->NextRule.IsValid())
+			else if (const URuleAliasNode* AliasRuleNode = Cast<URuleAliasNode>(PrevRuleNode))
 			{
-				DungeonEd_LogWarning("The next rule node of %s has no rule instance!", *Transition->GetName());
+				if (AliasRuleNode->bGlobalAlias)
+				{
+					DungeonRulesAsset->AddGlobalTransition(Transition);
+				}
+				else
+				{
+					for (const auto& AliasedState : AliasRuleNode->GetAliasedStates())
+					{
+						if (UDungeonRule* AliasedRule = AliasedState->GetNodeInstance<UDungeonRule>())
+							AliasedRule->AddTransition(Transition);
+					}
+				}
 			}
 		}
-	}
 
-	// Set the first rule
-	URuleNode* FirstNode = Cast<URuleNode>(EntryNode->GetOutputNode());
-	UDungeonRule* FirstRule = (FirstNode) ? FirstNode->GetNodeInstance<UDungeonRule>() : nullptr;
-	DungeonRulesAsset->SetFirstRule(FirstRule);
+		// Set the next rule of the transition instance
+		Transition->NextRule = nullptr;
+		if (URuleNodeBase* NextRuleNode = TransitionNode->GetNextState())
+		{
+			Transition->NextRule = NextRuleNode->GetNodeInstance<UDungeonRule>();
+		}
+	}
 }
 
 void UDungeonRulesGraph::OnCreated()

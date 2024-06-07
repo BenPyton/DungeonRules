@@ -44,7 +44,7 @@ public:
 	//virtual bool IsValidDungeon_Implementation() override;
 	virtual bool ContinueToAddRoom_Implementation() override;
 	virtual void OnGenerationInit_Implementation() override;
-
+	virtual void OnRoomAdded_Implementation(const URoomData* NewRoom) override;
 	//~ End ADungeonGenerator Interface
 
 protected:

@@ -69,6 +69,19 @@ URuleNodeBase::URuleNodeBase()
 {
 }
 
+void URuleNodeBase::AutowireNewNode(UEdGraphPin* FromPin)
+{
+	Super::AutowireNewNode(FromPin);
+
+	if (!FromPin)
+		return;
+
+	if (!GetSchema()->TryCreateConnection(FromPin, GetInputPin()))
+		return;
+
+	FromPin->GetOwningNode()->NodeConnectionListChanged();
+}
+
 UObject* URuleNodeBase::GetJumpTargetForDoubleClick() const
 {
 	return nullptr;
@@ -187,11 +200,8 @@ void URuleNodeBase::GetTransitionList(TArray<URuleTransitionNode*>& OutTransitio
 
 void URuleNodeBase::PostPasteNode()
 {
-	if (NodeInstance)
-	{
-		// Deep copy the pasted rule instance
-		CreateInstance(GetNodeInstance());
-	}
+	// Deep copy the pasted rule instance
+	CreateInstance(NodeInstance != nullptr);
 	Super::PostPasteNode();
 }
 
@@ -211,6 +221,11 @@ void URuleNodeBase::OnRenameNode(const FString& NewName)
 
 	NodeInstance->Modify();
 	NameInterface->OnNodeRename(NewName);
+}
+
+FText URuleNodeBase::GetNodeTitle(ENodeTitleType::Type TitleType) const
+{
+	return FText::FromString(GetStateName());
 }
 
 void URuleNodeBase::PostCopyNode()
@@ -235,38 +250,40 @@ void URuleNodeBase::PostEditUndo()
 
 #endif
 
-void URuleNodeBase::CreateInstance(const UObject* Template)
+void URuleNodeBase::CreateInstance(bool bDuplicateInstance /* = false*/)
 {
 	UEdGraph* Graph = GetGraph();
 	UObject* GraphOwner = Graph ? Graph->GetOuter() : nullptr;
 	if (!GraphOwner)
 		return;
 
-	FString Name;
-	if (!Template)
+	FString Name = GetStateName();
+	if (const UClass* InstanceClass = GetInstanceClass())
 	{
-		const UClass* InstanceClass = GetInstanceClass();
-		if (!InstanceClass)
-			return;
-
-		NodeInstance = NewObject<UObject>(GraphOwner, InstanceClass);
-		NodeInstance->SetFlags(RF_Transactional);
-		Name = GetDesiredNewNodeName();
-	}
-	else
-	{
-		NodeInstance = DuplicateObject(Template, GraphOwner);
-		if (INodeName* NameInterface = Cast<INodeName>(NodeInstance))
-			Name = NameInterface->GetNodeName();
+		if (!NodeInstance || !bDuplicateInstance)
+		{
+			NodeInstance = NewObject<UObject>(GraphOwner, InstanceClass);
+			NodeInstance->SetFlags(RF_Transactional);
+			Name = GetDesiredNewNodeName();
+		}
 		else
-			Name = NodeInstance->GetName();
+		{
+			check(NodeInstance)
+			NodeInstance = DuplicateObject(NodeInstance, GraphOwner);
+			if (INodeName* NameInterface = Cast<INodeName>(NodeInstance))
+				Name = NameInterface->GetNodeName();
+		}
 	}
 
+	// Rename node with a unique name
 	Name = GetNodeUniqueName(this, Name);
 	if (INodeName* NameInterface = Cast<INodeName>(NodeInstance))
 		NameInterface->OnNodeRename(Name);
+	else
+		OnRenameNode(Name);
 
-	InitializeInstance();
+	if (NodeInstance)
+		InitializeInstance();
 }
 
 void URuleNodeBase::ResetInstanceOwner()

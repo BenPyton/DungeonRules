@@ -23,6 +23,8 @@
 #include "Templates/Casts.h"
 #include "UObject/WeakObjectPtr.h"
 #include "UObject/WeakObjectPtrTemplates.h"
+#include "Nodes/RuleAliasNode.h"
+#include "Nodes/RuleNodeBase.h"
 
 class SToolTip;
 struct FGraphInformationPopupInfo;
@@ -37,6 +39,19 @@ struct FSlateBrush;
 void SGraphNodeDungeonRuleAlias::Construct(const FArguments& InArgs, URuleAliasNode* InNode)
 {
 	SGraphNodeDungeonRule::Construct(SGraphNodeDungeonRule::FArguments(), InNode);
+}
+
+bool SGraphNodeDungeonRuleAlias::IsNameReadOnly() const
+{
+	if (URuleAliasNode* AliasNode = Cast<URuleAliasNode>(GraphNode))
+	{
+		if (AliasNode->bGlobalAlias
+			|| AliasNode->GetAliasedState()
+			|| AliasNode->GetAliasedStates().Num() <= 0)
+			return true;
+	}
+
+	return SGraphNode::IsNameReadOnly();
 }
 
 FSlateColor SGraphNodeDungeonRuleAlias::GetBorderBackgroundColor_Internal(FLinearColor InactiveStateColor, FLinearColor ActiveStateColorDim, FLinearColor ActiveStateColorBright) const
@@ -55,9 +70,28 @@ const FSlateBrush* SGraphNodeDungeonRuleAlias::GetNameIcon() const
 	return FAppStyle::GetBrush(TEXT("Graph.AliasNode.Icon"));
 }
 
+FText SGraphNodeDungeonRuleAlias::GetNodeName() const
+{
+	if (URuleAliasNode* AliasNode = Cast<URuleAliasNode>(GraphNode))
+	{
+		if (AliasNode->bGlobalAlias)
+			return FText::FromString(TEXT("Any"));
+
+		if (URuleNodeBase* AliasedNode = AliasNode->GetAliasedState())
+			return FText::FromString(FString::Printf(TEXT("@%s"), *AliasedNode->GetStateName()));
+
+		if (AliasNode->GetAliasedStates().Num() <= 0)
+			return FText::FromString(TEXT("None"));
+	}
+
+	return SGraphNodeDungeonRule::GetNodeName();
+}
+
+#if false
 TSharedPtr<SToolTip> SGraphNodeDungeonRuleAlias::GetComplexTooltip()
 {
 	return nullptr;
 }
+#endif
 
 #undef LOCTEXT_NAMESPACE

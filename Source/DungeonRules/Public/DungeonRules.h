@@ -84,6 +84,8 @@ public:
 	//~ Begin INodeTooltip Interface
 	virtual FText GetNodeTooltip() const override;
 	//~ End INodeTooltip Interface
+
+	static TOptional<const UDungeonRule*> GetNextRuleFromTransitionList(ADungeonGenerator* Generator, const URoomData* PreviousRoom, const TArray<TWeakObjectPtr<const UDungeonRuleTransition>>& Transitions, const UObject* Context = nullptr);
 };
 
 UCLASS()
@@ -112,10 +114,11 @@ public:
 	//~ End INodeTooltip Interface
 
 public:
-	const UDungeonRule* GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
+	TOptional<const UDungeonRule*> GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
 
 #if WITH_EDITOR
 public:
+	void Clear();
 	void AddTransition(const UDungeonRuleTransition* Transition);
 #endif
 };
@@ -135,7 +138,7 @@ public:
 	URoomData* GetFirstRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule) const;
 	URoomData* GetNextRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const URoomData* PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const;
 	const UDungeonRule* GetNextRule(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const URoomData* RoomData) const;
-	FORCEINLINE const UDungeonRule* GetFirstRule() const { return FirstRule; }
+	FORCEINLINE const UDungeonRule* GetFirstRule() const { return FirstRule.Get(); }
 
 #if WITH_EDITOR
 public:
@@ -144,6 +147,7 @@ public:
 	void AddRule(UDungeonRule* Rule);
 	void SetFirstRule(UDungeonRule* Rule);
 	void AddTransition(UDungeonRuleTransition* Transition);
+	void AddGlobalTransition(UDungeonRuleTransition* GlobalTransition);
 #endif
 
 #if WITH_EDITORONLY_DATA
@@ -159,6 +163,13 @@ private:
 	UPROPERTY()
 	TArray<TObjectPtr<UDungeonRuleTransition>> Transitions;
 
+	// The first rule to start the generation.
+	// The rule must be registered in the Rules array too.
 	UPROPERTY()
-	TObjectPtr<UDungeonRule> FirstRule;
+	TWeakObjectPtr<UDungeonRule> FirstRule;
+
+	// Holds transitions from *any* state to another state.
+	// The transition objects must be registered in the Transitions array too.
+	UPROPERTY()
+	TArray<TWeakObjectPtr<const UDungeonRuleTransition>> GlobalTransitions;
 };

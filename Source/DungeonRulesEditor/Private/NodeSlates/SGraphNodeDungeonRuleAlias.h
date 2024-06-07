@@ -25,13 +25,22 @@ public:
 
 	void Construct(const FArguments& InArgs, URuleAliasNode* InNode);
 
-	// SNodePanel::SNode interface
+#if false
+	//~ Begin SNodePanel::SNode Interface
 	virtual TSharedPtr<SToolTip> GetComplexTooltip() override;
-	// End of SNodePanel::SNode interface
+	//~ End SNodePanel::SNode Interface
+#endif
 
 protected:
+	//~ Begin SGraphNode Interface
+	virtual bool IsNameReadOnly() const override;
+	//~ End SGraphNode Interface
+
 	virtual FSlateColor GetBorderBackgroundColor_Internal(FLinearColor InactiveStateColor, FLinearColor ActiveStateColorDim, FLinearColor ActiveStateColorBright) const;
 
+	//~ Begin SGraphNodeDungeonRule Interface
 	virtual FText GetPreviewCornerText() const override;
 	virtual const FSlateBrush* GetNameIcon() const override;
+	virtual FText GetNodeName() const override;
+	//~ End SGraphNodeDungeonRule Interface
 };

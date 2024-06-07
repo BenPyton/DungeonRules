@@ -30,7 +30,7 @@ URuleAliasNode::URuleAliasNode()
 	: Super()
 {
 	bCanRenameNode = true;
-	StateAliasName = TEXT("Alias");
+	StateAliasName = GetDesiredNewNodeName();
 }
 
 void URuleAliasNode::Serialize(FArchive& Ar)
@@ -45,6 +45,7 @@ void URuleAliasNode::AllocateDefaultPins()
 	CreatePin(EGPD_Output, DungeonRulesPinCategory::Transition, TEXT("Out"));
 }
 
+#if false
 void URuleAliasNode::ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const
 {
 	Super::ValidateNodeDuringCompilation(MessageLog);
@@ -54,44 +55,26 @@ void URuleAliasNode::ValidateNodeDuringCompilation(class FCompilerResultsLog& Me
 		MessageLog.Error(*LOCTEXT("AliasAsEntryState", "A alias (@@) used as a transition's target must alias a single state").ToString(), this);
 	}
 }
-
-void URuleAliasNode::AutowireNewNode(UEdGraphPin* FromPin)
-{
-	Super::AutowireNewNode(FromPin);
-
-	if (FromPin)
-	{
-		if (GetSchema()->TryCreateConnection(FromPin, GetInputPin()))
-		{
-			FromPin->GetOwningNode()->NodeConnectionListChanged();
-		}
-	}
-}
-
-void URuleAliasNode::PostPasteNode()
-{
-	Super::PostPasteNode();
-
-	// Find an interesting name, but try to keep the same if possible
-	TSharedPtr<INameValidatorInterface> NameValidator = FNameValidatorFactory::MakeValidator(this);
-	NameValidator->FindValidString(StateAliasName);
-}
-
-void URuleAliasNode::PostPlacedNewNode()
-{
-	// Find an interesting name, but try to keep the same if possible
-	TSharedPtr<INameValidatorInterface> NameValidator = FNameValidatorFactory::MakeValidator(this);
-	NameValidator->FindValidString(StateAliasName);
-}
-
-FText URuleAliasNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
-{
-	return FText::FromString(GetStateName());
-}
+#endif
 
 FText URuleAliasNode::GetTooltipText() const
 {
-	return LOCTEXT("ConduitNodeTooltip", "This is a conduit, which allows specification of a predicate condition for an entire group of transitions");
+	if (bGlobalAlias)
+		return LOCTEXT("AliasNodeTooltip_AnyState", "Alias for any other state.");
+
+	if (const URuleNodeBase* AliasedState = GetAliasedState())
+		return FText::Format(LOCTEXT("AliasNodeTooltip_OneState", "Alias for {0}."), FText::FromString(AliasedState->GetStateName()));
+
+	if (AliasedStateNodes.Num() <= 0)
+		return LOCTEXT("AliasNodeTooltip_NoState", "No state aliased.");
+
+	FString StateNames;
+	for (const auto& AliasedState : AliasedStateNodes)
+	{
+		StateNames += TEXT("\n- ") + AliasedState->GetStateName();
+	}
+
+	return FText::Format(LOCTEXT("AliasNodeTooltip_MultiState", "Alias for states:{0}"), FText::FromString(StateNames));
 }
 
 FString URuleAliasNode::GetStateName() const
@@ -170,14 +153,12 @@ void URuleAliasNode::RebuildAliasedStateNodeReferences()
 		Graph->GetNodesOfClassEx<URuleNode, URuleNodeBase>(StateNodes);
 		TSet<URuleNodeBase*> StateNodesSet(StateNodes);
 
-		for (auto StateNodeIt = AliasedStateNodes.CreateIterator(); StateNodeIt; ++StateNodeIt)
+		for (const auto& StateNode : AliasedStateNodes)
 		{
-			URuleNodeBase* AliasedState = StateNodeIt->Get();
-
 			// Keep only nodes that are still in the graph
-			if (IsValid(AliasedState) && StateNodesSet.Contains(AliasedState))
+			if (StateNode.IsValid() && StateNodesSet.Contains(StateNode.Get()))
 			{
-				NewAliasedStateNodes.Add(*StateNodeIt);
+				NewAliasedStateNodes.Add(StateNode);
 			}
 		}
 

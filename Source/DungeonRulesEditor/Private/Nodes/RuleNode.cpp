@@ -23,20 +23,6 @@ void URuleNode::AllocateDefaultPins()
 	UEdGraphPin* Outputs = CreatePin(EGPD_Output, DungeonRulesPinCategory::Transition, FName("Out"));
 }
 
-void URuleNode::AutowireNewNode(UEdGraphPin* FromPin)
-{
-	Super::AutowireNewNode(FromPin);
-
-	//@TODO: If the FromPin is a state, create a transition between us
-	if (FromPin)
-	{
-		if (GetSchema()->TryCreateConnection(FromPin, GetInputPin()))
-		{
-			FromPin->GetOwningNode()->NodeConnectionListChanged();
-		}
-	}
-}
-
 FText URuleNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
 	return FText::FromString(GetStateName());
@@ -47,12 +33,6 @@ const UClass* URuleNode::GetInstanceClass() const
 	return UDungeonRule::StaticClass();
 }
 
-FString URuleNode::GetStateName() const
-{
-	const UDungeonRule* Rule = GetNodeInstance<UDungeonRule>();
-	return Rule ? Rule->RuleName : TEXT("NULL");
-}
-
 UEdGraphPin* URuleNode::GetInputPin() const
 {
 	return Pins[0];
@@ -61,6 +41,17 @@ UEdGraphPin* URuleNode::GetInputPin() const
 UEdGraphPin* URuleNode::GetOutputPin() const
 {
 	return Pins[1];
+}
+
+FString URuleNode::GetStateName() const
+{
+	const UDungeonRule* Rule = GetNodeInstance<UDungeonRule>();
+	return Rule ? Rule->RuleName : TEXT("NULL");
+}
+
+TArray<FName> URuleNode::GetPropertyNamesToEdit() const
+{
+	return {GET_MEMBER_NAME_CHECKED(UDungeonRule, RoomChooser)};
 }
 
 #undef LOCTEXT_NAMESPACE

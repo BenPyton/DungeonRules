@@ -12,7 +12,7 @@ public:
 	FDungeonRulesToolkit();
 	~FDungeonRulesToolkit();
 
-	//~ BEGIN FAssetEditorToolkit
+	//~ Begin FAssetEditorToolkit Interface
 	virtual FName GetToolkitFName() const override;
 	virtual FText GetBaseToolkitName() const override;
 	virtual FString GetWorldCentricTabPrefix() const override;
@@ -22,7 +22,7 @@ public:
 	virtual void RegisterTabSpawners(const TSharedRef<FTabManager>& TabManager) override;
 	virtual void UnregisterTabSpawners(const TSharedRef<FTabManager>& TabManager) override;
 	virtual void SaveAsset_Execute() override;
-	//~ END FAssetEditorToolkit
+	//~ End FAssetEditorToolkit Interface
 
 	virtual void InitGraphAssetEditor(const EToolkitMode::Type InMode, const TSharedPtr<class IToolkitHost>& InToolkitHost, UObject* ObjectToEdit);
 	//virtual void BlueprintCompiled();
@@ -34,7 +34,9 @@ public:
 	//~ Begin FEditorUndoClient Interface
 	virtual void PostUndo(bool bSuccess) override;
 	virtual void PostRedo(bool bSuccess) override;
-	// End of FEditorUndoClient
+	//~ End FEditorUndoClient Interface
+
+	FORCEINLINE UDungeonRules* GetEditedAsset() const { return DungeonRules; }
 
 	void CreateCommandList();
 	

@@ -62,7 +62,7 @@ FText URuleTransitionNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 
 		return FText::Format(LOCTEXT("PrevStateToNewState", "{PrevState} to {NextState}"), Args);
 	}
-	return FText::FromString(TEXT("NULL"));
+	return Super::GetNodeTitle(TitleType);
 }
 
 const UClass* URuleTransitionNode::GetInstanceClass() const
@@ -73,6 +73,11 @@ const UClass* URuleTransitionNode::GetInstanceClass() const
 FString URuleTransitionNode::GetStateName() const
 {
 	return TEXT("(null)");
+}
+
+TArray<FName> URuleTransitionNode::GetPropertyNamesToEdit() const
+{
+	return {GET_MEMBER_NAME_CHECKED(UDungeonRuleTransition, Condition)};
 }
 
 URuleNodeBase* URuleTransitionNode::GetPreviousState() const

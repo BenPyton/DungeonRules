@@ -30,6 +30,7 @@ class URuleAliasNode : public URuleNodeBase
 public:
 	URuleAliasNode();
 
+	// This will alias any state. Takes into account new states created after this alias has been setup.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State Alias")
 	bool bGlobalAlias;
 
@@ -41,14 +42,12 @@ public:
 
 	//~ Begin UEdGraphNode Interface
 	virtual void AllocateDefaultPins() override;
-	virtual void AutowireNewNode(UEdGraphPin* FromPin) override;
-	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 	virtual FText GetTooltipText() const override;
 	virtual bool CanDuplicateNode() const override { return true; }
 	virtual void OnRenameNode(const FString& NewName) override;
-	virtual void PostPasteNode() override;
-	virtual void PostPlacedNewNode() override;
+#if false
 	virtual void ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const override;
+#endif
 	//~ End UEdGraphNode Interface
 
 	//~ Begin URuleNodeBase Interface
@@ -64,8 +63,6 @@ public:
 
 	// Returns null if aliasing more than one state.
 	DUNGEONRULESEDITOR_API URuleNodeBase* GetAliasedState() const;
-
-	static FName GetAliasedStateNodesPropertyName() { return GET_MEMBER_NAME_CHECKED(URuleAliasNode, AliasedStateNodes); }
 
 private:
 

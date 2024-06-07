@@ -39,6 +39,7 @@ public:
 	DUNGEONRULESEDITOR_API virtual FString GetStateName() const override;
 	DUNGEONRULESEDITOR_API virtual UEdGraphPin* GetInputPin() const override { return Pins[0]; }
 	DUNGEONRULESEDITOR_API virtual UEdGraphPin* GetOutputPin() const override { return Pins[1]; }
+	DUNGEONRULESEDITOR_API virtual TArray<FName> GetPropertyNamesToEdit() const override;
 	//~ End URuleNodeBase Interface
 
 	DUNGEONRULESEDITOR_API URuleNodeBase* GetPreviousState() const;

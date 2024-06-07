@@ -25,6 +25,7 @@ public:
 	virtual void PostLoad() override;
 
 	//~ Begin UEdGraphNode Interface
+	virtual void AutowireNewNode(UEdGraphPin* FromPin) override;
 	virtual UObject* GetJumpTargetForDoubleClick() const override;
 	virtual bool CanJumpToDefinition() const override;
 	virtual void JumpToDefinition() const override;
@@ -35,6 +36,7 @@ public:
 	virtual void PostPasteNode() override;
 	virtual void PostPlacedNewNode() override;
 	virtual void OnRenameNode(const FString& NewName) override;
+	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 	//~ End UEdGraphNode Interface
 
 	//~ Begin UObject Interface
@@ -60,6 +62,9 @@ public:
 
 	DUNGEONRULESEDITOR_API virtual void PostCopyNode();
 
+	// @return All names of the instance's properties to show in the detail panel
+	DUNGEONRULESEDITOR_API virtual TArray<FName> GetPropertyNamesToEdit() const { return {}; }
+
 	FORCEINLINE UObject* GetNodeInstance() const { return NodeInstance; }
 
 	template<class T>
@@ -79,7 +84,7 @@ public:
 #endif
 
 private:
-	void CreateInstance(const UObject* Template = nullptr);
+	void CreateInstance(bool bDuplicateInstance = false);
 	void ResetInstanceOwner();
 
 protected:

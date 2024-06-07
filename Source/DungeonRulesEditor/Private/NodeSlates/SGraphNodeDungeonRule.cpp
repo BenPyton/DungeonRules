@@ -259,7 +259,7 @@ void SGraphNodeDungeonRule::UpdateGraphNode()
 
 	FLinearColor TitleShadowColor(0.6f, 0.6f, 0.6f);
 	TSharedPtr<SErrorText> ErrorText;
-	TSharedPtr<SNodeTitle> NodeTitle = SNew(SNodeTitle, GraphNode);
+	NodeTitle = SNew(SNodeTitle, GraphNode);
 
 	this->ContentScale.Bind( this, &SGraphNode::GetContentScale );
 	this->GetOrAddSlot( ENodeZone::Center )
@@ -320,11 +320,11 @@ void SGraphNodeDungeonRule::UpdateGraphNode()
 								.AutoHeight()
 							[
 								SAssignNew(InlineEditableText, SInlineEditableTextBlock)
-								.Style( FAppStyle::Get(), "Graph.StateNode.NodeTitleInlineEditableText" )
-								.Text( NodeTitle.Get(), &SNodeTitle::GetHeadTitle )
+								.Style(FAppStyle::Get(), "Graph.StateNode.NodeTitleInlineEditableText")
+								.Text(this, &SGraphNodeDungeonRule::GetNodeName)
 								.OnVerifyTextChanged(this, &SGraphNodeDungeonRule::OnVerifyNameTextChanged)
 								.OnTextCommitted(this, &SGraphNodeDungeonRule::OnNameTextCommited)
-								.IsReadOnly( this, &SGraphNodeDungeonRule::IsNameReadOnly )
+								.IsReadOnly(this, &SGraphNodeDungeonRule::IsNameReadOnly)
 								.IsSelected(this, &SGraphNodeDungeonRule::IsSelectedExclusively)
 							]
 							+SVerticalBox::Slot()
@@ -406,6 +406,11 @@ FText SGraphNodeDungeonRule::GetPreviewCornerText() const
 const FSlateBrush* SGraphNodeDungeonRule::GetNameIcon() const
 {
 	return FAppStyle::GetBrush( TEXT("Graph.StateNode.Icon") );
+}
+
+FText SGraphNodeDungeonRule::GetNodeName() const
+{
+	return NodeTitle.IsValid() ? NodeTitle->GetHeadTitle() : FText::FromString(TEXT("NULL"));
 }
 
 /////////////////////////////////////////////////////

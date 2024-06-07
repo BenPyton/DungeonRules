@@ -17,6 +17,7 @@
 #include "Editor.h"
 #include "Misc/EngineVersionComparison.h"
 #include "SNodePanel.h" // GetSnapGridSize
+#include "DetailCustomizations/DungeonDetailsCustomization.h"
 
 #define LOCTEXT_NAMESPACE "DungeonRulesEditor"
 
@@ -267,14 +268,6 @@ void FDungeonRulesToolkit::CreateInternalWidgets()
 	EdGraphEditor = CreateGraphEditorWidget();
 	UpdateGraphEdPtr = EdGraphEditor;
 
-	//FDetailsViewArgs Args;
-	//Args.bHideSelectionTip = true;
-	//Args.NotifyHook = this;
-	//
-	//FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	//DungeonRulesProperties = PropertyModule.CreateDetailView(Args);
-	//DungeonRulesProperties->SetObject(DungeonRules);
-
 	FDetailsViewArgs DetailsViewArgs;
 	DetailsViewArgs.bUpdatesFromSelection = false;
 	DetailsViewArgs.bCustomNameAreaLocation = false;
@@ -285,8 +278,8 @@ void FDungeonRulesToolkit::CreateInternalWidgets()
 	FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 	DetailsWidget = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
 	DetailsWidget->SetObject(DungeonRules);
-
-	//Palette = SNew(SSoundCuePalette);
+	DetailsWidget->RegisterInstancedCustomPropertyLayout(UEdGraphNode::StaticClass(), FOnGetDetailCustomizationInstance::CreateStatic(&FEditorGraphNodeNameDetails::MakeInstance, this));
+	DetailsWidget->RegisterInstancedCustomPropertyLayout(URuleNodeBase::StaticClass(), FOnGetDetailCustomizationInstance::CreateStatic(&FDungeonRuleNodeBaseDetails::MakeInstance));
 }
 
 /*
@@ -368,11 +361,13 @@ void FDungeonRulesToolkit::OnSelectedNodesChanged(const TSet<class UObject*>& Ne
 	{
 		for (UObject* SelectedObj : NewSelection)
 		{
+#if false
 			if (URuleNodeBase* GraphNode = Cast<URuleNodeBase>(SelectedObj))
 			{
 				Selection.Add(GraphNode->GetNodeInstance());
 			}
 			else
+#endif
 			{
 				Selection.Add(SelectedObj);
 			}

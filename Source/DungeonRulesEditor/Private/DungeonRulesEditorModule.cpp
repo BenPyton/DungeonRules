@@ -29,12 +29,21 @@
 #include "Styling/SlateStyleRegistry.h"
 #include "EdGraphUtilities.h"
 #include "Factories/DungeonRulesVisualFactories.h"
+#include "DetailCustomizations/DungeonRuleAliasNodeDetails.h"
+#include "Nodes/RuleAliasNode.h"
 
 #define LOCTEXT_NAMESPACE "FDungeonRulesEditorModule"
+
+#define REGISTER_CUSTOM_CLASS_DETAILS(TYPE, DETAILS)\
+	PropertyModule.RegisterCustomClassLayout(TYPE::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&DETAILS::MakeInstance));
+
+#define UNREGISTER_CUSTOM_CLASS_DETAILS(TYPE)\
+	PropertyModule.UnregisterCustomClassLayout(TYPE::StaticClass()->GetFName());
 
 void FDungeonRulesEditorModule::StartupModule()
 {
 	DungeonEd_LogInfo("DungeonRulesEditor module Startup");
+
 	// Register visual factories for Dungeon Rules editor graph
 	{
 		DungeonRulesNodeFactory = MakeShareable(new FDungeonRulesNodeFactory());
@@ -46,16 +55,31 @@ void FDungeonRulesEditorModule::StartupModule()
 		DungeonRulesPinConnectionFactory = MakeShareable(new FDungeonRulesPinConnectionFactory());
 		FEdGraphUtilities::RegisterVisualPinConnectionFactory(DungeonRulesPinConnectionFactory);
 	}
+
+	// Register detail customizations
+	{
+		auto& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+		REGISTER_CUSTOM_CLASS_DETAILS(URuleAliasNode, FDungeonRuleAliasNodeDetails);
+		PropertyModule.NotifyCustomizationModuleChanged();
+	}
 }
 
 void FDungeonRulesEditorModule::ShutdownModule()
 {
-	// Unregister
+	// Unregister visual factories
 	{
 		FEdGraphUtilities::UnregisterVisualNodeFactory(DungeonRulesNodeFactory);
 		FEdGraphUtilities::UnregisterVisualPinFactory(DungeonRulesPinFactory);
 		FEdGraphUtilities::UnregisterVisualPinConnectionFactory(DungeonRulesPinConnectionFactory);
 	}
+
+	// Unreagister detail customizations
+	{
+		auto& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+		UNREGISTER_CUSTOM_CLASS_DETAILS(URuleAliasNode);
+		PropertyModule.NotifyCustomizationModuleChanged();
+	}
+
 	DungeonEd_LogInfo("DungeonRulesEditor module Shutdown");
 }
 

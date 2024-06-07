@@ -45,16 +45,15 @@ FText UDungeonRuleTransition::GetNodeTooltip() const
 	return Condition->GetDescription();
 }
 
-const UDungeonRule* UDungeonRule::GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
+TOptional<const UDungeonRule*> UDungeonRuleTransition::GetNextRuleFromTransitionList(ADungeonGenerator* Generator, const URoomData* PreviousRoom, const TArray<TWeakObjectPtr<const UDungeonRuleTransition>>& Transitions, const UObject* Context /*= nullptr*/)
 {
-	const UDungeonRule* NextRule = this;
+	TOptional<const UDungeonRule*> NextRule;
 	int32 CurrentPriority = INT32_MAX;
-	for (const auto& TransitionPtr : Transitions)
+	for (const auto& Transition : Transitions)
 	{
-		const UDungeonRuleTransition* Transition = TransitionPtr.Get();
-		if (!Transition)
+		if (!Transition.IsValid())
 		{
-			RulesLog_Warning("Invalid DungeonRuleTransition found in %s.", *RuleName);
+			RulesLog_Warning("Invalid transition found in %s.", *GetNameSafe(Context));
 			continue;
 		}
 
@@ -71,6 +70,13 @@ const UDungeonRule* UDungeonRule::GetNextRule(ADungeonGenerator* Generator, cons
 	return NextRule;
 }
 
+//////////////////////////////////////////////////////////////////////
+
+TOptional<const UDungeonRule*> UDungeonRule::GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
+{
+	return UDungeonRuleTransition::GetNextRuleFromTransitionList(Generator, PreviousRoom, Transitions, this);
+}
+
 FText UDungeonRule::GetNodeTooltip() const
 {
 	if (!IsValid(RoomChooser))
@@ -80,12 +86,19 @@ FText UDungeonRule::GetNodeTooltip() const
 }
 
 #if WITH_EDITOR
+void UDungeonRule::Clear()
+{
+	Transitions.Empty();
+}
+
 void UDungeonRule::AddTransition(const UDungeonRuleTransition* Transition)
 {
 	check(Transition);
 	Transitions.AddUnique(Transition);
 }
 #endif
+
+///////////////////////////////////////////////////////////////////
 
 UDungeonRules::UDungeonRules()
 	: Super()
@@ -147,13 +160,25 @@ const UDungeonRule* UDungeonRules::GetNextRule(ADungeonGenerator* Generator, con
 	if (!IsValid(CurrentRule))
 		return nullptr;
 
-	return CurrentRule->GetNextRule(Generator, Room);
+	TOptional<const UDungeonRule*> NextRule = CurrentRule->GetNextRule(Generator, Room);
+	if (NextRule.IsSet())
+		return NextRule.GetValue();
+
+	NextRule = UDungeonRuleTransition::GetNextRuleFromTransitionList(Generator, Room, GlobalTransitions, this);
+	return NextRule.IsSet() ? NextRule.GetValue() : CurrentRule;
 }
 
 #if WITH_EDITOR
 void UDungeonRules::Clear()
 {
-	FirstRule = nullptr;
+	FirstRule.Reset();
+	GlobalTransitions.Empty();
+
+	for (UDungeonRule* Rule : Rules)
+	{
+		Rule->Clear();
+	}
+
 	Rules.Empty();
 	Transitions.Empty();
 }
@@ -166,6 +191,7 @@ void UDungeonRules::AddRule(UDungeonRule* Rule)
 
 void UDungeonRules::SetFirstRule(UDungeonRule* Rule)
 {
+	check(Rules.Contains(Rule));
 	FirstRule = Rule;
 }
 
@@ -173,5 +199,11 @@ void UDungeonRules::AddTransition(UDungeonRuleTransition* Transition)
 {
 	check(Transition);
 	Transitions.AddUnique(Transition);
+}
+
+void UDungeonRules::AddGlobalTransition(UDungeonRuleTransition* GlobalTransition)
+{
+	check(Transitions.Contains(GlobalTransition));
+	GlobalTransitions.Add(GlobalTransition);
 }
 #endif

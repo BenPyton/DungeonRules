@@ -52,6 +52,10 @@ protected:
 
 	virtual FText GetPreviewCornerText() const;
 	virtual const FSlateBrush* GetNameIcon() const;
+	virtual FText GetNodeName() const;
+
+private:
+	TSharedPtr<SNodeTitle> NodeTitle {nullptr};
 };
 
 

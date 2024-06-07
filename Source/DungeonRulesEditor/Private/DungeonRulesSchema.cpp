@@ -317,13 +317,13 @@ void UDungeonRulesSchema::GetGraphContextActions(FGraphContextMenuBuilder& Conte
 		Action->NodeTemplate = NewObject<URuleNode>(ContextMenuBuilder.OwnerOfTemporaries);
 	}
 
-#if false // TODO: alias and conduit nodes
 	// Add state alias node
 	{
 		TSharedPtr<FDungeonRulesGraphSchemaAction_NewStateNode> Action = AddNewStateNodeAction(ContextMenuBuilder, FText::GetEmpty(), LOCTEXT("AddStateAlias", "Add State Alias"), LOCTEXT("AddStateAliasTooltip", "A new state alias"));
 		Action->NodeTemplate = NewObject<URuleAliasNode>(ContextMenuBuilder.OwnerOfTemporaries);
 	}
 
+#if false // TODO: conduit nodes
 	// Add conduit node
 	{
 		TSharedPtr<FDungeonRulesGraphSchemaAction_NewStateNode> Action = AddNewStateNodeAction(ContextMenuBuilder, FText::GetEmpty(), LOCTEXT("AddConduit", "Add Conduit"), LOCTEXT("AddConduitTooltip", "A new conduit state"));

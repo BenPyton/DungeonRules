@@ -21,7 +21,6 @@ public:
 
 	//~ Begin UEdGraphNode Interface
 	virtual void AllocateDefaultPins() override;
-	virtual void AutowireNewNode(UEdGraphPin* FromPin) override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 	virtual bool CanDuplicateNode() const override { return true; }
 	//~ End UEdGraphNode Interface
@@ -32,5 +31,6 @@ public:
 	virtual UEdGraphPin* GetOutputPin() const override;
 	virtual FString GetStateName() const override;
 	virtual FString GetDesiredNewNodeName() const { return TEXT("New Rule"); }
+	virtual TArray<FName> GetPropertyNamesToEdit() const override;
 	//~ End URuleNodeBase Interface
 };
