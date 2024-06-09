@@ -1,0 +1,35 @@
+{
+	"FileVersion": 3,
+	"Version": 100,
+	"VersionName": "0.1.0",
+	"FriendlyName": "Dungeon Rules Graph Editor",
+	"Description": "A state machine graph editor for the Procedural Dungeon plugin I made (https://github.com/BenPyton/ProceduralDungeon)",
+	"Category": "Procedural",
+	"CreatedBy": "Ben Pyton",
+	"CreatedByURL": "https://github.com/BenPyton",
+	"DocsURL": "https://github.com/BenPyton/DungeonRules",
+	"MarketplaceURL": "",
+	"SupportURL": "https://github.com/BenPyton/DungeonRules/issues",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": true,
+	"Modules": [
+		{
+			"Name": "DungeonRules",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64"
+			]
+		},
+
+		{
+			"Name": "DungeonRulesEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64"
+			]
+		}
+	]
+}
