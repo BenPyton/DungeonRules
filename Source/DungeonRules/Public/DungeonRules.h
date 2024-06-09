@@ -33,6 +33,7 @@ class UDungeonRoomChooser;
 class URuleTransitionCondition;
 class ADungeonGenerator;
 class URoomData;
+class UDungeonRule;
 
 UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
 class UNodeName : public UInterface
@@ -48,6 +49,8 @@ public:
 	virtual void OnNodeRename(FString NewName) = 0;
 };
 
+/////////////////////////////////////////
+
 UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
 class UNodeTooltip : public UInterface
 {
@@ -60,6 +63,38 @@ class DUNGEONRULES_API INodeTooltip
 public:
 	virtual FText GetNodeTooltip() const = 0;
 };
+
+/////////////////////////////////////////
+
+UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
+class UDungeonRuleProvider : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class DUNGEONRULES_API IDungeonRuleProvider
+{
+	GENERATED_BODY()
+public:
+	virtual const UDungeonRule* GetRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const = 0;
+};
+
+/////////////////////////////////////////
+
+UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
+class UDungeonConditionProvider : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class DUNGEONRULES_API IDungeonConditionProvider
+{
+	GENERATED_BODY()
+public:
+	virtual bool CheckCondition(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const = 0;
+};
+
+/////////////////////////////////////////
 
 UCLASS()
 class DUNGEONRULES_API UDungeonRuleTransition : public UObject, public INodeTooltip
@@ -76,7 +111,7 @@ public:
 	TObjectPtr<URuleTransitionCondition> Condition {nullptr};
 
 	UPROPERTY()
-	TWeakObjectPtr<class UDungeonRule> NextRule {nullptr};
+	TScriptInterface<IDungeonRuleProvider> NextRule {nullptr};
 
 public:
 	bool CheckCondition(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
@@ -88,8 +123,10 @@ public:
 	static TOptional<const UDungeonRule*> GetNextRuleFromTransitionList(ADungeonGenerator* Generator, const URoomData* PreviousRoom, const TArray<TWeakObjectPtr<const UDungeonRuleTransition>>& Transitions, const UObject* Context = nullptr);
 };
 
+/////////////////////////////////////////
+
 UCLASS()
-class DUNGEONRULES_API UDungeonRule : public UObject, public INodeName, public INodeTooltip
+class DUNGEONRULES_API UDungeonRule : public UObject, public INodeName, public INodeTooltip, public IDungeonRuleProvider
 {
 	GENERATED_BODY()
 
@@ -113,6 +150,10 @@ public:
 	virtual FText GetNodeTooltip() const override;
 	//~ End INodeTooltip Interface
 
+	//~ Begin IDungeonRuleProvider Interface
+	virtual const UDungeonRule* GetRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const override { return this; }
+	//~ End IDungeonRuleProvider Interface
+
 public:
 	TOptional<const UDungeonRule*> GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
 
@@ -123,9 +164,34 @@ public:
 #endif
 };
 
-/**
- * 
- */
+/////////////////////////////////////////
+
+UCLASS()
+class DUNGEONRULES_API URuleConduit : public UObject, public IDungeonRuleProvider, public IDungeonConditionProvider
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	TArray<TWeakObjectPtr<const UDungeonRuleTransition>> Transitions;
+
+	//~ Begin IDungeonRuleProvider Interface
+	virtual const UDungeonRule* GetRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const override;
+	//~ End IDungeonRuleProvider Interface
+
+	//~ Begin IDungeonConditionProvider Interface
+	virtual bool CheckCondition(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const override;
+	//~ End IDungeonConditionProvider Interface
+
+#if WITH_EDITOR
+public:
+	void Clear();
+	void AddTransition(const UDungeonRuleTransition* Transition);
+#endif
+};
+
+/////////////////////////////////////////
+
 UCLASS(BlueprintType)
 class DUNGEONRULES_API UDungeonRules : public UDataAsset
 {
@@ -145,6 +211,7 @@ public:
 	// Clear FirstRule, Rules and all transitions
 	void Clear();
 	void AddRule(UDungeonRule* Rule);
+	void AddConduit(URuleConduit* Conduit);
 	void SetFirstRule(UDungeonRule* Rule);
 	void AddTransition(UDungeonRuleTransition* Transition);
 	void AddGlobalTransition(UDungeonRuleTransition* GlobalTransition);
@@ -159,6 +226,9 @@ public:
 private:
 	UPROPERTY()
 	TArray<TObjectPtr<UDungeonRule>> Rules;
+
+	UPROPERTY()
+	TArray<TObjectPtr<URuleConduit>> Conduits;
 
 	UPROPERTY()
 	TArray<TObjectPtr<UDungeonRuleTransition>> Transitions;

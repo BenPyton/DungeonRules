@@ -6,6 +6,7 @@
 #include "Nodes/RuleTransitionNode.h"
 #include "Nodes/RuleEntryNode.h"
 #include "Nodes/RuleAliasNode.h"
+#include "Nodes/RuleConduitNode.h"
 #include "DungeonRules.h"
 #include "DUngeonRulesEdLog.h"
 
@@ -128,6 +129,25 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 		DungeonRulesAsset->AddRule(Rule);
 	}
 
+	// Add conduits to the asset
+	for (const UEdGraphNode* Node : Nodes)
+	{
+		const URuleConduitNode* ConduitNode = Cast<URuleConduitNode>(Node);
+		if (!ConduitNode)
+			continue;
+
+		URuleConduit* Conduit = ConduitNode->GetNodeInstance<URuleConduit>();
+		if (!Conduit)
+			continue;
+
+		if (Conduit->GetOuter() != DungeonRulesAsset)
+		{
+			DungeonEd_LogWarning("Conduit %s has not the asset %s as outer!", *Conduit->GetName(), *DungeonRulesAsset->GetName());
+		}
+
+		DungeonRulesAsset->AddConduit(Conduit);
+	}
+
 	// Set the first rule
 	URuleNode* FirstNode = Cast<URuleNode>(EntryNode->GetOutputNode());
 	UDungeonRule* FirstRule = (FirstNode) ? FirstNode->GetNodeInstance<UDungeonRule>() : nullptr;
@@ -154,8 +174,10 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 		// Add the transition into the list of the previous rule
 		if (const URuleNodeBase* PrevRuleNode = TransitionNode->GetPreviousState())
 		{
-			if(UDungeonRule* Rule = PrevRuleNode->GetNodeInstance<UDungeonRule>())
+			if (UDungeonRule* Rule = PrevRuleNode->GetNodeInstance<UDungeonRule>())
 				Rule->AddTransition(Transition);
+			else if (URuleConduit* Conduit = PrevRuleNode->GetNodeInstance<URuleConduit>())
+				Conduit->AddTransition(Transition);
 			else if (const URuleAliasNode* AliasRuleNode = Cast<URuleAliasNode>(PrevRuleNode))
 			{
 				if (AliasRuleNode->bGlobalAlias)
@@ -177,7 +199,7 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 		Transition->NextRule = nullptr;
 		if (URuleNodeBase* NextRuleNode = TransitionNode->GetNextState())
 		{
-			Transition->NextRule = NextRuleNode->GetNodeInstance<UDungeonRule>();
+			Transition->NextRule = NextRuleNode->GetNodeInstance();
 		}
 	}
 }

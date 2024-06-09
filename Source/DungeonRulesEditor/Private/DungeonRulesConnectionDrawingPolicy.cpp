@@ -24,6 +24,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "Brushes/SlateRoundedBoxBrush.h"
 #include "Styling/StyleColors.h"
+#include "Nodes/RuleConduitNode.h"
 
 class FSlateRect;
 class SWidget;
@@ -159,8 +160,8 @@ void FDungeonRulesConnectionDrawingPolicy::DrawPreviewConnector(const FGeometry&
 	UEdGraphPin* OutputPin = (Pin->Direction == EGPD_Output) ? Pin : nullptr;
 	DetermineWiringStyle(OutputPin, InputPin, /*inout*/ Params);
 
-	const FVector2D OutputPoint = (OutputPin) ? FGeometryHelper::FindClosestPointOnGeom(PinGeometry, EndPoint) : StartPoint;
-	const FVector2D InputPoint = (InputPin) ? FGeometryHelper::FindClosestPointOnGeom(PinGeometry, StartPoint) : EndPoint;
+	const FVector2D OutputPoint = (OutputPin) ? Internal_FindLineAnchorPoint(EndPoint, PinGeometry, OutputPin) : StartPoint;
+	const FVector2D InputPoint = (InputPin) ? Internal_FindLineAnchorPoint(StartPoint, PinGeometry, InputPin) : EndPoint;
 
 	Params.bUserFlag2 = false; // bUserFlag2 is used to indicate whether the drawn arrow is a preview transition (the temporary transition when creating or relinking).
 	DrawSplineWithArrow(OutputPoint, InputPoint, Params);
@@ -282,6 +283,76 @@ void FDungeonRulesConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVec
 	);
 }
 
+struct FDungeonGeometryHelper
+{
+	static void ConvertToRotatedPoints(const FGeometry& Geom, TArray<FVector2D>& Points, float AngleInRadian)
+	{
+		const FVector2D Size = Geom.GetDrawSize();
+		const FVector2D Location = FVector2D(Geom.AbsolutePosition);
+		const FVector2D Center = Location + 0.5 * Size;
+		const FVector2D LocalLocation = Location - Center;
+		const FVector2D Rotation = FVector2D(cos(AngleInRadian), sin(AngleInRadian));
+		const FVector2D LocalPoints[4] = {
+			FVector2D(0.0f, 0.0f),
+			FVector2D(0.0f, Size.Y),
+			FVector2D(Size.X, Size.Y),
+			FVector2D(Size.X, 0.0f)
+		};
+
+		int32 Index = Points.AddUninitialized(4);
+		for (int32 i = 0; i < 4; ++i)
+		{
+			FVector2D CurrentLocation = LocalLocation + LocalPoints[i];
+			Points[Index++] = Center + FVector2D(
+				CurrentLocation.X * Rotation.X - CurrentLocation.Y * Rotation.Y,
+				CurrentLocation.X * Rotation.Y + CurrentLocation.Y * Rotation.X);
+		}
+	}
+
+	static FVector2D FindClosestPointOnRotatedGeom(const FGeometry& Geom, const FVector2D& TestPoint, float AngleInRadian)
+	{
+		TArray<FVector2D> Points;
+		ConvertToRotatedPoints(Geom, Points, AngleInRadian);
+
+		float BestDistanceSquared = MAX_FLT;
+		FVector2D BestPoint;
+		for (int32 i = 0; i < Points.Num(); ++i)
+		{
+			const FVector2D Candidate = FGeometryHelper::FindClosestPointOnLine(Points[i], Points[(i + 1) % Points.Num()], TestPoint);
+			const float CandidateDistanceSquared = (Candidate - TestPoint).SizeSquared();
+			if (CandidateDistanceSquared < BestDistanceSquared)
+			{
+				BestPoint = Candidate;
+				BestDistanceSquared = CandidateDistanceSquared;
+			}
+		}
+
+		return BestPoint;
+	}
+};
+
+FVector2D FDungeonRulesConnectionDrawingPolicy::Internal_FindLineAnchorPoint(const FVector2D& SeedPoint, const FGeometry& Geom, const UEdGraphPin* Pin) const
+{
+	if (Pin)
+	{
+		const URuleConduitNode* Conduit = Cast<URuleConduitNode>(Pin->GetOwningNode());
+		if (!Conduit)
+		{
+			if (const URuleTransitionNode* Transition = Cast<URuleTransitionNode>(Pin->GetOwningNode()))
+			{
+				Conduit = Cast<URuleConduitNode>((Pin->Direction == EGPD_Input) ? Transition->GetNextState() : Transition->GetPreviousState());
+			}
+		}
+
+		if (Conduit)
+		{
+			return FDungeonGeometryHelper::FindClosestPointOnRotatedGeom(Geom, SeedPoint, FMath::DegreesToRadians(-45.0f));
+		}
+	}
+
+	return FGeometryHelper::FindClosestPointOnGeom(Geom, SeedPoint);
+}
+
 void FDungeonRulesConnectionDrawingPolicy::DrawCircle(const FVector2D& Center, float Radius, const FLinearColor& Color, const int NumLineSegments)
 {
 	TempPoints.Empty();
@@ -313,10 +384,10 @@ void FDungeonRulesConnectionDrawingPolicy::DrawSplineWithArrow(const FGeometry& 
 	const FVector2D StartCenter = FGeometryHelper::CenterOf(StartGeom);
 	const FVector2D EndCenter = FGeometryHelper::CenterOf(EndGeom);
 	const FVector2D SeedPoint = (StartCenter + EndCenter) * 0.5f;
-	
+
 	// Find the (approximate) closest points between the two boxes
-	const FVector2D StartAnchorPoint = FGeometryHelper::FindClosestPointOnGeom(StartGeom, SeedPoint);
-	const FVector2D EndAnchorPoint = FGeometryHelper::FindClosestPointOnGeom(EndGeom, SeedPoint);
+	const FVector2D StartAnchorPoint = Internal_FindLineAnchorPoint(SeedPoint, StartGeom, Params.AssociatedPin1);
+	const FVector2D EndAnchorPoint = Internal_FindLineAnchorPoint(SeedPoint, EndGeom, Params.AssociatedPin2);
 
 	DrawSplineWithArrow(StartAnchorPoint, EndAnchorPoint, Params);
 }

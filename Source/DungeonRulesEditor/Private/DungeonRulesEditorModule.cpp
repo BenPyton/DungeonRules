@@ -31,6 +31,7 @@
 #include "Factories/DungeonRulesVisualFactories.h"
 #include "DetailCustomizations/DungeonRuleAliasNodeDetails.h"
 #include "Nodes/RuleAliasNode.h"
+#include "Interfaces/IPluginManager.h"
 
 #define LOCTEXT_NAMESPACE "FDungeonRulesEditorModule"
 
@@ -39,6 +40,8 @@
 
 #define UNREGISTER_CUSTOM_CLASS_DETAILS(TYPE)\
 	PropertyModule.UnregisterCustomClassLayout(TYPE::StaticClass()->GetFName());
+
+#define IMAGE_BRUSH( RelativePath, ... ) FSlateImageBrush( StyleSet->RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
 
 void FDungeonRulesEditorModule::StartupModule()
 {
@@ -62,6 +65,23 @@ void FDungeonRulesEditorModule::StartupModule()
 		REGISTER_CUSTOM_CLASS_DETAILS(URuleAliasNode, FDungeonRuleAliasNodeDetails);
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
+
+	// Register slate style set
+	{
+		StyleSet = MakeShareable(new FSlateStyleSet("DungeonRulesStyle"));
+		FString ContentDir = IPluginManager::Get().FindPlugin("ProceduralDungeon")->GetBaseDir();
+		StyleSet->SetContentRoot(ContentDir);
+
+		const FVector2D Icon20x20(20.0f, 20.0f);
+		const FVector2D Icon40x40(40.0f, 40.0f);
+
+		StyleSet->Set("DungeonRules.ConduitNode.Body", new IMAGE_BRUSH(TEXT("Resources/ConduitNode_body"), Icon40x40));
+		StyleSet->Set("DungeonRules.ConduitNode.Shadow", new IMAGE_BRUSH(TEXT("Resources/ConduitNode_shadow"), Icon40x40));
+		StyleSet->Set("DungeonRules.ConduitNode.ShadowSelected", new IMAGE_BRUSH(TEXT("Resources/ConduitNode_shadow_selected"), Icon40x40));
+		StyleSet->Set("DungeonRules.ConduitNode.Pin.Hovered", new IMAGE_BRUSH(TEXT("Resources/ConduitNode_pin_hovercue"), Icon40x40));
+
+		FSlateStyleRegistry::RegisterSlateStyle(*StyleSet);
+	}
 }
 
 void FDungeonRulesEditorModule::ShutdownModule()
@@ -73,11 +93,16 @@ void FDungeonRulesEditorModule::ShutdownModule()
 		FEdGraphUtilities::UnregisterVisualPinConnectionFactory(DungeonRulesPinConnectionFactory);
 	}
 
-	// Unreagister detail customizations
+	// Unregister detail customizations
 	{
 		auto& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 		UNREGISTER_CUSTOM_CLASS_DETAILS(URuleAliasNode);
 		PropertyModule.NotifyCustomizationModuleChanged();
+	}
+
+	// Unregister slate style set
+	{
+		FSlateStyleRegistry::UnRegisterSlateStyle(*StyleSet);
 	}
 
 	DungeonEd_LogInfo("DungeonRulesEditor module Shutdown");

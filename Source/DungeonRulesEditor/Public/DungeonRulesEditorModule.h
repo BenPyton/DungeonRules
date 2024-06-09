@@ -44,4 +44,5 @@ private:
 	TSharedPtr<FDungeonRulesNodeFactory> DungeonRulesNodeFactory;
 	TSharedPtr<FDungeonRulesPinFactory> DungeonRulesPinFactory;
 	TSharedPtr<FDungeonRulesPinConnectionFactory> DungeonRulesPinConnectionFactory;
+	TSharedPtr<FSlateStyleSet> StyleSet;
 };

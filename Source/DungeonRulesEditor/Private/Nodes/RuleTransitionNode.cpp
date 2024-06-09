@@ -77,7 +77,10 @@ FString URuleTransitionNode::GetStateName() const
 
 TArray<FName> URuleTransitionNode::GetPropertyNamesToEdit() const
 {
-	return {GET_MEMBER_NAME_CHECKED(UDungeonRuleTransition, Condition)};
+	return {
+		GET_MEMBER_NAME_CHECKED(UDungeonRuleTransition, PriorityOrder),
+		GET_MEMBER_NAME_CHECKED(UDungeonRuleTransition, Condition)
+	};
 }
 
 URuleNodeBase* URuleTransitionNode::GetPreviousState() const

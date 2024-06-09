@@ -323,13 +323,11 @@ void UDungeonRulesSchema::GetGraphContextActions(FGraphContextMenuBuilder& Conte
 		Action->NodeTemplate = NewObject<URuleAliasNode>(ContextMenuBuilder.OwnerOfTemporaries);
 	}
 
-#if false // TODO: conduit nodes
 	// Add conduit node
 	{
 		TSharedPtr<FDungeonRulesGraphSchemaAction_NewStateNode> Action = AddNewStateNodeAction(ContextMenuBuilder, FText::GetEmpty(), LOCTEXT("AddConduit", "Add Conduit"), LOCTEXT("AddConduitTooltip", "A new conduit state"));
 		Action->NodeTemplate = NewObject<URuleConduitNode>(ContextMenuBuilder.OwnerOfTemporaries);
 	}
-#endif
 
 	// Entry point (only if doesn't already exist)
 	{

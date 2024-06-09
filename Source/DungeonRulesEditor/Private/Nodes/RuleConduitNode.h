@@ -19,13 +19,12 @@ public:
 
 	//~ Begin UEdGraphNode Interface
 	virtual void AllocateDefaultPins() override;
-	virtual void AutowireNewNode(UEdGraphPin* FromPin) override;
-	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 	virtual FText GetTooltipText() const override;
 	virtual bool CanDuplicateNode() const override { return true; }
 	//~ End UEdGraphNode Interface
 
 	//~ Begin UDungeonRuleNodeBase Interface
+	virtual const UClass* GetInstanceClass() const override;
 	virtual UEdGraphPin* GetInputPin() const override;
 	virtual UEdGraphPin* GetOutputPin() const override;
 	virtual FString GetStateName() const override;

@@ -53,6 +53,7 @@ public:
 
 protected:
 	void Internal_DrawLineWithArrow(const FVector2D& StartAnchorPoint, const FVector2D& EndAnchorPoint, const FConnectionParams& Params);
+	FVector2D Internal_FindLineAnchorPoint(const FVector2D& SeedPoint, const FGeometry& Geom, const UEdGraphPin* Pin) const;
 
 	// Draw line-based circle (no solid filling)
 	void DrawCircle(const FVector2D& Center, float Radius, const FLinearColor& Color, const int NumLineSegments);

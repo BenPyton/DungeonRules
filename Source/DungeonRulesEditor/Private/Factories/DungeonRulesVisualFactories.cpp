@@ -16,6 +16,7 @@
 #include "NodeSlates/SGraphNodeDungeonRuleEntry.h"
 #include "NodeSlates/SGraphNodeDungeonRuleExit.h"
 #include "NodeSlates/SGraphNodeDungeonRuleTransition.h"
+#include "NodeSlates/SGraphNodeDungeonRuleConduit.h"
 #include "EdGraph/EdGraphNode.h"
 #include "EdGraph/EdGraphPin.h"
 #include "EdGraph/EdGraphSchema.h"

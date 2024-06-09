@@ -6,6 +6,7 @@
 #include "Kismet2/Kismet2NameValidators.h"
 #include "Kismet2/CompilerResultsLog.h"
 #include "DungeonRulesEdTypes.h"
+#include "DungeonRules.h"
 
 #define LOCTEXT_NAMESPACE "RuleConduitNode"
 
@@ -15,7 +16,7 @@
 URuleConduitNode::URuleConduitNode()
 	: Super()
 {
-	bCanRenameNode = true;
+	bCanRenameNode = false;
 }
 
 void URuleConduitNode::AllocateDefaultPins()
@@ -24,27 +25,28 @@ void URuleConduitNode::AllocateDefaultPins()
 	CreatePin(EGPD_Output, DungeonRulesPinCategory::Transition, TEXT("Out"));
 }
 
-void URuleConduitNode::AutowireNewNode(UEdGraphPin* FromPin)
-{
-	Super::AutowireNewNode(FromPin);
-
-	if (FromPin)
-	{
-		if (GetSchema()->TryCreateConnection(FromPin, GetInputPin()))
-		{
-			FromPin->GetOwningNode()->NodeConnectionListChanged();
-		}
-	}
-}
-
-FText URuleConduitNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
-{
-	return FText::FromString(GetStateName());
-}
-
 FText URuleConduitNode::GetTooltipText() const
 {
-	return LOCTEXT("ConduitNodeTooltip", "This is a conduit, which allows specification of a predicate condition for an entire group of transitions");
+	const UEdGraphPin* Input = GetInputPin();
+	if (Input->LinkedTo.Num() <= 0)
+		return LOCTEXT("ConduitNodeTooltip_NoInput", "No input. This path will not be reached.");
+
+	const UEdGraphPin* Output = GetOutputPin();
+	if (Output->LinkedTo.Num() <= 0)
+		return LOCTEXT("ConduitNodeTooltip_NoOutput", "No output. This path is a dead end.");
+
+	FText TextOne = LOCTEXT("ConduitNodeTooltip_OneConnection", "One");
+	FText TextMany = LOCTEXT("ConduitNodeTooltip_ManyConnections", "Many");
+
+	const FText& InputConnections = (Input->LinkedTo.Num() == 1) ? TextOne : TextMany;
+	const FText& OutputConnections = (Output->LinkedTo.Num() == 1) ? TextOne : TextMany;
+
+	return FText::Format(LOCTEXT("ConduitNodeTooltip", "{0} to {1} conduit."), InputConnections, OutputConnections);
+}
+
+const UClass* URuleConduitNode::GetInstanceClass() const
+{
+	return URuleConduit::StaticClass();
 }
 
 UEdGraphPin* URuleConduitNode::GetInputPin() const
@@ -59,7 +61,7 @@ UEdGraphPin* URuleConduitNode::GetOutputPin() const
 
 FString URuleConduitNode::GetStateName() const
 {
-	return TEXT("(null)");
+	return GetDesiredNewNodeName();
 }
 
 FString URuleConduitNode::GetDesiredNewNodeName() const

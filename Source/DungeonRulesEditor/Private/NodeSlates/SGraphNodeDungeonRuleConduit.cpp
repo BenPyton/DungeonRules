@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "SGraphNodeDungeonRule.h"
+#include "SGraphNodeDungeonRuleConduit.h"
 
 #include "Nodes/RuleConduitNode.h"
 #include "Nodes/RuleNodeBase.h"
@@ -40,6 +40,7 @@
 #include "Widgets/SToolTip.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "Widgets/Text/STextBlock.h"
+#include "Styling/SlateStyleRegistry.h"
 
 class SWidget;
 class UEdGraphSchema;
@@ -52,22 +53,23 @@ struct FSlateBrush;
 /////////////////////////////////////////////////////
 // SStateMachineOutputPin
 
-class SStateMachineOutputPin : public SGraphPin
+class SConduitOutputPin : public SGraphPin
 {
 public:
-	SLATE_BEGIN_ARGS(SStateMachineOutputPin){}
+	SLATE_BEGIN_ARGS(SConduitOutputPin){}
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs, UEdGraphPin* InPin);
 protected:
 	// Begin SGraphPin interface
 	virtual TSharedRef<SWidget>	GetDefaultValueWidget() override;
+	virtual FSlateColor GetPinColor() const override;
 	// End SGraphPin interface
 
 	const FSlateBrush* GetPinBorder() const;
 };
 
-void SStateMachineOutputPin::Construct(const FArguments& InArgs, UEdGraphPin* InPin)
+void SConduitOutputPin::Construct(const FArguments& InArgs, UEdGraphPin* InPin)
 {
 	this->SetCursor( EMouseCursor::Default );
 
@@ -81,29 +83,43 @@ void SStateMachineOutputPin::Construct(const FArguments& InArgs, UEdGraphPin* In
 
 	// Set up a hover for pins that is tinted the color of the pin.
 	SBorder::Construct( SBorder::FArguments()
-		.BorderImage( this, &SStateMachineOutputPin::GetPinBorder )
-		.BorderBackgroundColor( this, &SStateMachineOutputPin::GetPinColor )
-		.OnMouseButtonDown( this, &SStateMachineOutputPin::OnPinMouseDown )
-		.Cursor( this, &SStateMachineOutputPin::GetPinCursor )
+		.BorderImage( this, &SConduitOutputPin::GetPinBorder )
+		.BorderBackgroundColor( this, &SConduitOutputPin::GetPinColor )
+		.OnMouseButtonDown( this, &SConduitOutputPin::OnPinMouseDown )
+		.Cursor( this, &SConduitOutputPin::GetPinCursor )
 	);
 }
 
-TSharedRef<SWidget>	SStateMachineOutputPin::GetDefaultValueWidget()
+TSharedRef<SWidget>	SConduitOutputPin::GetDefaultValueWidget()
 {
 	return SNew(STextBlock);
 }
 
-const FSlateBrush* SStateMachineOutputPin::GetPinBorder() const
+FSlateColor SConduitOutputPin::GetPinColor() const
 {
+	return FLinearColor(0.8f, 0.8f, 0.8f);
+}
+
+const FSlateBrush* SConduitOutputPin::GetPinBorder() const
+{
+	const ISlateStyle* DungeonRulesStyle = FSlateStyleRegistry::FindSlateStyle("DungeonRulesStyle");
+	if (!DungeonRulesStyle)
+	{
+		UE_LOG(LogTemp, Error, TEXT("DungeonRulesStyle style set was not found!"));
+	}
+
 	return ( IsHovered() )
-		? FAppStyle::GetBrush( TEXT("Graph.StateNode.Pin.BackgroundHovered") )
-		: FAppStyle::GetBrush( TEXT("Graph.StateNode.Pin.Background") );
+		? DungeonRulesStyle->GetBrush(TEXT("DungeonRules.ConduitNode.Pin.Hovered"))
+		: FAppStyle::GetBrush(TEXT("NoBrush"));
+	//return ( IsHovered() )
+	//	? FAppStyle::GetBrush( TEXT("Graph.StateNode.Pin.BackgroundHovered") )
+	//	: FAppStyle::GetBrush( TEXT("Graph.StateNode.Pin.Background") );
 }
 
 /////////////////////////////////////////////////////
 // SGraphNodeDungeonRule
 
-void SGraphNodeDungeonRule::Construct(const FArguments& InArgs, URuleNodeBase* InNode)
+void SGraphNodeDungeonRuleConduit::Construct(const FArguments& InArgs, URuleNodeBase* InNode)
 {
 	this->GraphNode = InNode;
 
@@ -112,7 +128,8 @@ void SGraphNodeDungeonRule::Construct(const FArguments& InArgs, URuleNodeBase* I
 	this->UpdateGraphNode();
 }
 
-void SGraphNodeDungeonRule::GetStateInfoPopup(UEdGraphNode* GraphNode, TArray<FGraphInformationPopupInfo>& Popups)
+#if false
+void SGraphNodeDungeonRuleConduit::GetStateInfoPopup(UEdGraphNode* GraphNode, TArray<FGraphInformationPopupInfo>& Popups)
 {
 	UAnimBlueprint* AnimBlueprint = Cast<UAnimBlueprint>(FBlueprintEditorUtils::FindBlueprintForNode(GraphNode));
 	if(AnimBlueprint)
@@ -159,12 +176,13 @@ void SGraphNodeDungeonRule::GetStateInfoPopup(UEdGraphNode* GraphNode, TArray<FG
 	}
 }
 
-void SGraphNodeDungeonRule::GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const
+void SGraphNodeDungeonRuleConduit::GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const
 {
 	GetStateInfoPopup(GraphNode, Popups);
 }
+#endif
 
-FSlateColor SGraphNodeDungeonRule::GetBorderBackgroundColor() const
+FSlateColor SGraphNodeDungeonRuleConduit::GetBorderBackgroundColor() const
 {
 	FLinearColor InactiveStateColor(0.08f, 0.08f, 0.08f);
 	FLinearColor ActiveStateColorDim(0.4f, 0.3f, 0.15f);
@@ -173,8 +191,9 @@ FSlateColor SGraphNodeDungeonRule::GetBorderBackgroundColor() const
 	return GetBorderBackgroundColor_Internal(InactiveStateColor, ActiveStateColorDim, ActiveStateColorBright);
 }
 
-FSlateColor SGraphNodeDungeonRule::GetBorderBackgroundColor_Internal(FLinearColor InactiveStateColor, FLinearColor ActiveStateColorDim, FLinearColor ActiveStateColorBright) const
+FSlateColor SGraphNodeDungeonRuleConduit::GetBorderBackgroundColor_Internal(FLinearColor InactiveStateColor, FLinearColor ActiveStateColorDim, FLinearColor ActiveStateColorBright) const
 {
+#if false // Blueprint
 	UAnimBlueprint* AnimBlueprint = Cast<UAnimBlueprint>(FBlueprintEditorUtils::FindBlueprintForNode(GraphNode));
 	if(AnimBlueprint)
 	{
@@ -202,11 +221,12 @@ FSlateColor SGraphNodeDungeonRule::GetBorderBackgroundColor_Internal(FLinearColo
 			}
 		}
 	}
+#endif
 
 	return InactiveStateColor;
 }
 
-void SGraphNodeDungeonRule::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+void SGraphNodeDungeonRuleConduit::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	// Add pins to the hover set so outgoing transitions arrows remains highlighted while the mouse is over the state node
 	if (const URuleNodeBase* StateNode = Cast<URuleNodeBase>(GraphNode))
@@ -226,7 +246,7 @@ void SGraphNodeDungeonRule::OnMouseEnter(const FGeometry& MyGeometry, const FPoi
 	SGraphNode::OnMouseEnter(MyGeometry, MouseEvent);
 }
 
-void SGraphNodeDungeonRule::OnMouseLeave(const FPointerEvent& MouseEvent)
+void SGraphNodeDungeonRuleConduit::OnMouseLeave(const FPointerEvent& MouseEvent)
 {
 	// Remove manually added pins from the hover set
 	if (const URuleNodeBase* StateNode = Cast<URuleNodeBase>(GraphNode))
@@ -246,7 +266,20 @@ void SGraphNodeDungeonRule::OnMouseLeave(const FPointerEvent& MouseEvent)
 	SGraphNode::OnMouseLeave(MouseEvent);
 }
 
-void SGraphNodeDungeonRule::UpdateGraphNode()
+const FSlateBrush* SGraphNodeDungeonRuleConduit::GetShadowBrush(bool bSelected) const
+{
+	const ISlateStyle* DungeonRulesStyle = FSlateStyleRegistry::FindSlateStyle("DungeonRulesStyle");
+	if (!DungeonRulesStyle)
+	{
+		UE_LOG(LogTemp, Error, TEXT("DungeonRulesStyle style set was not found!"));
+	}
+
+	return (bSelected)
+		? DungeonRulesStyle->GetBrush(TEXT("DungeonRules.ConduitNode.ShadowSelected"))
+		: DungeonRulesStyle->GetBrush(TEXT("DungeonRules.ConduitNode.Shadow"));
+}
+
+void SGraphNodeDungeonRuleConduit::UpdateGraphNode()
 {
 	InputPins.Empty();
 	OutputPins.Empty();
@@ -255,26 +288,31 @@ void SGraphNodeDungeonRule::UpdateGraphNode()
 	RightNodeBox.Reset();
 	LeftNodeBox.Reset();
 
-	const FSlateBrush* NodeTypeIcon = GetNameIcon();
+	const ISlateStyle* DungeonRulesStyle = FSlateStyleRegistry::FindSlateStyle("DungeonRulesStyle");
+	if (!DungeonRulesStyle)
+	{
+		UE_LOG(LogTemp, Error, TEXT("DungeonRulesStyle style set was not found!"));
+	}
 
-	FLinearColor TitleShadowColor(0.6f, 0.6f, 0.6f);
-	TSharedPtr<SErrorText> ErrorText;
-	NodeTitle = SNew(SNodeTitle, GraphNode);
+	FSlateRenderTransform Rotated45Degrees(FQuat2f(FMath::DegreesToRadians(-45.0f)));
+	FVector2D CenteredPivot = FVector2D(0.5, 0.5);
 
 	this->ContentScale.Bind( this, &SGraphNode::GetContentScale );
+	this->SetRenderTransform(Rotated45Degrees);
+	this->SetRenderTransformPivot(CenteredPivot);
 	this->GetOrAddSlot( ENodeZone::Center )
 		.HAlign(HAlign_Center)
 		.VAlign(VAlign_Center)
 		[
 			SNew(SBorder)
-			.BorderImage( FAppStyle::GetBrush( "Graph.StateNode.Body" ) )
+			.BorderImage(FAppStyle::GetBrush("Graph.StateNode.Body"))
 			.Padding(0)
-			.BorderBackgroundColor( this, &SGraphNodeDungeonRule::GetBorderBackgroundColor )
+			.BorderBackgroundColor(this, &SGraphNodeDungeonRuleConduit::GetBorderBackgroundColor)
 			[
 				SNew(SOverlay)
 
 				// PIN AREA
-				+SOverlay::Slot()
+				+ SOverlay::Slot()
 				.HAlign(HAlign_Fill)
 				.VAlign(VAlign_Fill)
 				[
@@ -282,83 +320,38 @@ void SGraphNodeDungeonRule::UpdateGraphNode()
 				]
 
 				// STATE NAME AREA
-				+SOverlay::Slot()
+				+ SOverlay::Slot()
 				.HAlign(HAlign_Center)
 				.VAlign(VAlign_Center)
 				.Padding(10.0f)
 				[
-					SNew(SBorder)
-					.BorderImage( FAppStyle::GetBrush("Graph.StateNode.ColorSpill") )
-					.BorderBackgroundColor( TitleShadowColor )
-					.HAlign(HAlign_Center)
-					.VAlign(VAlign_Center)
-					.Visibility(EVisibility::SelfHitTestInvisible)
-					[
-						SNew(SHorizontalBox)
-						+SHorizontalBox::Slot()
-						.AutoWidth()
-						[
-							// POPUP ERROR MESSAGE
-							SAssignNew(ErrorText, SErrorText )
-							.BackgroundColor( this, &SGraphNodeDungeonRule::GetErrorColor )
-							.ToolTipText( this, &SGraphNodeDungeonRule::GetErrorMsgToolTip )
-						]
-#if false // TODO: should be kept or removed?
-						+SHorizontalBox::Slot()
-						.AutoWidth()
-						.VAlign(VAlign_Center)
-						[
-							SNew(SImage)
-							.Image(NodeTypeIcon)
-						]
-#endif
-						+SHorizontalBox::Slot()
-						.Padding(FMargin(4.0f, 0.0f, 4.0f, 0.0f))
-						[
-							SNew(SVerticalBox)
-							+SVerticalBox::Slot()
-								.AutoHeight()
-							[
-								SAssignNew(InlineEditableText, SInlineEditableTextBlock)
-								.Style(FAppStyle::Get(), "Graph.StateNode.NodeTitleInlineEditableText")
-								.Text(this, &SGraphNodeDungeonRule::GetNodeName)
-								.OnVerifyTextChanged(this, &SGraphNodeDungeonRule::OnVerifyNameTextChanged)
-								.OnTextCommitted(this, &SGraphNodeDungeonRule::OnNameTextCommited)
-								.IsReadOnly(this, &SGraphNodeDungeonRule::IsNameReadOnly)
-								.IsSelected(this, &SGraphNodeDungeonRule::IsSelectedExclusively)
-							]
-							+SVerticalBox::Slot()
-								.AutoHeight()
-							[
-								NodeTitle.ToSharedRef()
-							]
-						]
-					]
+					SNew(SImage)
+					.Image(DungeonRulesStyle->GetBrush("DungeonRules.ConduitNode.Body"))
+						.DesiredSizeOverride(FVector2D(20.0f, 20.0f))
 				]
 			]
 		];
 
-	ErrorReporting = ErrorText;
-	ErrorReporting->SetError(ErrorMsg);
 	CreatePinWidgets();
 }
 
-void SGraphNodeDungeonRule::CreatePinWidgets()
+void SGraphNodeDungeonRuleConduit::CreatePinWidgets()
 {
 	URuleNodeBase* StateNode = CastChecked<URuleNodeBase>(GraphNode);
 
 	UEdGraphPin* CurPin = StateNode->GetOutputPin();
 	if (!CurPin->bHidden)
 	{
-		TSharedPtr<SGraphPin> NewPin = SNew(SStateMachineOutputPin, CurPin);
+		TSharedPtr<SGraphPin> NewPin = SNew(SConduitOutputPin, CurPin);
 
 		this->AddPin(NewPin.ToSharedRef());
 	}
 }
 
-void SGraphNodeDungeonRule::AddPin(const TSharedRef<SGraphPin>& PinToAdd)
+void SGraphNodeDungeonRuleConduit::AddPin(const TSharedRef<SGraphPin>& PinToAdd)
 {
 	PinToAdd->SetOwner( SharedThis(this) );
+	//RightNodeBox->SetRenderOpacity(0.2f);
 	RightNodeBox->AddSlot()
 		.HAlign(HAlign_Fill)
 		.VAlign(VAlign_Fill)
@@ -369,7 +362,7 @@ void SGraphNodeDungeonRule::AddPin(const TSharedRef<SGraphPin>& PinToAdd)
 	OutputPins.Add(PinToAdd);
 }
 
-TSharedPtr<SToolTip> SGraphNodeDungeonRule::GetComplexTooltip()
+TSharedPtr<SToolTip> SGraphNodeDungeonRuleConduit::GetComplexTooltip()
 {
 	URuleNodeBase* StateNode = CastChecked<URuleNodeBase>(GraphNode);
 	FText TooltipDesc = StateNode->GetTooltipText();
@@ -394,23 +387,6 @@ TSharedPtr<SToolTip> SGraphNodeDungeonRule::GetComplexTooltip()
 			]
 #endif
 		];
-}
-
-FText SGraphNodeDungeonRule::GetPreviewCornerText() const
-{
-	URuleNodeBase* StateNode = CastChecked<URuleNodeBase>(GraphNode);
-
-	return FText::Format(NSLOCTEXT("SGraphNodeDungeonRule", "PreviewCornerStateText", "{0} state"), FText::FromString(StateNode->GetStateName()));
-}
-
-const FSlateBrush* SGraphNodeDungeonRule::GetNameIcon() const
-{
-	return FAppStyle::GetBrush( TEXT("Graph.StateNode.Icon") );
-}
-
-FText SGraphNodeDungeonRule::GetNodeName() const
-{
-	return NodeTitle.IsValid() ? NodeTitle->GetHeadTitle() : FText::FromString(TEXT("NULL"));
 }
 
 #undef LOCTEXT_NAMESPACE

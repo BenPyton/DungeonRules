@@ -31,9 +31,26 @@
 
 bool UDungeonRuleTransition::CheckCondition(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
 {
-	if (!IsValid(Condition))
-		return true;
+	UE_LOG(LogTemp, Log, TEXT("[%s] Transition Check Condition"), *GetNameSafe(PreviousRoom));
+	if (const IDungeonConditionProvider* ConditionProvider = Cast<IDungeonConditionProvider>(NextRule.GetObject()))
+	{
+		UE_LOG(LogTemp, Log, TEXT("NextRule has condition"));
+		// If the next state has a condition and is not fulfilled, then we can't go into it.
+		if (!ConditionProvider->CheckCondition(Generator, PreviousRoom))
+		{
+			UE_LOG(LogTemp, Log, TEXT("Condition not valid"));
+			return false;
+		}
+	}
 
+	// If this transition has no condition, then it goes always to the next state.
+	if (!IsValid(Condition))
+	{
+		UE_LOG(LogTemp, Log, TEXT("No condition"));
+		return true;
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("Check Condition from transition"));
 	return Condition->Check(Generator, PreviousRoom);
 }
 
@@ -63,7 +80,8 @@ TOptional<const UDungeonRule*> UDungeonRuleTransition::GetNextRuleFromTransition
 		if (!Transition->CheckCondition(Generator, PreviousRoom))
 			continue;
 
-		NextRule = Transition->NextRule.Get();
+		const IDungeonRuleProvider* RuleProvider = Transition->NextRule.GetInterface();
+		NextRule = RuleProvider ? RuleProvider->GetRule(Generator, PreviousRoom) : nullptr;
 		CurrentPriority = Transition->PriorityOrder;
 	}
 
@@ -92,6 +110,39 @@ void UDungeonRule::Clear()
 }
 
 void UDungeonRule::AddTransition(const UDungeonRuleTransition* Transition)
+{
+	check(Transition);
+	Transitions.AddUnique(Transition);
+}
+#endif
+
+///////////////////////////////////////////////////////////////////
+
+const UDungeonRule* URuleConduit::GetRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
+{
+	auto NextRule = UDungeonRuleTransition::GetNextRuleFromTransitionList(Generator, PreviousRoom, Transitions, this);
+	return NextRule.IsSet() ? NextRule.GetValue() : nullptr;
+}
+
+bool URuleConduit::CheckCondition(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
+{
+	UE_LOG(LogTemp, Log, TEXT("[%s] Conduit Check Condition"), *GetNameSafe(PreviousRoom));
+	// Returns true if at least one output is valid.
+	for (const auto& Transition : Transitions)
+	{
+		if (Transition->CheckCondition(Generator, PreviousRoom))
+			return true;
+	}
+	return false;
+}
+
+#if WITH_EDITOR
+void URuleConduit::Clear()
+{
+	Transitions.Empty();
+}
+
+void URuleConduit::AddTransition(const UDungeonRuleTransition* Transition)
 {
 	check(Transition);
 	Transitions.AddUnique(Transition);
@@ -174,19 +225,31 @@ void UDungeonRules::Clear()
 	FirstRule.Reset();
 	GlobalTransitions.Empty();
 
+	for (URuleConduit* Conduit : Conduits)
+	{
+		Conduit->Clear();
+	}
+
 	for (UDungeonRule* Rule : Rules)
 	{
 		Rule->Clear();
 	}
 
-	Rules.Empty();
 	Transitions.Empty();
+	Conduits.Empty();
+	Rules.Empty();
 }
 
 void UDungeonRules::AddRule(UDungeonRule* Rule)
 {
 	check(Rule);
 	Rules.AddUnique(Rule);
+}
+
+void UDungeonRules::AddConduit(URuleConduit* Conduit)
+{
+	check(Conduit);
+	Conduits.AddUnique(Conduit);
 }
 
 void UDungeonRules::SetFirstRule(UDungeonRule* Rule)
