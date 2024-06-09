@@ -18,18 +18,25 @@
 			"Name": "DungeonRules",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
-			"WhitelistPlatforms": [
+			"PlatformAllowList": [
 				"Win64"
 			]
 		},
-
 		{
 			"Name": "DungeonRulesEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default",
-			"WhitelistPlatforms": [
+			"PlatformAllowList": [
 				"Win64"
 			]
+		}
+	],
+	"Installed": false,
+	"EnabledByDefault": true,
+	"Plugins": [
+		{
+			"Name": "ProceduralDungeon",
+			"Enabled": true
 		}
 	]
 }
