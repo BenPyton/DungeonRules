@@ -27,6 +27,8 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "ProceduralDungeonTypes.h"
+#include "Interfaces/NodeInterfaces.h"
+#include "Interfaces/DungeonInterfaces.h"
 #include "DungeonRules.generated.h"
 
 class UDungeonRoomChooser;
@@ -34,67 +36,6 @@ class URuleTransitionCondition;
 class ADungeonGenerator;
 class URoomData;
 class UDungeonRule;
-
-UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
-class UNodeName : public UInterface
-{
-	GENERATED_BODY()
-};
-
-class DUNGEONRULES_API INodeName
-{
-	GENERATED_BODY()
-public:
-	virtual FString GetNodeName() const = 0;
-	virtual void OnNodeRename(FString NewName) = 0;
-};
-
-/////////////////////////////////////////
-
-UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
-class UNodeTooltip : public UInterface
-{
-	GENERATED_BODY()
-};
-
-class DUNGEONRULES_API INodeTooltip
-{
-	GENERATED_BODY()
-public:
-	virtual FText GetNodeTooltip() const = 0;
-};
-
-/////////////////////////////////////////
-
-UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
-class UDungeonRuleProvider : public UInterface
-{
-	GENERATED_BODY()
-};
-
-class DUNGEONRULES_API IDungeonRuleProvider
-{
-	GENERATED_BODY()
-public:
-	virtual const UDungeonRule* GetRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const = 0;
-};
-
-/////////////////////////////////////////
-
-UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
-class UDungeonConditionProvider : public UInterface
-{
-	GENERATED_BODY()
-};
-
-class DUNGEONRULES_API IDungeonConditionProvider
-{
-	GENERATED_BODY()
-public:
-	virtual bool CheckCondition(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const = 0;
-};
-
-/////////////////////////////////////////
 
 UCLASS()
 class DUNGEONRULES_API UDungeonRuleTransition : public UObject, public INodeTooltip
@@ -227,6 +168,7 @@ private:
 	UPROPERTY()
 	TArray<TObjectPtr<UDungeonRule>> Rules;
 
+	// TODO: maybe merge conduits with rules using a common interface? (something like a 'ITransitionContainer'?)
 	UPROPERTY()
 	TArray<TObjectPtr<URuleConduit>> Conduits;
 
