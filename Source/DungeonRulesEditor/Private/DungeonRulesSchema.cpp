@@ -132,6 +132,7 @@ void UDungeonRulesSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 
 	FGraphNodeCreator<URuleExitNode> ExitNodeCreator(Graph);
 	URuleExitNode* ExitNode = ExitNodeCreator.CreateNode();
+	ExitNode->NodePosX = 500;
 	ExitNodeCreator.Finalize();
 	SetNodeMetaData(ExitNode, FNodeMetadata::DefaultGraphNode);
 
