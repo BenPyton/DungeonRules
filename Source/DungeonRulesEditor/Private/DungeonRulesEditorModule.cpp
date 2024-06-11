@@ -5,13 +5,11 @@
 
 #include "DungeonRulesEditorModule.h"
 #include "DungeonRulesEdLog.h"
-#include "DungeonRulesEdTypes.h"
-#include "Styling/SlateStyle.h"
-#include "Styling/SlateStyleRegistry.h"
-#include "EdGraphUtilities.h"
+#include "Nodes/RuleAliasNode.h"
 #include "Factories/DungeonRulesVisualFactories.h"
 #include "DetailCustomizations/DungeonRuleAliasNodeDetails.h"
-#include "Nodes/RuleAliasNode.h"
+#include "EdGraphUtilities.h"
+#include "Styling/SlateStyleRegistry.h"
 #include "Interfaces/IPluginManager.h"
 
 #define LOCTEXT_NAMESPACE "FDungeonRulesEditorModule"

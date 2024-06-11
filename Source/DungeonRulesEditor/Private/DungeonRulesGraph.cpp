@@ -4,12 +4,11 @@
 // (See accompanying file LICENSE or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 #include "DungeonRulesGraph.h"
-#include "Nodes/RuleNodeBase.h"
-#include "Nodes/RuleNode.h"
-#include "Nodes/RuleTransitionNode.h"
-#include "Nodes/RuleEntryNode.h"
 #include "Nodes/RuleAliasNode.h"
 #include "Nodes/RuleConduitNode.h"
+#include "Nodes/RuleEntryNode.h"
+#include "Nodes/RuleNode.h"
+#include "Nodes/RuleTransitionNode.h"
 #include "DungeonRules.h"
 #include "DUngeonRulesEdLog.h"
 

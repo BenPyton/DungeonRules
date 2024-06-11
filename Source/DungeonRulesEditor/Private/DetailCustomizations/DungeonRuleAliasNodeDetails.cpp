@@ -1,10 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "DungeonRuleAliasNodeDetails.h"
-
 #include "Nodes/RuleAliasNode.h"
 #include "Nodes/RuleNode.h"
-#include "Nodes/RuleNodeBase.h"
 #include "DungeonRulesGraph.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"

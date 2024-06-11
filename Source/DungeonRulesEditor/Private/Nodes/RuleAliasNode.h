@@ -5,19 +5,8 @@
 
 #pragma once
 
-#include "RuleNodeBase.h"
-#include "Animation/AnimTypes.h"
-#include "Containers/Set.h"
-#include "Containers/UnrealString.h"
 #include "CoreMinimal.h"
-#include "EdGraph/EdGraphNode.h"
-#include "Internationalization/Text.h"
-#include "Misc/AssertionMacros.h"
-#include "UObject/NameTypes.h"
-#include "UObject/ObjectMacros.h"
-#include "UObject/UObjectGlobals.h"
-#include "UObject/WeakObjectPtrTemplates.h"
-
+#include "RuleNodeBase.h"
 #include "RuleAliasNode.generated.h"
 
 class FArchive;

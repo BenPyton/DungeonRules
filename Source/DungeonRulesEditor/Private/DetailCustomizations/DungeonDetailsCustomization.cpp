@@ -1,14 +1,11 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "DungeonDetailsCustomization.h"
-#include "DetailCategoryBuilder.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
-#include "EdGraph/EdGraphNode.h"
 #include "EdGraphNode_Comment.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SMultiLineEditableTextBox.h"
-#include "DungeonRules.h"
 #include "Nodes/RuleNodeBase.h"
 
 #define LOCTEXT_NAMESPACE "DungeonDetailsCustomization"

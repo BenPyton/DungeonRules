@@ -4,13 +4,9 @@
 // (See accompanying file LICENSE or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 #include "RuleNode.h"
-#include "Kismet2/BlueprintEditorUtils.h"
 #include "RuleTransitionNode.h"
-#include "DungeonRulesGraph.h"
-#include "DungeonRules.h"
-#include "Kismet2/Kismet2NameValidators.h"
 #include "DungeonRulesEdTypes.h"
-#include "DungeonRulesEdLog.h"
+#include "DungeonRules.h"
 
 #define LOCTEXT_NAMESPACE "DungeonRuleNode"
 

@@ -11,6 +11,8 @@
 #include "GraphEditor.h"
 #include "IDetailsView.h"
 
+class UDungeonRules;
+
 class FDungeonRulesToolkit : public FAssetEditorToolkit, public FEditorUndoClient, public FNotifyHook
 {
 public:
@@ -90,7 +92,7 @@ private:
 	static const FName DetailsTabId;
 	static const FName GraphTabId;
 
-	class UDungeonRules* DungeonRules;
+	UDungeonRules* DungeonRules;
 	TSharedPtr<SGraphEditor> EdGraphEditor;
 	TSharedPtr<IDetailsView> DetailsWidget;
 

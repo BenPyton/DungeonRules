@@ -7,8 +7,6 @@
 
 #include "CoreMinimal.h"
 #include "RuleNodeBase.h"
-#include "Internationalization/Text.h"
-#include "UObject/UObjectGlobals.h"
 #include "RuleExitNode.generated.h"
 
 class UObject;

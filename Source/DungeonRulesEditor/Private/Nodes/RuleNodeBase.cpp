@@ -9,12 +9,8 @@
 
 #include "RuleNodeBase.h"
 #include "UObject/FrameworkObjectVersion.h"
-#include "Animation/AnimBlueprint.h"
-#include "Animation/AnimClassInterface.h"
-#include "Kismet2/BlueprintEditorUtils.h"
 #include "DungeonRulesGraph.h"
 #include "DungeonRulesSchema.h"
-#include "Kismet2/Kismet2NameValidators.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "RuleTransitionNode.h"
 #include "DungeonRules.h"

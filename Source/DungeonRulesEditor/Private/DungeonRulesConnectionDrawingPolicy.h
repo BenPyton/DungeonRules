@@ -6,10 +6,6 @@
 #pragma once
 
 #include "ConnectionDrawingPolicy.h"
-#include "Containers/Map.h"
-#include "HAL/Platform.h"
-#include "Math/Vector2D.h"
-#include "Templates/SharedPointer.h"
 
 class FArrangedChildren;
 class FArrangedWidget;

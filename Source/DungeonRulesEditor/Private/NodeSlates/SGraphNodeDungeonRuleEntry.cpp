@@ -5,25 +5,8 @@
 
 
 #include "SGraphNodeDungeonRuleEntry.h"
-
 #include "Nodes/RuleEntryNode.h"
-#include "Delegates/Delegate.h"
-#include "GenericPlatform/ICursor.h"
-#include "HAL/PlatformCrt.h"
-#include "Internationalization/Internationalization.h"
-#include "Layout/Margin.h"
-#include "Math/Color.h"
-#include "Math/Vector2D.h"
-#include "Misc/Attribute.h"
-#include "Misc/Optional.h"
 #include "SGraphPin.h"
-#include "SNodePanel.h"
-#include "SlotBase.h"
-#include "Styling/AppStyle.h"
-#include "Types/SlateEnums.h"
-#include "Widgets/Layout/SBorder.h"
-#include "Widgets/SBoxPanel.h"
-#include "Widgets/SOverlay.h"
 
 /////////////////////////////////////////////////////
 // SGraphNodeDungeonRuleEntry

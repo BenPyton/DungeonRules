@@ -4,22 +4,7 @@
 // (See accompanying file LICENSE or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 #include "RuleAliasNode.h"
-
 #include "RuleNode.h"
-#include "Containers/Array.h"
-#include "EdGraph/EdGraph.h"
-#include "EdGraph/EdGraphPin.h"
-#include "EdGraph/EdGraphSchema.h"
-#include "HAL/Platform.h"
-#include "HAL/PlatformCrt.h"
-#include "Internationalization/Internationalization.h"
-#include "Kismet2/CompilerResultsLog.h"
-#include "Kismet2/Kismet2NameValidators.h"
-#include "Templates/Casts.h"
-#include "Templates/ChooseClass.h"
-#include "Templates/SharedPointer.h"
-#include "UObject/Object.h"
-#include "UObject/WeakObjectPtr.h"
 #include "DungeonRulesEdTypes.h"
 
 class FArchive;

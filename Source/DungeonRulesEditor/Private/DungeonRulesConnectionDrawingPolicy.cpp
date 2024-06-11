@@ -4,30 +4,10 @@
 // (See accompanying file LICENSE or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 #include "DungeonRulesConnectionDrawingPolicy.h"
-
+#include "Nodes/RuleConduitNode.h"
 #include "Nodes/RuleEntryNode.h"
-#include "Nodes/RuleExitNode.h"
-#include "Nodes/RuleNodeBase.h"
 #include "Nodes/RuleTransitionNode.h"
 #include "NodeSlates/SGraphNodeDungeonRuleTransition.h"
-#include "Containers/Set.h"
-#include "EdGraph/EdGraphPin.h"
-#include "Layout/ArrangedChildren.h"
-#include "Layout/ArrangedWidget.h"
-#include "Layout/PaintGeometry.h"
-#include "Math/Color.h"
-#include "Math/UnrealMathSSE.h"
-#include "Misc/Optional.h"
-#include "Rendering/DrawElements.h"
-#include "Rendering/RenderingCommon.h"
-#include "SGraphNode.h"
-#include "SGraphPin.h"
-#include "Styling/SlateBrush.h"
-#include "Templates/Casts.h"
-#include "Math/UnrealMathUtility.h"
-#include "Brushes/SlateRoundedBoxBrush.h"
-#include "Styling/StyleColors.h"
-#include "Nodes/RuleConduitNode.h"
 
 class FSlateRect;
 class SWidget;

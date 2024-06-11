@@ -5,18 +5,7 @@
 
 #pragma once
 
-#include "Containers/Array.h"
-#include "Containers/Map.h"
-#include "Containers/UnrealString.h"
-#include "HAL/Platform.h"
-#include "Internationalization/Text.h"
-#include "Math/Color.h"
-#include "Math/Vector2D.h"
 #include "SGraphNode.h"
-#include "SNodePanel.h"
-#include "Styling/SlateColor.h"
-#include "Templates/SharedPointer.h"
-#include "Widgets/DeclarativeSyntaxSupport.h"
 
 class STextEntryPopup;
 class SToolTip;

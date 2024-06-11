@@ -6,8 +6,6 @@
 #include "AssetDefinition_DungeonRules.h"
 #include "DungeonRules.h"
 #include "Toolkits/DungeonRulesToolkit.h"
-#include "Modules/ModuleManager.h"
-//#include "ProceduralDungeonEditor.h"
 
 #define LOCTEXT_NAMESPACE "ActionTreeEditor"
 

@@ -5,15 +5,10 @@
 
 #pragma once
 
-#include "Containers/Array.h"
-#include "Internationalization/Text.h"
 #include "SGraphNode.h"
-#include "Styling/SlateColor.h"
-#include "Templates/SharedPointer.h"
-#include "Widgets/DeclarativeSyntaxSupport.h"
 
 class SGraphPin;
-class URuleEntryNode;
+class URuleExitNode;
 struct FGraphInformationPopupInfo;
 struct FNodeInfoContext;
 

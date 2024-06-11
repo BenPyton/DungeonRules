@@ -6,8 +6,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/ObjectMacros.h"
-#include "Animation/AnimTypes.h"
 #include "RuleNodeBase.h"
 #include "RuleNode.generated.h"
 

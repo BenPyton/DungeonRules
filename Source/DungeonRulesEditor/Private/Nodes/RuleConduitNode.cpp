@@ -4,10 +4,7 @@
 // (See accompanying file LICENSE or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 #include "RuleConduitNode.h"
-#include "Kismet2/BlueprintEditorUtils.h"
 #include "RuleTransitionNode.h"
-#include "Kismet2/Kismet2NameValidators.h"
-#include "Kismet2/CompilerResultsLog.h"
 #include "DungeonRulesEdTypes.h"
 #include "DungeonRules.h"
 

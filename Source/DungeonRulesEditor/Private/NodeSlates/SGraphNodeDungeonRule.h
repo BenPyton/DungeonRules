@@ -5,13 +5,7 @@
 
 #pragma once
 
-#include "Containers/Array.h"
-#include "Internationalization/Text.h"
-#include "Math/Color.h"
 #include "SGraphNode.h"
-#include "Styling/SlateColor.h"
-#include "Templates/SharedPointer.h"
-#include "Widgets/DeclarativeSyntaxSupport.h"
 
 class SGraphPin;
 class SToolTip;

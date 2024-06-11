@@ -7,13 +7,7 @@
 
 #include "CoreMinimal.h"
 #include "EdGraph/EdGraph.h"
-#include "UObject/ObjectMacros.h"
-#include "UObject/ObjectPtr.h"
-#include "UObject/UObjectGlobals.h"
-
 #include "DungeonRulesGraph.generated.h"
-
-//class UObject;
 
 UCLASS(MinimalAPI)
 class UDungeonRulesGraph : public UEdGraph

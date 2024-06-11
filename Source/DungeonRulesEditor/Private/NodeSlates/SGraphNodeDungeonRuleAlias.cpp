@@ -4,30 +4,7 @@
 // (See accompanying file LICENSE or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 #include "SGraphNodeDungeonRuleAlias.h"
-
 #include "Nodes/RuleAliasNode.h"
-#include "Nodes/RuleNodeBase.h"
-#include "Animation/AnimBlueprint.h"
-#include "Animation/AnimBlueprintGeneratedClass.h"
-#include "Animation/AnimInstance.h"
-#include "DungeonRulesGraph.h"
-#include "SGraphNodeDungeonRule.h"
-#include "SGraphNodeDungeonRuleTransition.h"
-#include "Containers/ContainerAllocationPolicies.h"
-#include "Containers/Map.h"
-#include "Containers/Set.h"
-#include "EdGraph/EdGraphNode.h"
-#include "Engine/Blueprint.h"
-#include "HAL/PlatformCrt.h"
-#include "Internationalization/Internationalization.h"
-#include "Kismet2/BlueprintEditorUtils.h"
-#include "Math/UnrealMathSSE.h"
-#include "Styling/AppStyle.h"
-#include "Templates/Casts.h"
-#include "UObject/WeakObjectPtr.h"
-#include "UObject/WeakObjectPtrTemplates.h"
-#include "Nodes/RuleAliasNode.h"
-#include "Nodes/RuleNodeBase.h"
 
 class SToolTip;
 struct FGraphInformationPopupInfo;

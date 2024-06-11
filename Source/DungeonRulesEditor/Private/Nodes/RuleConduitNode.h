@@ -6,7 +6,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/ObjectMacros.h"
 #include "RuleNodeBase.h"
 #include "RuleConduitNode.generated.h"
 

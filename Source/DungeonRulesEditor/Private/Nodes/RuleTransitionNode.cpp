@@ -8,15 +8,10 @@
 =============================================================================*/
 
 #include "RuleTransitionNode.h"
-#include "Kismet2/BlueprintEditorUtils.h"
 #include "RuleConduitNode.h"
-#include "Kismet2/CompilerResultsLog.h"
-#include "EdGraphUtilities.h"
-#include "Kismet2/Kismet2NameValidators.h"
-#include "ScopedTransaction.h"
-#include "UObject/UE5MainStreamObjectVersion.h"
 #include "DungeonRulesEdTypes.h"
 #include "DungeonRules.h"
+#include "EdGraphUtilities.h"
 
 #define LOCTEXT_NAMESPACE "A3Nodes"
 
