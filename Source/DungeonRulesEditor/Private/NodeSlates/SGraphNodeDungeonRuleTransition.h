@@ -33,7 +33,9 @@ public:
 	void Construct(const FArguments& InArgs, URuleTransitionNode* InNode);
 
 	//~ Begin SNodePanel::SNode Interface
+#if false // Blueprint
 	virtual void GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const override;
+#endif
 	virtual void MoveTo(const FVector2D& NewPosition, FNodeSet& NodeFilter, bool bMarkDirty = true) override;
 	virtual bool RequiresSecondPassLayout() const override;
 	virtual void PerformSecondPassLayout(const TMap< UObject*, TSharedRef<SNode> >& NodeToWidgetLookup) const override;

@@ -128,7 +128,7 @@ void SGraphNodeDungeonRuleConduit::Construct(const FArguments& InArgs, URuleNode
 	this->UpdateGraphNode();
 }
 
-#if false
+#if false // Blueprint
 void SGraphNodeDungeonRuleConduit::GetStateInfoPopup(UEdGraphNode* GraphNode, TArray<FGraphInformationPopupInfo>& Popups)
 {
 	UAnimBlueprint* AnimBlueprint = Cast<UAnimBlueprint>(FBlueprintEditorUtils::FindBlueprintForNode(GraphNode));
@@ -378,14 +378,12 @@ TSharedPtr<SToolTip> SGraphNodeDungeonRuleConduit::GetComplexTooltip()
 					.TextStyle(FAppStyle::Get(), TEXT("Graph.TransitionNode.TooltipName"))
 					.Text(TooltipDesc)
 			]
-#if false // TODO: documentation
 			+SVerticalBox::Slot()
 			.AutoHeight()
 			.Padding(FMargin(0.0f, 5.0f, 0.0f, 0.0f))
 			[
 				IDocumentation::Get()->CreateToolTip(FText::FromString("Documentation"), NULL, StateNode->GetDocumentationLink(), StateNode->GetDocumentationExcerptName())
 			]
-#endif
 		];
 }
 

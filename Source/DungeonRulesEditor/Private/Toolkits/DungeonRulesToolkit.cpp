@@ -361,7 +361,7 @@ void FDungeonRulesToolkit::OnSelectedNodesChanged(const TSet<class UObject*>& Ne
 	{
 		for (UObject* SelectedObj : NewSelection)
 		{
-#if false
+#if false // TODO: Should be removed, the detail customizations take care of that now.
 			if (URuleNodeBase* GraphNode = Cast<URuleNodeBase>(SelectedObj))
 			{
 				Selection.Add(GraphNode->GetNodeInstance());

@@ -52,9 +52,11 @@ void SGraphNodeDungeonRuleTransition::Construct(const FArguments& InArgs, URuleT
 	this->UpdateGraphNode();
 }
 
+#if false // Blueprint?
 void SGraphNodeDungeonRuleTransition::GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const
 {
 }
+#endif
 
 void SGraphNodeDungeonRuleTransition::MoveTo(const FVector2D& NewPosition, FNodeSet& NodeFilter, bool bMarkDirty)
 {
@@ -137,15 +139,13 @@ TSharedRef<SWidget> SGraphNodeDungeonRuleTransition::GenerateRichTooltip()
 				.Text(TooltipDesc)
 		];
 
-#if false // TODO: documentation
 	Widget->AddSlot()
 		.AutoHeight()
 		.Padding( 2.0f )
 		[
-			IDocumentation::Get()->CreateToolTip(FText::FromString("Documentation"), NULL, TransNode->GetDocumentationLink(), TransNode->GetDocumentationExcerptName())
+			IDocumentation::Get()->CreateToolTip(FText::FromString("Documentation"), nullptr, TransNode->GetDocumentationLink(), TransNode->GetDocumentationExcerptName())
 		];
-#endif
-			
+
 	return Widget;
 }
 

@@ -87,11 +87,4 @@ FText SGraphNodeDungeonRuleAlias::GetNodeName() const
 	return SGraphNodeDungeonRule::GetNodeName();
 }
 
-#if false
-TSharedPtr<SToolTip> SGraphNodeDungeonRuleAlias::GetComplexTooltip()
-{
-	return nullptr;
-}
-#endif
-
 #undef LOCTEXT_NAMESPACE

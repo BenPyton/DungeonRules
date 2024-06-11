@@ -45,7 +45,7 @@ void URuleAliasNode::AllocateDefaultPins()
 	CreatePin(EGPD_Output, DungeonRulesPinCategory::Transition, TEXT("Out"));
 }
 
-#if false
+#if false // Blueprint
 void URuleAliasNode::ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const
 {
 	Super::ValidateNodeDuringCompilation(MessageLog);

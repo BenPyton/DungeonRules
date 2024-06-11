@@ -127,12 +127,10 @@ void URuleNodeBase::PrepareForCopying()
 	}
 }
 
-#if false // TODO: documentation
 FString URuleNodeBase::GetDocumentationLink() const
 {
-	return TEXT("Shared/GraphNodes/AnimationStateMachine");
+	return TEXT("DungeonRules");
 }
-#endif
 
 void URuleNodeBase::Serialize(FArchive& Ar)
 {

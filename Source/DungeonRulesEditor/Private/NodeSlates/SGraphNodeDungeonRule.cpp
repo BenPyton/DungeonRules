@@ -112,6 +112,7 @@ void SGraphNodeDungeonRule::Construct(const FArguments& InArgs, URuleNodeBase* I
 	this->UpdateGraphNode();
 }
 
+#if false // Blueprint
 void SGraphNodeDungeonRule::GetStateInfoPopup(UEdGraphNode* GraphNode, TArray<FGraphInformationPopupInfo>& Popups)
 {
 	UAnimBlueprint* AnimBlueprint = Cast<UAnimBlueprint>(FBlueprintEditorUtils::FindBlueprintForNode(GraphNode));
@@ -163,6 +164,7 @@ void SGraphNodeDungeonRule::GetNodeInfoPopups(FNodeInfoContext* Context, TArray<
 {
 	GetStateInfoPopup(GraphNode, Popups);
 }
+#endif
 
 FSlateColor SGraphNodeDungeonRule::GetBorderBackgroundColor() const
 {
@@ -175,6 +177,7 @@ FSlateColor SGraphNodeDungeonRule::GetBorderBackgroundColor() const
 
 FSlateColor SGraphNodeDungeonRule::GetBorderBackgroundColor_Internal(FLinearColor InactiveStateColor, FLinearColor ActiveStateColorDim, FLinearColor ActiveStateColorBright) const
 {
+#if false // Blueprint
 	UAnimBlueprint* AnimBlueprint = Cast<UAnimBlueprint>(FBlueprintEditorUtils::FindBlueprintForNode(GraphNode));
 	if(AnimBlueprint)
 	{
@@ -202,6 +205,7 @@ FSlateColor SGraphNodeDungeonRule::GetBorderBackgroundColor_Internal(FLinearColo
 			}
 		}
 	}
+#endif
 
 	return InactiveStateColor;
 }
@@ -385,14 +389,12 @@ TSharedPtr<SToolTip> SGraphNodeDungeonRule::GetComplexTooltip()
 					.TextStyle(FAppStyle::Get(), TEXT("Graph.TransitionNode.TooltipName"))
 					.Text(TooltipDesc)
 			]
-#if false // TODO: documentation
 			+SVerticalBox::Slot()
 			.AutoHeight()
 			.Padding(FMargin(0.0f, 5.0f, 0.0f, 0.0f))
 			[
-				IDocumentation::Get()->CreateToolTip(FText::FromString("Documentation"), NULL, StateNode->GetDocumentationLink(), StateNode->GetDocumentationExcerptName())
+				IDocumentation::Get()->CreateToolTip(FText::FromString("Documentation"), nullptr, StateNode->GetDocumentationLink(), StateNode->GetDocumentationExcerptName())
 			]
-#endif
 		];
 }
 

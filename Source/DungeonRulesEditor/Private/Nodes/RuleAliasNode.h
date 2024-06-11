@@ -45,7 +45,7 @@ public:
 	virtual FText GetTooltipText() const override;
 	virtual bool CanDuplicateNode() const override { return true; }
 	virtual void OnRenameNode(const FString& NewName) override;
-#if false
+#if false // Blueprint
 	virtual void ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const override;
 #endif
 	//~ End UEdGraphNode Interface

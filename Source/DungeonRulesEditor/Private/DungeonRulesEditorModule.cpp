@@ -69,7 +69,7 @@ void FDungeonRulesEditorModule::StartupModule()
 	// Register slate style set
 	{
 		StyleSet = MakeShareable(new FSlateStyleSet("DungeonRulesStyle"));
-		FString ContentDir = IPluginManager::Get().FindPlugin("ProceduralDungeon")->GetBaseDir();
+		FString ContentDir = IPluginManager::Get().FindPlugin("DungeonRules")->GetBaseDir();
 		StyleSet->SetContentRoot(ContentDir);
 
 		const FVector2D Icon20x20(20.0f, 20.0f);

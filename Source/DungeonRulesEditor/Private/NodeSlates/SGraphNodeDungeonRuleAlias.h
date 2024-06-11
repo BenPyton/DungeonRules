@@ -25,12 +25,6 @@ public:
 
 	void Construct(const FArguments& InArgs, URuleAliasNode* InNode);
 
-#if false
-	//~ Begin SNodePanel::SNode Interface
-	virtual TSharedPtr<SToolTip> GetComplexTooltip() override;
-	//~ End SNodePanel::SNode Interface
-#endif
-
 protected:
 	//~ Begin SGraphNode Interface
 	virtual bool IsNameReadOnly() const override;

@@ -75,7 +75,7 @@ void SGraphNodeDungeonRuleEntry::UpdateGraphNode()
 				[
 					SAssignNew(RightNodeBox, SVerticalBox)
 				]
-			]			
+			]
 		];
 
 	CreatePinWidgets();

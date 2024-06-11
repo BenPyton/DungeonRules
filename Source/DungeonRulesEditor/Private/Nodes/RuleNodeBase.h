@@ -37,6 +37,7 @@ public:
 	virtual void PostPlacedNewNode() override;
 	virtual void OnRenameNode(const FString& NewName) override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
+	virtual FString GetDocumentationLink() const override;
 	//~ End UEdGraphNode Interface
 
 	//~ Begin UObject Interface
@@ -76,12 +77,6 @@ public:
 protected:
 	DUNGEONRULESEDITOR_API virtual FString GetDesiredNewNodeName() const { return TEXT("Base"); }
 	DUNGEONRULESEDITOR_API virtual void InitializeInstance() const {}
-
-#if false // TODO: documentation
-public:
-	// Gets the animation state node documentation link
-	virtual FString GetDocumentationLink() const override;
-#endif
 
 private:
 	void CreateInstance(bool bDuplicateInstance = false);
