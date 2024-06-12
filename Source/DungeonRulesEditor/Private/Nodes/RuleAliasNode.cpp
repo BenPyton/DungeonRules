@@ -33,18 +33,6 @@ void URuleAliasNode::AllocateDefaultPins()
 	CreatePin(EGPD_Output, DungeonRulesPinCategory::Transition, TEXT("Out"));
 }
 
-#if false // Blueprint
-void URuleAliasNode::ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const
-{
-	Super::ValidateNodeDuringCompilation(MessageLog);
-
-	if ((GetInputPin()->LinkedTo.Num() > 0) && (bGlobalAlias || AliasedStateNodes.Num() != 1))
-	{
-		MessageLog.Error(*LOCTEXT("AliasAsEntryState", "A alias (@@) used as a transition's target must alias a single state").ToString(), this);
-	}
-}
-#endif
-
 FText URuleAliasNode::GetTooltipText() const
 {
 	if (bGlobalAlias)

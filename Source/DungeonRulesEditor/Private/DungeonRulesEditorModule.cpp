@@ -87,17 +87,6 @@ void FDungeonRulesEditorModule::ShutdownModule()
 	DungeonEd_LogInfo("DungeonRulesEditor module Shutdown");
 }
 
-/*void FDungeonRulesEditorModule::StartNodeHelper()
-{
-	if (!NodeHelper.IsValid())
-	{
-		NodeHelper = MakeShareable(new FGraphNodeClassHelper(UATNode::StaticClass()));
-		FGraphNodeClassHelper::AddObservedBlueprintClasses(UATAction_BlueprintBase::StaticClass());
-		FGraphNodeClassHelper::AddObservedBlueprintClasses(UATCondition_BlueprintBase::StaticClass());
-		NodeHelper->UpdateAvailableBlueprintClasses();
-	}
-}*/
-
 #undef LOCTEXT_NAMESPACE
 
 IMPLEMENT_MODULE(FDungeonRulesEditorModule, DungeonRulesEditor)

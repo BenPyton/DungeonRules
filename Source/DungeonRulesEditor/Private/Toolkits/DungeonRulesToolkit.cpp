@@ -30,23 +30,15 @@ FDungeonRulesToolkit::FDungeonRulesToolkit()
 	{
 		Editor->RegisterForUndo(this);
 	}
-
-	//OnClassListUpdatedDelegateHandle = FGraphNodeClassHelper::OnPackageListUpdated.AddRaw(this, &FDungeonRulesToolkit::OnClassListUpdated);
-
-	//GEditor->OnBlueprintCompiled().AddRaw(this, &FDungeonRulesToolkit::BlueprintCompiled);
 }
 
 FDungeonRulesToolkit::~FDungeonRulesToolkit()
 {
-	//GEditor->OnBlueprintCompiled().RemoveAll(this);
-
 	UEditorEngine* Editor = (UEditorEngine*)GEngine;
 	if (Editor)
 	{
 		Editor->UnregisterForUndo(this);
 	}
-
-	//FGraphNodeClassHelper::OnPackageListUpdated.Remove(OnClassListUpdatedDelegateHandle);
 }
 
 void FDungeonRulesToolkit::CreateCommandList()
@@ -280,15 +272,6 @@ void FDungeonRulesToolkit::CreateInternalWidgets()
 	DetailsWidget->RegisterInstancedCustomPropertyLayout(UEdGraphNode::StaticClass(), FOnGetDetailCustomizationInstance::CreateStatic(&FEditorGraphNodeNameDetails::MakeInstance, this));
 	DetailsWidget->RegisterInstancedCustomPropertyLayout(URuleNodeBase::StaticClass(), FOnGetDetailCustomizationInstance::CreateStatic(&FDungeonRuleNodeBaseDetails::MakeInstance));
 }
-
-/*
-void FDungeonRulesToolkit::BlueprintCompiled()
-{
-	UEdGraph* EdGraph = EdGraphEditor->GetCurrentGraph();
-	if (UDungeonRulesGraph* MyGraph = Cast<UDungeonRulesGraph>(EdGraph))
-		MyGraph->RefreshNodes();
-}
-*/
 
 void FDungeonRulesToolkit::SaveAsset_Execute()
 {
@@ -560,29 +543,6 @@ void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 	if (RulesGraph)
 		RulesGraph->LockUpdates();
 
-#if false // TODO: Copied from AIGraph
-	UAIGraphNode* SelectedParent = NULL;
-	bool bHasMultipleNodesSelected = false;
-
-	const FGraphPanelSelectionSet SelectedNodes = GetSelectedNodes();
-	for (UObject* SelectedObj : SelectedNodes)
-	{
-		URuleNodeBase* Node = Cast<URuleNodeBase>(SelectedObj);
-		if (Node)
-		{
-			if (SelectedParent == nullptr)
-			{
-				SelectedParent = Node;
-			}
-			else
-			{
-				bHasMultipleNodesSelected = true;
-				break;
-			}
-		}
-	}
-#endif
-
 	// Clear the selection set (newly pasted stuff will be selected)
 	CurrentGraphEditor->ClearSelectionSet();
 
@@ -616,51 +576,6 @@ void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 		AvgNodePosition.Y *= InvNumNodes;
 	}
 
-#if false // TODO: Copied from AIGraph
-	bool bPastedParentNode = false;
-
-	TMap<FGuid/*New*/, FGuid/*Old*/> NewToOldNodeMapping;
-
-	TMap<int32, UAIGraphNode*> ParentMap;
-	for (TSet<UEdGraphNode*>::TIterator It(PastedNodes); It; ++It)
-	{
-		UEdGraphNode* PasteNode = *It;
-		UAIGraphNode* PasteAINode = Cast<UAIGraphNode>(PasteNode);
-
-		if (PasteNode && (PasteAINode == nullptr || !PasteAINode->IsSubNode()))
-		{
-			bPastedParentNode = true;
-
-			// Select the newly pasted stuff
-			CurrentGraphEditor->SetNodeSelection(PasteNode, true);
-
-			const FVector::FReal NodePosX = (PasteNode->NodePosX - AvgNodePosition.X) + Location.X;
-			const FVector::FReal NodePosY = (PasteNode->NodePosY - AvgNodePosition.Y) + Location.Y;
-
-			PasteNode->NodePosX = static_cast<int32>(NodePosX);
-			PasteNode->NodePosY = static_cast<int32>(NodePosY);
-
-			PasteNode->SnapToGrid(16);
-
-			const FGuid OldGuid = PasteNode->NodeGuid;
-
-			// Give new node a different Guid from the old one
-			PasteNode->CreateNewGuid();
-
-			const FGuid NewGuid = PasteNode->NodeGuid;
-
-			NewToOldNodeMapping.Add(NewGuid, OldGuid);
-
-			if (PasteAINode)
-			{
-				PasteAINode->RemoveAllSubNodes();
-				ParentMap.Add(PasteAINode->CopySubNodeIndex, PasteAINode);
-			}
-		}
-	}
-
-	FixupPastedNodes(PastedNodes, NewToOldNodeMapping);
-#else
 	for (UEdGraphNode* PastedNode : PastedNodes)
 	{
 		if (!PastedNode)
@@ -676,13 +591,9 @@ void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 		// Give new node a different Guid from the old one
 		PastedNode->CreateNewGuid();
 	}
-#endif
 
 	if (RulesGraph)
 	{
-#if false // TODO: Copied from AIGraph
-		RulesGraph->UpdateClassData();
-#endif
 		RulesGraph->OnNodesPasted(TextToImport);
 		RulesGraph->UnlockUpdates();
 	}
@@ -697,13 +608,6 @@ void FDungeonRulesToolkit::PasteNodesHere(const FVector2D& Location)
 		GraphOwner->MarkPackageDirty();
 	}
 }
-
-#if false // TODO: copied from AIGraph
-void FDungeonRulesToolkit::FixupPastedNodes(const TSet<UEdGraphNode*>& PastedGraphNodes, const TMap<FGuid/*New*/, FGuid/*Old*/>& NewToOldNodeMapping)
-{
-
-}
-#endif
 
 bool FDungeonRulesToolkit::CanPasteNodes() const
 {

@@ -78,13 +78,6 @@ void FDungeonRuleAliasNodeDetails::OnPropertyAliasAllStatesCheckboxChanged(EChec
 		{
 			StateAliasNode->GetAliasedStates().Reset();
 		}
-
-#if false // Blueprint
-		if (UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNodeChecked(StateAliasNode))
-		{
-			FBlueprintEditorUtils::MarkBlueprintAsModified(Blueprint);
-		}
-#endif
 	}
 }
 
@@ -126,13 +119,6 @@ void FDungeonRuleAliasNodeDetails::OnPropertyIsStateAliasedCheckboxChanged(EChec
 		{
 			StateAliasNode->GetAliasedStates().Remove(StateNodeWeak);
 		}
-
-#if false // Blueprint
-		if (UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForNodeChecked(StateAliasNode))
-		{
-			FBlueprintEditorUtils::MarkBlueprintAsModified(Blueprint);
-		}
-#endif
 	}
 }
 

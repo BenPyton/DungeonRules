@@ -96,60 +96,6 @@ void SGraphNodeDungeonRuleConduit::Construct(const FArguments& InArgs, URuleNode
 	this->UpdateGraphNode();
 }
 
-#if false // Blueprint
-void SGraphNodeDungeonRuleConduit::GetStateInfoPopup(UEdGraphNode* GraphNode, TArray<FGraphInformationPopupInfo>& Popups)
-{
-	UAnimBlueprint* AnimBlueprint = Cast<UAnimBlueprint>(FBlueprintEditorUtils::FindBlueprintForNode(GraphNode));
-	if(AnimBlueprint)
-	{
-		UAnimInstance* ActiveObject = Cast<UAnimInstance>(AnimBlueprint->GetObjectBeingDebugged());
-		UAnimBlueprintGeneratedClass* Class = AnimBlueprint->GetAnimBlueprintGeneratedClass();
-
-		FLinearColor CurrentStateColor(1.f, 0.5f, 0.25f);
-
-		// Display various types of debug data
-		if ((ActiveObject != NULL) && (Class != NULL))
-		{
-			if (Class->GetAnimNodeProperties().Num())
-			{
-				if (FStateMachineDebugData* DebugInfo = Class->GetAnimBlueprintDebugData().StateMachineDebugData.Find(GraphNode->GetGraph()))
-				{
-					if(int32* StateIndexPtr = DebugInfo->NodeToStateIndex.Find(GraphNode))
-					{
-						for(const FStateMachineStateDebugData& StateData : Class->GetAnimBlueprintDebugData().StateData)
-						{
-							if(StateData.StateMachineIndex == DebugInfo->MachineIndex && StateData.StateIndex == *StateIndexPtr)
-							{
-								if (StateData.Weight > 0.0f)
-								{
-									FText StateText;
-									if (StateData.ElapsedTime > 0.0f)
-									{
-										StateText = FText::Format(LOCTEXT("ActiveStateWeightFormat", "{0}\nActive for {1}s"), FText::AsPercent(StateData.Weight), FText::AsNumber(StateData.ElapsedTime));
-									}
-									else
-									{
-										StateText = FText::Format(LOCTEXT("StateWeightFormat", "{0}"), FText::AsPercent(StateData.Weight));
-									}
-
-									Popups.Emplace(nullptr, CurrentStateColor, StateText.ToString());
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-void SGraphNodeDungeonRuleConduit::GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const
-{
-	GetStateInfoPopup(GraphNode, Popups);
-}
-#endif
-
 FSlateColor SGraphNodeDungeonRuleConduit::GetBorderBackgroundColor() const
 {
 	FLinearColor InactiveStateColor(0.08f, 0.08f, 0.08f);
@@ -161,36 +107,6 @@ FSlateColor SGraphNodeDungeonRuleConduit::GetBorderBackgroundColor() const
 
 FSlateColor SGraphNodeDungeonRuleConduit::GetBorderBackgroundColor_Internal(FLinearColor InactiveStateColor, FLinearColor ActiveStateColorDim, FLinearColor ActiveStateColorBright) const
 {
-#if false // Blueprint
-	UAnimBlueprint* AnimBlueprint = Cast<UAnimBlueprint>(FBlueprintEditorUtils::FindBlueprintForNode(GraphNode));
-	if(AnimBlueprint)
-	{
-		UAnimInstance* ActiveObject = Cast<UAnimInstance>(AnimBlueprint->GetObjectBeingDebugged());
-		UAnimBlueprintGeneratedClass* Class = AnimBlueprint->GetAnimBlueprintGeneratedClass();
-
-		// Display various types of debug data
-		if ((ActiveObject != NULL) && (Class != NULL))
-		{
-			if (FStateMachineDebugData* DebugInfo = Class->GetAnimBlueprintDebugData().StateMachineDebugData.Find(GraphNode->GetGraph()))
-			{
-				if(int32* StateIndexPtr = DebugInfo->NodeToStateIndex.Find(GraphNode))
-				{
-					for(const FStateMachineStateDebugData& StateData : Class->GetAnimBlueprintDebugData().StateData)
-					{
-						if(StateData.StateMachineIndex == DebugInfo->MachineIndex && StateData.StateIndex == *StateIndexPtr)
-						{
-							if (StateData.Weight > 0.0f)
-							{
-								return FMath::Lerp<FLinearColor>(ActiveStateColorDim, ActiveStateColorBright, StateData.Weight);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-#endif
-
 	return InactiveStateColor;
 }
 

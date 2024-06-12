@@ -32,8 +32,6 @@ public:
 	//~ End FAssetEditorToolkit Interface
 
 	virtual void InitGraphAssetEditor(const EToolkitMode::Type InMode, const TSharedPtr<class IToolkitHost>& InToolkitHost, UObject* ObjectToEdit);
-	//virtual void BlueprintCompiled();
-
 
 	FGraphPanelSelectionSet GetSelectedNodes() const;
 	virtual void OnSelectedNodesChanged(const TSet<class UObject*>& NewSelection);
@@ -69,13 +67,6 @@ public:
 
 	bool OnNodeVerifyTitleCommit(const FText& NewText, UEdGraphNode* NodeBeingChanged, FText& OutErrorMessage);
 	void OnNodeTitleCommitted(const FText& NewText, ETextCommit::Type CommitInfo, UEdGraphNode* NodeBeingChanged);
-
-/*
-	virtual void OnClassListUpdated();
-	*/
-
-protected:
-	//virtual void FixupPastedNodes(const TSet<UEdGraphNode*>& NewPastedGraphNodes, const TMap<FGuid/*New*/, FGuid/*Old*/>& NewToOldNodeMapping);
 
 protected:
 

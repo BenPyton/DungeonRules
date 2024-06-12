@@ -32,9 +32,6 @@ TConstArrayView<FAssetCategoryPath> UAssetDefinition_DungeonRules::GetAssetCateg
 
 EAssetCommandResult UAssetDefinition_DungeonRules::OpenAssets(const FAssetOpenArgs& OpenArgs) const
 {
-	//FProceduralDungeonEditorModule& DungeonEdModule = FModuleManager::GetModuleChecked<FProceduralDungeonEditorModule>("ProceduralDungeonEditorModule");
-	//DungeonEdModule.StartNodeHelper();
-
 	EToolkitMode::Type Mode = OpenArgs.GetToolkitMode();
 	for (UDungeonRules* DungeonRules : OpenArgs.LoadObjects<UDungeonRules>())
 	{

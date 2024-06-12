@@ -27,9 +27,6 @@ public:
 	void Construct(const FArguments& InArgs, URuleNodeBase* InNode);
 
 	// SNodePanel::SNode interface
-#if false // Blueprint
-	virtual void GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const override;
-#endif
 	virtual const FSlateBrush* GetShadowBrush(bool bSelected) const override;
 	// End of SNodePanel::SNode interface
 
@@ -45,9 +42,6 @@ public:
 	void OnMouseLeave(const FPointerEvent& MouseEvent) override;
 	// End of SWidget interface
 
-#if false // Blueprint
-	static void GetStateInfoPopup(UEdGraphNode* GraphNode, TArray<FGraphInformationPopupInfo>& Popups);
-#endif
 protected:
 	FSlateColor GetBorderBackgroundColor() const;
 	virtual FSlateColor GetBorderBackgroundColor_Internal(FLinearColor InactiveStateColor, FLinearColor ActiveStateColorDim, FLinearColor ActiveStateColorBright) const;

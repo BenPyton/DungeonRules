@@ -38,14 +38,6 @@ public:
 	void OnMouseLeave(const FPointerEvent& MouseEvent) override;
 	// End of SWidget interface
 
-#if false // Blueprint
-	// SNodePanel::SNode interface
-	virtual void GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const override;
-	// End of SNodePanel::SNode interface
-
-	static void GetStateInfoPopup(UEdGraphNode* GraphNode, TArray<FGraphInformationPopupInfo>& Popups);
-#endif
-
 protected:
 	FSlateColor GetBorderBackgroundColor() const;
 	virtual FSlateColor GetBorderBackgroundColor_Internal(FLinearColor InactiveStateColor, FLinearColor ActiveStateColorDim, FLinearColor ActiveStateColorBright) const;

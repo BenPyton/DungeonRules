@@ -30,12 +30,6 @@ void SGraphNodeDungeonRuleTransition::Construct(const FArguments& InArgs, URuleT
 	this->UpdateGraphNode();
 }
 
-#if false // Blueprint?
-void SGraphNodeDungeonRuleTransition::GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const
-{
-}
-#endif
-
 void SGraphNodeDungeonRuleTransition::MoveTo(const FVector2D& NewPosition, FNodeSet& NodeFilter, bool bMarkDirty)
 {
 	// Ignored; position is set by the location of the attached state nodes

@@ -25,7 +25,6 @@ public:
 	TObjectPtr<class URuleExitNode> ExitNode;
 
 	virtual void OnSave();
-	//virtual void RefreshNodes(); // used in DungeonRulesToolkit.cpp --- Is Needed?
 
 	UPROPERTY()
 	int32 GraphVersion;
@@ -38,13 +37,6 @@ public:
 	virtual void MarkVersion();
 
 	virtual void OnNodesPasted(const FString& ImportStr);
-
-#if false // TODO: Copied from AIGraph
-	bool UpdateUnknownNodeClasses();
-	void UpdateDeprecatedClasses();
-	void RemoveOrphanedNodes();
-	void UpdateClassData();
-#endif
 
 	bool IsLocked() const;
 	void LockUpdates();
@@ -61,10 +53,6 @@ protected:
 	 */
 	uint32 bLockUpdates : 1;
 
-#if false // TODO: Copied from AIGraph
-	virtual void CollectAllNodeInstances(TSet<UObject*>& NodeInstances);
-	virtual bool CanRemoveNestedObject(UObject* TestObject) const;
-#endif
 	virtual void OnNodeInstanceRemoved(UObject* NodeInstance);
 
 	UEdGraphPin* FindGraphNodePin(UEdGraphNode* Node, EEdGraphPinDirection Dir);
