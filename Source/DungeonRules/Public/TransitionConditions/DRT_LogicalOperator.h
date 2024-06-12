@@ -33,4 +33,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Instanced, Category = "Transition Condition")
 	TArray<TObjectPtr<URuleTransitionCondition>> Conditions;
+
+#if WITH_DEV_AUTOMATION_TESTS
+public:
+	void SetConditions(const TArray<TObjectPtr<URuleTransitionCondition>>& NewConditions) { Conditions = NewConditions; }
+	void SetOperator(ELogicalOperator NewOperator) { Operator = NewOperator; }
+#endif
 };

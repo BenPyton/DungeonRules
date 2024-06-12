@@ -21,6 +21,6 @@ enum class EComparisonOp : uint8
 
 struct FComparisonHelper
 {
-	DUNGEONRULES_API static bool Check(int A, int B, EComparisonOp Operator);
-	DUNGEONRULES_API static FText GetComparisonText(EComparisonOp Operator, int Value);
+	DUNGEONRULES_API static bool Check(const int A, const int B, const EComparisonOp Operator);
+	DUNGEONRULES_API static FText GetComparisonText(const EComparisonOp Operator, const int Value);
 };

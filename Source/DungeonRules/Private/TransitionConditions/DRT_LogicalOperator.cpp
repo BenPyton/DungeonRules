@@ -10,6 +10,11 @@
 
 bool UDRT_LogicalOperator::Check_Implementation(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
 {
+	// If there is no condition, by default the transition pass.
+	// So if there is no condition in an AND or an OR, the transition must pass too.
+	if (Conditions.Num() <= 0)
+		return true;
+
 	const bool OperatorResult = static_cast<bool>(Operator);
 	for (const URuleTransitionCondition* Condition : Conditions)
 	{

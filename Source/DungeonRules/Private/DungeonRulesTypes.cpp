@@ -14,7 +14,7 @@ namespace
 	static constexpr uint8 Greater = 2;
 };
 
-bool FComparisonHelper::Check(int A, int B, EComparisonOp Operator)
+bool FComparisonHelper::Check(const int A, const int B, const EComparisonOp Operator)
 {
 #if false // naive approach
 	switch (Comparison)
@@ -42,7 +42,7 @@ bool FComparisonHelper::Check(int A, int B, EComparisonOp Operator)
 #endif
 }
 
-FText FComparisonHelper::GetComparisonText(EComparisonOp Operator, int Value)
+FText FComparisonHelper::GetComparisonText(const EComparisonOp Operator, const int Value)
 {
 	FText ValueText = FText::AsNumber(Value);
 	switch (Operator)

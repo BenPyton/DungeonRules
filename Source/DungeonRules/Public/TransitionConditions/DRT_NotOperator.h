@@ -23,4 +23,9 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Instanced, Category = "Transition Condition")
 	TObjectPtr<URuleTransitionCondition> Condition;
+
+#if WITH_DEV_AUTOMATION_TESTS
+public:
+	void SetCondition(URuleTransitionCondition* NewCondition) { Condition = NewCondition; }
+#endif
 };
