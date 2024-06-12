@@ -6,8 +6,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RuleNodeBase.h"
-#include "RuleTransitionNode.generated.h"
+#include "DungeonRulesNode.h"
+#include "DungeonRulesNode_Transition.generated.h"
 
 class UCurveFloat;
 class UEdGraph;
@@ -15,12 +15,12 @@ class UEdGraphPin;
 class UDungeonRuleTransition;
 
 UCLASS(MinimalAPI, config=Editor)
-class URuleTransitionNode : public URuleNodeBase
+class UDungeonRulesNode_Transition : public UDungeonRulesNode
 {
 	GENERATED_BODY()
 
 public:
-	URuleTransitionNode();
+	UDungeonRulesNode_Transition();
 
 	//~ Begin UObject Interface
 	virtual void Serialize(FArchive& Ar) override;
@@ -35,27 +35,27 @@ public:
 	virtual void PostPasteNode() override;
 	//~ End UEdGraphNode Interface
 
-	//~ Begin URuleNodeBase Interface
+	//~ Begin UDungeonRulesNode Interface
 	DUNGEONRULESEDITOR_API virtual const UClass* GetInstanceClass() const override;
 	DUNGEONRULESEDITOR_API virtual FString GetStateName() const override;
 	DUNGEONRULESEDITOR_API virtual UEdGraphPin* GetInputPin() const override { return Pins[0]; }
 	DUNGEONRULESEDITOR_API virtual UEdGraphPin* GetOutputPin() const override { return Pins[1]; }
 	DUNGEONRULESEDITOR_API virtual TArray<FName> GetPropertyNamesToEdit() const override;
-	//~ End URuleNodeBase Interface
+	//~ End UDungeonRulesNode Interface
 
-	DUNGEONRULESEDITOR_API URuleNodeBase* GetPreviousState() const;
-	DUNGEONRULESEDITOR_API URuleNodeBase* GetNextState() const;
-	DUNGEONRULESEDITOR_API void CreateConnections(URuleNodeBase* PreviousState, URuleNodeBase* NextState);
+	DUNGEONRULESEDITOR_API UDungeonRulesNode* GetPreviousState() const;
+	DUNGEONRULESEDITOR_API UDungeonRulesNode* GetNextState() const;
+	DUNGEONRULESEDITOR_API void CreateConnections(UDungeonRulesNode* PreviousState, UDungeonRulesNode* NextState);
 
 	/**
 	 * Relink transition head (where the arrow is of a state transition) to a new state.
 	 * @param[in] NewTargetState The new transition target.
 	 */
-	DUNGEONRULESEDITOR_API void RelinkHead(URuleNodeBase* NewTargetState);
+	DUNGEONRULESEDITOR_API void RelinkHead(UDungeonRulesNode* NewTargetState);
 
 	/**
 	 * Helper function to gather the transition nodes to be relinked by taking the graph selection into account as well.
 	 * For example when relinking a transition holding several transition nodes but only a few are selected to be relinked.
 	 */
-	DUNGEONRULESEDITOR_API static TArray<URuleTransitionNode*> GetListTransitionNodesToRelink(UEdGraphPin* SourcePin, UEdGraphPin* OldTargetPin, const TArray<UEdGraphNode*>& InSelectedGraphNodes);
+	DUNGEONRULESEDITOR_API static TArray<UDungeonRulesNode_Transition*> GetListTransitionNodesToRelink(UEdGraphPin* SourcePin, UEdGraphPin* OldTargetPin, const TArray<UEdGraphNode*>& InSelectedGraphNodes);
 };

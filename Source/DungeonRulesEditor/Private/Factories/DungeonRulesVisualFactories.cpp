@@ -6,46 +6,46 @@
 #include "DungeonRulesVisualFactories.h"
 #include "DungeonRulesEdTypes.h"
 #include "DungeonRulesSchema.h"
-#include "Nodes/RuleAliasNode.h"
-#include "Nodes/RuleConduitNode.h"
-#include "Nodes/RuleEntryNode.h"
-#include "Nodes/RuleExitNode.h"
-#include "Nodes/RuleNode.h"
-#include "Nodes/RuleTransitionNode.h"
-#include "NodeSlates/SGraphNodeDungeonRule.h"
-#include "NodeSlates/SGraphNodeDungeonRuleAlias.h"
-#include "NodeSlates/SGraphNodeDungeonRuleConduit.h"
-#include "NodeSlates/SGraphNodeDungeonRuleEntry.h"
-#include "NodeSlates/SGraphNodeDungeonRuleExit.h"
-#include "NodeSlates/SGraphNodeDungeonRuleTransition.h"
+#include "Nodes/DungeonRulesNode_Alias.h"
+#include "Nodes/DungeonRulesNode_Begin.h"
+#include "Nodes/DungeonRulesNode_Conduit.h"
+#include "Nodes/DungeonRulesNode_State.h"
+#include "Nodes/DungeonRulesNode_Stop.h"
+#include "Nodes/DungeonRulesNode_Transition.h"
+#include "NodeSlates/SGraphNodeDungeonRules_Alias.h"
+#include "NodeSlates/SGraphNodeDungeonRules_Begin.h"
+#include "NodeSlates/SGraphNodeDungeonRules_Conduit.h"
+#include "NodeSlates/SGraphNodeDungeonRules_State.h"
+#include "NodeSlates/SGraphNodeDungeonRules_Stop.h"
+#include "NodeSlates/SGraphNodeDungeonRules_Transition.h"
 #include "DungeonRulesConnectionDrawingPolicy.h"
 #include "KismetPins/SGraphPinExec.h"
 
 TSharedPtr<class SGraphNode> FDungeonRulesNodeFactory::CreateNode(class UEdGraphNode* InNode) const 
 {
-	if (URuleTransitionNode* TransitionNode = Cast<URuleTransitionNode>(InNode))
+	if (UDungeonRulesNode_Transition* TransitionNode = Cast<UDungeonRulesNode_Transition>(InNode))
 	{
-		return SNew(SGraphNodeDungeonRuleTransition, TransitionNode);
+		return SNew(SGraphNodeDungeonRules_Transition, TransitionNode);
 	}
-	else if (URuleNode* StateNode = Cast<URuleNode>(InNode))
+	else if (UDungeonRulesNode_State* StateNode = Cast<UDungeonRulesNode_State>(InNode))
 	{
-		return SNew(SGraphNodeDungeonRule, StateNode);
+		return SNew(SGraphNodeDungeonRules_State, StateNode);
 	}
-	else if (URuleAliasNode* StateAliasNode = Cast<URuleAliasNode>(InNode))
+	else if (UDungeonRulesNode_Alias* StateAliasNode = Cast<UDungeonRulesNode_Alias>(InNode))
 	{
-		return SNew(SGraphNodeDungeonRuleAlias, StateAliasNode);
+		return SNew(SGraphNodeDungeonRules_Alias, StateAliasNode);
 	}
-	else if (URuleConduitNode* ConduitNode = Cast<URuleConduitNode>(InNode))
+	else if (UDungeonRulesNode_Conduit* ConduitNode = Cast<UDungeonRulesNode_Conduit>(InNode))
 	{
-		return SNew(SGraphNodeDungeonRuleConduit, ConduitNode);
+		return SNew(SGraphNodeDungeonRules_Conduit, ConduitNode);
 	}
-	else if (URuleEntryNode* EntryNode = Cast<URuleEntryNode>(InNode))
+	else if (UDungeonRulesNode_Begin* EntryNode = Cast<UDungeonRulesNode_Begin>(InNode))
 	{
-		return SNew(SGraphNodeDungeonRuleEntry, EntryNode);
+		return SNew(SGraphNodeDungeonRules_Begin, EntryNode);
 	}
-	else if (URuleExitNode* ExitNode = Cast<URuleExitNode>(InNode))
+	else if (UDungeonRulesNode_Stop* ExitNode = Cast<UDungeonRulesNode_Stop>(InNode))
 	{
-		return SNew(SGraphNodeDungeonRuleExit, ExitNode);
+		return SNew(SGraphNodeDungeonRules_Stop, ExitNode);
 	}
 	
 	return nullptr;

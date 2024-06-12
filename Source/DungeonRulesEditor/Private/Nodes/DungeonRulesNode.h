@@ -7,7 +7,7 @@
 
 #include "CoreMinimal.h"
 #include "EdGraph/EdGraphNode.h"
-#include "RuleNodeBase.generated.h"
+#include "DungeonRulesNode.generated.h"
 
 class INameValidatorInterface;
 class UAnimBlueprint;
@@ -16,12 +16,12 @@ class UEdGraphPin;
 class UEdGraphSchema;
 
 UCLASS(MinimalAPI, abstract)
-class URuleNodeBase : public UEdGraphNode
+class UDungeonRulesNode : public UEdGraphNode
 {
 	GENERATED_BODY()
 
 public:
-	URuleNodeBase();
+	UDungeonRulesNode();
 
 	virtual void Serialize(FArchive& Ar) override;
 	virtual void PostLoad() override;
@@ -61,7 +61,7 @@ public:
 	DUNGEONRULESEDITOR_API virtual FString GetStateName() const { return TEXT("BaseState"); }
 
 	// Populates the OutTransitions array with a list of transition nodes connected to this state
-	DUNGEONRULESEDITOR_API virtual void GetTransitionList(TArray<class URuleTransitionNode*>& OutTransitions, bool bWantSortedList = false) const;
+	DUNGEONRULESEDITOR_API virtual void GetTransitionList(TArray<class UDungeonRulesNode_Transition*>& OutTransitions, bool bWantSortedList = false) const;
 
 	DUNGEONRULESEDITOR_API virtual void PostCopyNode();
 

@@ -4,11 +4,11 @@
 // (See accompanying file LICENSE or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 #include "DungeonRulesGraph.h"
-#include "Nodes/RuleAliasNode.h"
-#include "Nodes/RuleConduitNode.h"
-#include "Nodes/RuleEntryNode.h"
-#include "Nodes/RuleNode.h"
-#include "Nodes/RuleTransitionNode.h"
+#include "Nodes/DungeonRulesNode_Alias.h"
+#include "Nodes/DungeonRulesNode_Begin.h"
+#include "Nodes/DungeonRulesNode_Conduit.h"
+#include "Nodes/DungeonRulesNode_State.h"
+#include "Nodes/DungeonRulesNode_Transition.h"
 #include "DungeonRules.h"
 #include "DUngeonRulesEdLog.h"
 
@@ -54,11 +54,11 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 	// Add rule instances to the asset
 	for (const UEdGraphNode* Node : Nodes)
 	{
-		const URuleNode* RuleNode = Cast<URuleNode>(Node);
-		if (!RuleNode)
+		const UDungeonRulesNode_State* DungeonRulesNode_State = Cast<UDungeonRulesNode_State>(Node);
+		if (!DungeonRulesNode_State)
 			continue;
 
-		UDungeonRule* Rule = RuleNode->GetNodeInstance<UDungeonRule>();
+		UDungeonRule* Rule = DungeonRulesNode_State->GetNodeInstance<UDungeonRule>();
 		if (!Rule)
 			continue;
 
@@ -73,7 +73,7 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 	// Add conduits to the asset
 	for (const UEdGraphNode* Node : Nodes)
 	{
-		const URuleConduitNode* ConduitNode = Cast<URuleConduitNode>(Node);
+		const UDungeonRulesNode_Conduit* ConduitNode = Cast<UDungeonRulesNode_Conduit>(Node);
 		if (!ConduitNode)
 			continue;
 
@@ -90,14 +90,14 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 	}
 
 	// Set the first rule
-	URuleNode* FirstNode = Cast<URuleNode>(EntryNode->GetOutputNode());
+	UDungeonRulesNode_State* FirstNode = Cast<UDungeonRulesNode_State>(BeginNode->GetOutputNode());
 	UDungeonRule* FirstRule = (FirstNode) ? FirstNode->GetNodeInstance<UDungeonRule>() : nullptr;
 	DungeonRulesAsset->SetFirstRule(FirstRule);
 
 	// Add transition instances to the asset + in the rule instances too
 	for (const UEdGraphNode* Node : Nodes)
 	{
-		const URuleTransitionNode* TransitionNode = Cast<URuleTransitionNode>(Node);
+		const UDungeonRulesNode_Transition* TransitionNode = Cast<UDungeonRulesNode_Transition>(Node);
 		if (!TransitionNode)
 			continue;
 
@@ -113,13 +113,13 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 		DungeonRulesAsset->AddTransition(Transition);
 
 		// Add the transition into the list of the previous rule
-		if (const URuleNodeBase* PrevRuleNode = TransitionNode->GetPreviousState())
+		if (const UDungeonRulesNode* PrevRuleNode = TransitionNode->GetPreviousState())
 		{
 			if (UDungeonRule* Rule = PrevRuleNode->GetNodeInstance<UDungeonRule>())
 				Rule->AddTransition(Transition);
 			else if (URuleConduit* Conduit = PrevRuleNode->GetNodeInstance<URuleConduit>())
 				Conduit->AddTransition(Transition);
-			else if (const URuleAliasNode* AliasRuleNode = Cast<URuleAliasNode>(PrevRuleNode))
+			else if (const UDungeonRulesNode_Alias* AliasRuleNode = Cast<UDungeonRulesNode_Alias>(PrevRuleNode))
 			{
 				if (AliasRuleNode->bGlobalAlias)
 				{
@@ -138,7 +138,7 @@ void UDungeonRulesGraph::UpdateAsset(int32 UpdateFlags)
 
 		// Set the next rule of the transition instance
 		Transition->NextRule = nullptr;
-		if (URuleNodeBase* NextRuleNode = TransitionNode->GetNextState())
+		if (UDungeonRulesNode* NextRuleNode = TransitionNode->GetNextState())
 		{
 			Transition->NextRule = NextRuleNode->GetNodeInstance();
 		}

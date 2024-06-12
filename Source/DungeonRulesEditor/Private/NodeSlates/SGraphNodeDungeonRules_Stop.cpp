@@ -4,14 +4,14 @@
 // (See accompanying file LICENSE or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 
-#include "SGraphNodeDungeonRuleEntry.h"
-#include "Nodes/RuleEntryNode.h"
+#include "SGraphNodeDungeonRules_Stop.h"
+#include "Nodes/DungeonRulesNode_Stop.h"
 #include "SGraphPin.h"
 
 /////////////////////////////////////////////////////
-// SGraphNodeDungeonRuleEntry
+// SGraphNodeDungeonRules_Begin
 
-void SGraphNodeDungeonRuleEntry::Construct(const FArguments& InArgs, URuleEntryNode* InNode)
+void SGraphNodeDungeonRules_Stop::Construct(const FArguments& InArgs, UDungeonRulesNode_Stop* InNode)
 {
 	this->GraphNode = InNode;
 
@@ -20,7 +20,7 @@ void SGraphNodeDungeonRuleEntry::Construct(const FArguments& InArgs, URuleEntryN
 	this->UpdateGraphNode();
 }
 
-FSlateColor SGraphNodeDungeonRuleEntry::GetBorderBackgroundColor() const
+FSlateColor SGraphNodeDungeonRules_Stop::GetBorderBackgroundColor() const
 {
 	FLinearColor InactiveStateColor(0.08f, 0.08f, 0.08f);
 	FLinearColor ActiveStateColorDim(0.4f, 0.3f, 0.15f);
@@ -29,7 +29,7 @@ FSlateColor SGraphNodeDungeonRuleEntry::GetBorderBackgroundColor() const
 	return InactiveStateColor;
 }
 
-void SGraphNodeDungeonRuleEntry::UpdateGraphNode()
+void SGraphNodeDungeonRules_Stop::UpdateGraphNode()
 {
 	InputPins.Empty();
 	OutputPins.Empty();
@@ -49,7 +49,7 @@ void SGraphNodeDungeonRuleEntry::UpdateGraphNode()
 			SNew(SBorder)
 			.BorderImage( FAppStyle::GetBrush( "Graph.StateNode.Body" ) )
 			.Padding(0)
-			.BorderBackgroundColor( this, &SGraphNodeDungeonRuleEntry::GetBorderBackgroundColor )
+			.BorderBackgroundColor( this, &SGraphNodeDungeonRules_Stop::GetBorderBackgroundColor )
 			[
 				SNew(SOverlay)
 
@@ -59,28 +59,28 @@ void SGraphNodeDungeonRuleEntry::UpdateGraphNode()
 				.VAlign(VAlign_Fill)
 				.Padding(10.0f)
 				[
-					SAssignNew(RightNodeBox, SVerticalBox)
+					SAssignNew(LeftNodeBox, SVerticalBox)
 				]
-			]
+			]			
 		];
 
 	CreatePinWidgets();
 }
 
-void SGraphNodeDungeonRuleEntry::AddPin(const TSharedRef<SGraphPin>& PinToAdd)
+void SGraphNodeDungeonRules_Stop::AddPin(const TSharedRef<SGraphPin>& PinToAdd)
 {
 	PinToAdd->SetOwner( SharedThis(this) );
-	RightNodeBox->AddSlot()
+	LeftNodeBox->AddSlot()
 		.HAlign(HAlign_Fill)
 		.VAlign(VAlign_Fill)
 		.FillHeight(1.0f)
 		[
 			PinToAdd
 		];
-	OutputPins.Add(PinToAdd);
+	InputPins.Add(PinToAdd);
 }
 
-FText SGraphNodeDungeonRuleEntry::GetPreviewCornerText() const
+FText SGraphNodeDungeonRules_Stop::GetPreviewCornerText() const
 {
-	return NSLOCTEXT("SGraphNodeDungeonRuleEntry", "CornerTextDescription", "Entry point for state machine");
+	return NSLOCTEXT("SGraphNodeDungeonRules_Stop", "CornerTextDescription", "Exit point for state machine");
 }

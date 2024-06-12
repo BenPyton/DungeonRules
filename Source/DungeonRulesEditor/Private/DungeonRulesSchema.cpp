@@ -9,12 +9,12 @@
 
 #include "DungeonRulesSchema.h"
 #include "DungeonRulesGraph.h"
-#include "Nodes/RuleAliasNode.h"
-#include "Nodes/RuleConduitNode.h"
-#include "Nodes/RuleEntryNode.h"
-#include "Nodes/RuleExitNode.h"
-#include "Nodes/RuleNode.h"
-#include "Nodes/RuleTransitionNode.h"
+#include "Nodes/DungeonRulesNode_Alias.h"
+#include "Nodes/DungeonRulesNode_Conduit.h"
+#include "Nodes/DungeonRulesNode_Begin.h"
+#include "Nodes/DungeonRulesNode_Stop.h"
+#include "Nodes/DungeonRulesNode_State.h"
+#include "Nodes/DungeonRulesNode_Transition.h"
 #include "EdGraphNode_Comment.h"
 #include "Settings/EditorStyleSettings.h"
 #include "GraphEditorActions.h"
@@ -108,26 +108,26 @@ UDungeonRulesSchema::UDungeonRulesSchema()
 
 void UDungeonRulesSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 {
-	// Create the entry/exit tunnels
-	FGraphNodeCreator<URuleEntryNode> EntryNodeCreator(Graph);
-	URuleEntryNode* EntryNode = EntryNodeCreator.CreateNode();
-	EntryNodeCreator.Finalize();
-	SetNodeMetaData(EntryNode, FNodeMetadata::DefaultGraphNode);
+	// Create the begin/stop tunnels
+	FGraphNodeCreator<UDungeonRulesNode_Begin> BeginNodeCreator(Graph);
+	UDungeonRulesNode_Begin* BeginNode = BeginNodeCreator.CreateNode();
+	BeginNodeCreator.Finalize();
+	SetNodeMetaData(BeginNode, FNodeMetadata::DefaultGraphNode);
 
 	if (UDungeonRulesGraph* DungeonRulesGraph = CastChecked<UDungeonRulesGraph>(&Graph))
 	{
-		DungeonRulesGraph->EntryNode = EntryNode;
+		DungeonRulesGraph->BeginNode = BeginNode;
 	}
 
-	FGraphNodeCreator<URuleExitNode> ExitNodeCreator(Graph);
-	URuleExitNode* ExitNode = ExitNodeCreator.CreateNode();
-	ExitNode->NodePosX = 500;
-	ExitNodeCreator.Finalize();
-	SetNodeMetaData(ExitNode, FNodeMetadata::DefaultGraphNode);
+	FGraphNodeCreator<UDungeonRulesNode_Stop> StopNodeCreator(Graph);
+	UDungeonRulesNode_Stop* StopNode = StopNodeCreator.CreateNode();
+	StopNode->NodePosX = 500;
+	StopNodeCreator.Finalize();
+	SetNodeMetaData(StopNode, FNodeMetadata::DefaultGraphNode);
 
 	if (UDungeonRulesGraph* DungeonRulesGraph = CastChecked<UDungeonRulesGraph>(&Graph))
 	{
-		DungeonRulesGraph->ExitNode = ExitNode;
+		DungeonRulesGraph->StopNode = StopNode;
 	}
 }
 
@@ -143,10 +143,10 @@ const FPinConnectionResponse UDungeonRulesSchema::CanCreateConnection(const UEdG
 	}
 
 	// Connect entry node to a state is OK
-	const bool bPinAIsEntry = PinA->GetOwningNode()->IsA(URuleEntryNode::StaticClass());
-	const bool bPinBIsEntry = PinB->GetOwningNode()->IsA(URuleEntryNode::StaticClass());
-	const bool bPinAIsStateNode = PinA->GetOwningNode()->IsA(URuleNodeBase::StaticClass());
-	const bool bPinBIsStateNode = PinB->GetOwningNode()->IsA(URuleNodeBase::StaticClass());
+	const bool bPinAIsEntry = PinA->GetOwningNode()->IsA(UDungeonRulesNode_Begin::StaticClass());
+	const bool bPinBIsEntry = PinB->GetOwningNode()->IsA(UDungeonRulesNode_Begin::StaticClass());
+	const bool bPinAIsStateNode = PinA->GetOwningNode()->IsA(UDungeonRulesNode::StaticClass());
+	const bool bPinBIsStateNode = PinB->GetOwningNode()->IsA(UDungeonRulesNode::StaticClass());
 
 	// Special case handling for entry states: Only allow creating connections starting at the entry state.
 	if (bPinAIsEntry || bPinBIsEntry)
@@ -159,8 +159,8 @@ const FPinConnectionResponse UDungeonRulesSchema::CanCreateConnection(const UEdG
 		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Entry must connect to a state node"));
 	}
 
-	const bool bPinAIsTransition = PinA->GetOwningNode()->IsA(URuleTransitionNode::StaticClass());
-	const bool bPinBIsTransition = PinB->GetOwningNode()->IsA(URuleTransitionNode::StaticClass());
+	const bool bPinAIsTransition = PinA->GetOwningNode()->IsA(UDungeonRulesNode_Transition::StaticClass());
+	const bool bPinBIsTransition = PinB->GetOwningNode()->IsA(UDungeonRulesNode_Transition::StaticClass());
 
 	if (bPinAIsTransition && bPinBIsTransition)
 	{
@@ -190,7 +190,7 @@ bool UDungeonRulesSchema::TryCreateConnection(UEdGraphPin* PinA, UEdGraphPin* Pi
 {
 	if (PinB->Direction == PinA->Direction)
 	{
-		if (URuleNodeBase* Node = Cast<URuleNodeBase>(PinB->GetOwningNode()))
+		if (UDungeonRulesNode* Node = Cast<UDungeonRulesNode>(PinB->GetOwningNode()))
 		{
 			if (PinA->Direction == EGPD_Input)
 			{
@@ -213,14 +213,14 @@ bool UDungeonRulesSchema::CreateAutomaticConversionNodeAndConnections(UEdGraphPi
 	// Reaching here should have taken care of the pin direction.
 	check(PinA->Direction != PinB->Direction);
 
-	URuleNodeBase* NodeFrom = Cast<URuleNodeBase>((PinA->Direction == EGPD_Output) ? PinA->GetOwningNode() : PinB->GetOwningNode());
-	URuleNodeBase* NodeTo = Cast<URuleNodeBase>((PinA->Direction == EGPD_Input) ? PinA->GetOwningNode() : PinB->GetOwningNode());
+	UDungeonRulesNode* NodeFrom = Cast<UDungeonRulesNode>((PinA->Direction == EGPD_Output) ? PinA->GetOwningNode() : PinB->GetOwningNode());
+	UDungeonRulesNode* NodeTo = Cast<UDungeonRulesNode>((PinA->Direction == EGPD_Input) ? PinA->GetOwningNode() : PinB->GetOwningNode());
 
 	if (NodeFrom && NodeTo
 		&& (NodeFrom->GetOutputPin() != nullptr)
 		&& (NodeTo->GetInputPin() != nullptr))
 	{
-		URuleTransitionNode* TransitionNode = FDungeonRulesGraphSchemaAction_NewStateNode::SpawnNodeFromTemplate<URuleTransitionNode>(NodeFrom->GetGraph(), NewObject<URuleTransitionNode>(), FVector2D(0.0f, 0.0f), false);
+		UDungeonRulesNode_Transition* TransitionNode = FDungeonRulesGraphSchemaAction_NewStateNode::SpawnNodeFromTemplate<UDungeonRulesNode_Transition>(NodeFrom->GetGraph(), NewObject<UDungeonRulesNode_Transition>(), FVector2D(0.0f, 0.0f), false);
 		TransitionNode->CreateConnections(NodeFrom, NodeTo);
 
 		return true;
@@ -237,13 +237,13 @@ bool UDungeonRulesSchema::TryRelinkConnectionTarget(UEdGraphPin* SourcePin, UEdG
 		return false;
 	}
 
-	URuleNodeBase* OldTargetState = Cast<URuleNodeBase>(OldTargetPin->GetOwningNode());
-	URuleNodeBase* NewTargetState = Cast<URuleNodeBase>(NewTargetPin->GetOwningNode());
+	UDungeonRulesNode* OldTargetState = Cast<UDungeonRulesNode>(OldTargetPin->GetOwningNode());
+	UDungeonRulesNode* NewTargetState = Cast<UDungeonRulesNode>(NewTargetPin->GetOwningNode());
 	if (!OldTargetState || !NewTargetState)
 		return false;
 
 	// In the case we are relinking the transition starting at the entry state, the SourceState is nullptr. Special case handling.
-	URuleEntryNode* EntryState = Cast<URuleEntryNode>(SourcePin->GetOwningNode());
+	UDungeonRulesNode_Begin* EntryState = Cast<UDungeonRulesNode_Begin>(SourcePin->GetOwningNode());
 	if (EntryState)
 	{
 		// Add the new incoming transition to the new target state
@@ -253,8 +253,8 @@ bool UDungeonRulesSchema::TryRelinkConnectionTarget(UEdGraphPin* SourcePin, UEdG
 	}
 
 	// Collect all transition nodes starting at the source state, filter them by the transitions and perform the actual relink operation.
-	const TArray<URuleTransitionNode*> TransitionNodes = URuleTransitionNode::GetListTransitionNodesToRelink(SourcePin, OldTargetPin, InSelectedGraphNodes);
-	for (URuleTransitionNode* TransitionNode : TransitionNodes)
+	const TArray<UDungeonRulesNode_Transition*> TransitionNodes = UDungeonRulesNode_Transition::GetListTransitionNodesToRelink(SourcePin, OldTargetPin, InSelectedGraphNodes);
+	for (UDungeonRulesNode_Transition* TransitionNode : TransitionNodes)
 	{
 		TransitionNode->RelinkHead(NewTargetState);
 	}
@@ -276,9 +276,9 @@ bool UDungeonRulesSchema::IsConnectionRelinkingAllowed(UEdGraphPin* InPin) const
 {
 	if (InPin && InPin->GetOwningNode())
 	{
-		URuleNodeBase* StateNode = Cast<URuleNodeBase>(InPin->GetOwningNode());
-		URuleTransitionNode* TransitionNode = Cast<URuleTransitionNode>(InPin->GetOwningNode());
-		URuleEntryNode* EntryNode = Cast<URuleEntryNode>(InPin->GetOwningNode());
+		UDungeonRulesNode* StateNode = Cast<UDungeonRulesNode>(InPin->GetOwningNode());
+		UDungeonRulesNode_Transition* TransitionNode = Cast<UDungeonRulesNode_Transition>(InPin->GetOwningNode());
+		UDungeonRulesNode_Begin* EntryNode = Cast<UDungeonRulesNode_Begin>(InPin->GetOwningNode());
 		if (StateNode || TransitionNode || EntryNode)
 		{
 			return true;
@@ -304,19 +304,19 @@ void UDungeonRulesSchema::GetGraphContextActions(FGraphContextMenuBuilder& Conte
 	// Add state node
 	{
 		TSharedPtr<FDungeonRulesGraphSchemaAction_NewStateNode> Action = AddNewStateNodeAction(ContextMenuBuilder, FText::GetEmpty(), LOCTEXT("AddState", "Add State"), LOCTEXT("AddStateTooltip", "A new state"));
-		Action->NodeTemplate = NewObject<URuleNode>(ContextMenuBuilder.OwnerOfTemporaries);
+		Action->NodeTemplate = NewObject<UDungeonRulesNode_State>(ContextMenuBuilder.OwnerOfTemporaries);
 	}
 
 	// Add state alias node
 	{
 		TSharedPtr<FDungeonRulesGraphSchemaAction_NewStateNode> Action = AddNewStateNodeAction(ContextMenuBuilder, FText::GetEmpty(), LOCTEXT("AddStateAlias", "Add State Alias"), LOCTEXT("AddStateAliasTooltip", "A new state alias"));
-		Action->NodeTemplate = NewObject<URuleAliasNode>(ContextMenuBuilder.OwnerOfTemporaries);
+		Action->NodeTemplate = NewObject<UDungeonRulesNode_Alias>(ContextMenuBuilder.OwnerOfTemporaries);
 	}
 
 	// Add conduit node
 	{
 		TSharedPtr<FDungeonRulesGraphSchemaAction_NewStateNode> Action = AddNewStateNodeAction(ContextMenuBuilder, FText::GetEmpty(), LOCTEXT("AddConduit", "Add Conduit"), LOCTEXT("AddConduitTooltip", "A new conduit state"));
-		Action->NodeTemplate = NewObject<URuleConduitNode>(ContextMenuBuilder.OwnerOfTemporaries);
+		Action->NodeTemplate = NewObject<UDungeonRulesNode_Conduit>(ContextMenuBuilder.OwnerOfTemporaries);
 	}
 
 	// Entry point (only if doesn't already exist)
@@ -325,7 +325,7 @@ void UDungeonRulesSchema::GetGraphContextActions(FGraphContextMenuBuilder& Conte
 		for (auto NodeIt = ContextMenuBuilder.CurrentGraph->Nodes.CreateConstIterator(); NodeIt; ++NodeIt)
 		{
 			UEdGraphNode* Node = *NodeIt;
-			if (const URuleEntryNode* StateNode = Cast<URuleEntryNode>(Node))
+			if (const UDungeonRulesNode_Begin* StateNode = Cast<UDungeonRulesNode_Begin>(Node))
 			{
 				bHasEntry = true;
 				break;
@@ -335,7 +335,7 @@ void UDungeonRulesSchema::GetGraphContextActions(FGraphContextMenuBuilder& Conte
 		if (!bHasEntry)
 		{
 			TSharedPtr<FDungeonRulesGraphSchemaAction_NewStateNode> Action = AddNewStateNodeAction(ContextMenuBuilder, FText::GetEmpty(), LOCTEXT("AddEntryPoint", "Add Entry Point"), LOCTEXT("AddEntryPointTooltip", "Define State Machine's Entry Point"));
-			Action->NodeTemplate = NewObject<URuleEntryNode>(ContextMenuBuilder.OwnerOfTemporaries);
+			Action->NodeTemplate = NewObject<UDungeonRulesNode_Begin>(ContextMenuBuilder.OwnerOfTemporaries);
 		}
 	}
 
@@ -362,7 +362,7 @@ void UDungeonRulesSchema::GetContextMenuActions(UToolMenu* Menu, UGraphNodeConte
 	check(Context && Context->Graph);
 	if (Context->Node)
 	{
-		FToolMenuSection& Section = Menu->AddSection("DungeonRulesMachineNodeActions", LOCTEXT("NodeActionsMenuHeader", "Node Actions"));
+		FToolMenuSection& Section = Menu->AddSection("DungeonRulesNodeActions", LOCTEXT("NodeActionsMenuHeader", "Node Actions"));
 		if (!Context->bIsDebugging)
 		{
 			// Node contextual actions
@@ -406,7 +406,7 @@ void UDungeonRulesSchema::DroppedAssetsOnGraph(const TArray<FAssetData>& Assets,
 	if(Asset != NULL && GetNodeClassForAsset(Asset->GetClass()))
 	{
 		// Spawn new state
-		URuleNode* NewStateNode = FDungeonRulesGraphSchemaAction_NewStateNode::SpawnNodeFromTemplate<URuleNode>(Graph, NewObject<URuleNode>(), GraphPosition);
+		UDungeonRulesNode_State* NewStateNode = FDungeonRulesGraphSchemaAction_NewStateNode::SpawnNodeFromTemplate<UDungeonRulesNode_State>(Graph, NewObject<UDungeonRulesNode_State>(), GraphPosition);
 
 		// Try to name the state close to the asset
 		FEdGraphUtilities::RenameGraphToNameOrCloseToName(NewStateNode->BoundGraph, Asset->GetName());
@@ -422,7 +422,7 @@ void UDungeonRulesSchema::DroppedAssetsOnGraph(const TArray<FAssetData>& Assets,
 void UDungeonRulesSchema::DroppedAssetsOnNode(const TArray<FAssetData>& Assets, const FVector2D& GraphPosition, UEdGraphNode* Node) const
 {
 	UAnimationAsset* Asset = FAssetData::GetFirstAsset<UAnimationAsset>(Assets);
-	URuleNode* StateNodeUnderCursor = Cast<URuleNode>(Node);
+	UDungeonRulesNode_State* StateNodeUnderCursor = Cast<UDungeonRulesNode_State>(Node);
 	if(Asset != NULL && StateNodeUnderCursor != NULL)
 	{
 		// Dropped onto a state machine state; try some user friendly resposnes
@@ -466,7 +466,7 @@ void UDungeonRulesSchema::GetAssetsNodeHoverMessage(const TArray<FAssetData>& As
 		return;
 	}
 
-	const URuleNode* StateNodeUnderCursor = Cast<const URuleNode>(HoverNode);
+	const UDungeonRulesNode_State* StateNodeUnderCursor = Cast<const UDungeonRulesNode_State>(HoverNode);
 	if (StateNodeUnderCursor != NULL)
 	{
 		OutOkIcon = true;

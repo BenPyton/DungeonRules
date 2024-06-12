@@ -7,37 +7,37 @@
 	DungeonRuleNode.cpp
 =============================================================================*/
 
-#include "RuleEntryNode.h"
+#include "DungeonRulesNode_Begin.h"
 #include "DungeonRulesSchema.h"
 #include "DungeonRulesEdTypes.h"
 
-#define LOCTEXT_NAMESPACE "RuleEntryNode"
+#define LOCTEXT_NAMESPACE "DungeonRulesNode_Begin"
 
 /////////////////////////////////////////////////////
-// URuleEntryNode
+// UDungeonRulesNode_Begin
 
-URuleEntryNode::URuleEntryNode(const FObjectInitializer& ObjectInitializer)
+UDungeonRulesNode_Begin::UDungeonRulesNode_Begin(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 }
 
-void URuleEntryNode::AllocateDefaultPins()
+void UDungeonRulesNode_Begin::AllocateDefaultPins()
 {
-	UEdGraphPin* Outputs = CreatePin(EGPD_Output, DungeonRulesPinCategory::Exec, TEXT("Entry"));
+	UEdGraphPin* Outputs = CreatePin(EGPD_Output, DungeonRulesPinCategory::Exec, TEXT("Begin"));
 }
 
-FText URuleEntryNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
+FText UDungeonRulesNode_Begin::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
 	UEdGraph* Graph = GetGraph();
 	return FText::FromString(Graph->GetName());
 }
 
-FText URuleEntryNode::GetTooltipText() const
+FText UDungeonRulesNode_Begin::GetTooltipText() const
 {
 	return LOCTEXT("StateEntryNodeTooltip", "Entry point for state machine");
 }
 
-UEdGraphNode* URuleEntryNode::GetOutputNode() const
+UEdGraphNode* UDungeonRulesNode_Begin::GetOutputNode() const
 {
 	if(Pins.Num() > 0 && Pins[0] != NULL)
 	{

@@ -4,11 +4,11 @@
 // (See accompanying file LICENSE or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 /*=============================================================================
-	RuleTransitionNode.cpp
+	DungeonRulesNode_Transition.cpp
 =============================================================================*/
 
-#include "RuleTransitionNode.h"
-#include "RuleConduitNode.h"
+#include "DungeonRulesNode_Transition.h"
+#include "DungeonRulesNode_Conduit.h"
 #include "DungeonRulesEdTypes.h"
 #include "DungeonRules.h"
 #include "EdGraphUtilities.h"
@@ -16,14 +16,14 @@
 #define LOCTEXT_NAMESPACE "A3Nodes"
 
 /////////////////////////////////////////////////////
-// URuleTransitionNode
+// UDungeonRulesNode_Transition
 
-URuleTransitionNode::URuleTransitionNode()
+UDungeonRulesNode_Transition::UDungeonRulesNode_Transition()
 	: Super()
 {
 }
 
-void URuleTransitionNode::AllocateDefaultPins()
+void UDungeonRulesNode_Transition::AllocateDefaultPins()
 {
 	UEdGraphPin* Inputs = CreatePin(EGPD_Input, DungeonRulesPinCategory::Transition, TEXT("In"));
 	Inputs->bHidden = true;
@@ -31,7 +31,7 @@ void URuleTransitionNode::AllocateDefaultPins()
 	Outputs->bHidden = true;
 }
 
-void URuleTransitionNode::PostPasteNode()
+void UDungeonRulesNode_Transition::PostPasteNode()
 {
 	Super::PostPasteNode();
 
@@ -47,10 +47,10 @@ void URuleTransitionNode::PostPasteNode()
 	}
 }
 
-FText URuleTransitionNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
+FText UDungeonRulesNode_Transition::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
-	URuleNodeBase* PrevState = GetPreviousState();
-	URuleNodeBase* NextState = GetNextState();
+	UDungeonRulesNode* PrevState = GetPreviousState();
+	UDungeonRulesNode* NextState = GetNextState();
 
 	if ((PrevState != NULL) && (NextState != NULL))
 	{
@@ -63,17 +63,17 @@ FText URuleTransitionNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 	return Super::GetNodeTitle(TitleType);
 }
 
-const UClass* URuleTransitionNode::GetInstanceClass() const
+const UClass* UDungeonRulesNode_Transition::GetInstanceClass() const
 {
 	return UDungeonRuleTransition::StaticClass();
 }
 
-FString URuleTransitionNode::GetStateName() const
+FString UDungeonRulesNode_Transition::GetStateName() const
 {
 	return TEXT("(null)");
 }
 
-TArray<FName> URuleTransitionNode::GetPropertyNamesToEdit() const
+TArray<FName> UDungeonRulesNode_Transition::GetPropertyNamesToEdit() const
 {
 	return {
 		GET_MEMBER_NAME_CHECKED(UDungeonRuleTransition, PriorityOrder),
@@ -81,11 +81,11 @@ TArray<FName> URuleTransitionNode::GetPropertyNamesToEdit() const
 	};
 }
 
-URuleNodeBase* URuleTransitionNode::GetPreviousState() const
+UDungeonRulesNode* UDungeonRulesNode_Transition::GetPreviousState() const
 {
 	if (Pins[0]->LinkedTo.Num() > 0)
 	{
-		return Cast<URuleNodeBase>(Pins[0]->LinkedTo[0]->GetOwningNode());
+		return Cast<UDungeonRulesNode>(Pins[0]->LinkedTo[0]->GetOwningNode());
 	}
 	else
 	{
@@ -93,11 +93,11 @@ URuleNodeBase* URuleTransitionNode::GetPreviousState() const
 	}
 }
 
-URuleNodeBase* URuleTransitionNode::GetNextState() const
+UDungeonRulesNode* UDungeonRulesNode_Transition::GetNextState() const
 {
 	if (Pins[1]->LinkedTo.Num() > 0)
 	{
-		return Cast<URuleNodeBase>(Pins[1]->LinkedTo[0]->GetOwningNode());
+		return Cast<UDungeonRulesNode>(Pins[1]->LinkedTo[0]->GetOwningNode());
 	}
 	else
 	{
@@ -105,12 +105,12 @@ URuleNodeBase* URuleTransitionNode::GetNextState() const
 	}
 }
 
-FLinearColor URuleTransitionNode::GetNodeTitleColor() const
+FLinearColor UDungeonRulesNode_Transition::GetNodeTitleColor() const
 {
 	return FColorList::Red;
 }
 
-void URuleTransitionNode::PinConnectionListChanged(UEdGraphPin* Pin)
+void UDungeonRulesNode_Transition::PinConnectionListChanged(UEdGraphPin* Pin)
 {
 	if (Pin->LinkedTo.Num() == 0)
 	{
@@ -127,7 +127,7 @@ void URuleTransitionNode::PinConnectionListChanged(UEdGraphPin* Pin)
 	}
 }
 
-void URuleTransitionNode::CreateConnections(URuleNodeBase* PreviousState, URuleNodeBase* NextState)
+void UDungeonRulesNode_Transition::CreateConnections(UDungeonRulesNode* PreviousState, UDungeonRulesNode* NextState)
 {
 	// Previous to this
 	Pins[0]->Modify();
@@ -144,9 +144,9 @@ void URuleTransitionNode::CreateConnections(URuleNodeBase* PreviousState, URuleN
 	Pins[1]->MakeLinkTo(NextState->GetInputPin());
 }
 
-void URuleTransitionNode::RelinkHead(URuleNodeBase* NewTargetState)
+void UDungeonRulesNode_Transition::RelinkHead(UDungeonRulesNode* NewTargetState)
 {
-	URuleNodeBase* TargetStateBeforeRelinking = GetNextState();
+	UDungeonRulesNode* TargetStateBeforeRelinking = GetNextState();
 
 	// Relink the target state of the transition node
 	Pins[1]->Modify();
@@ -154,26 +154,26 @@ void URuleTransitionNode::RelinkHead(URuleNodeBase* NewTargetState)
 	Pins[1]->MakeLinkTo(NewTargetState->GetInputPin());
 }
 
-TArray<URuleTransitionNode*> URuleTransitionNode::GetListTransitionNodesToRelink(UEdGraphPin* SourcePin, UEdGraphPin* OldTargetPin, const TArray<UEdGraphNode*>& InSelectedGraphNodes)
+TArray<UDungeonRulesNode_Transition*> UDungeonRulesNode_Transition::GetListTransitionNodesToRelink(UEdGraphPin* SourcePin, UEdGraphPin* OldTargetPin, const TArray<UEdGraphNode*>& InSelectedGraphNodes)
 {
-	URuleNodeBase* SourceState = Cast<URuleNodeBase>(SourcePin->GetOwningNode());
+	UDungeonRulesNode* SourceState = Cast<UDungeonRulesNode>(SourcePin->GetOwningNode());
 	if (SourceState == nullptr || SourceState->GetInputPin() == nullptr || SourceState->GetOutputPin() == nullptr)
 	{
 		return {};
 	}
 
 	// Collect all transition nodes starting at the source state
-	TArray<URuleTransitionNode*> TransitionNodeCandidates;
+	TArray<UDungeonRulesNode_Transition*> TransitionNodeCandidates;
 	SourceState->GetTransitionList(TransitionNodeCandidates);
 
 	// Remove the transition nodes from the candidates that are linked to a different target state.
 	for (int i = TransitionNodeCandidates.Num() - 1; i >= 0; i--)
 	{
-		URuleTransitionNode* CurrentTransition = TransitionNodeCandidates[i];
+		UDungeonRulesNode_Transition* CurrentTransition = TransitionNodeCandidates[i];
 
 		// Get the actual target states from the transition nodes
 		UEdGraphNode* TransitionTargetNode = CurrentTransition->GetNextState();
-		URuleTransitionNode* CastedOldTarget = Cast<URuleTransitionNode>(OldTargetPin->GetOwningNode());
+		UDungeonRulesNode_Transition* CastedOldTarget = Cast<UDungeonRulesNode_Transition>(OldTargetPin->GetOwningNode());
 		UEdGraphNode* OldTargetNode = CastedOldTarget->GetNextState();
 
 		// Compare the target states rather than comparing against the transition nodes
@@ -184,10 +184,10 @@ TArray<URuleTransitionNode*> URuleTransitionNode::GetListTransitionNodesToRelink
 	}
 
 	// Collect the subset of selected transitions from the list of possible transitions to be relinked
-	TSet<URuleTransitionNode*> SelectedTransitionNodes;
+	TSet<UDungeonRulesNode_Transition*> SelectedTransitionNodes;
 	for (UEdGraphNode* GraphNode : InSelectedGraphNodes)
 	{
-		URuleTransitionNode* TransitionNode = Cast<URuleTransitionNode>(GraphNode);
+		UDungeonRulesNode_Transition* TransitionNode = Cast<UDungeonRulesNode_Transition>(GraphNode);
 		if (!TransitionNode)
 		{
 			continue;
@@ -199,9 +199,9 @@ TArray<URuleTransitionNode*> URuleTransitionNode::GetListTransitionNodesToRelink
 		}
 	}
 
-	TArray<URuleTransitionNode*> Result;
+	TArray<UDungeonRulesNode_Transition*> Result;
 	Result.Reserve(TransitionNodeCandidates.Num());
-	for (URuleTransitionNode* TransitionNode : TransitionNodeCandidates)
+	for (UDungeonRulesNode_Transition* TransitionNode : TransitionNodeCandidates)
 	{
 		// Only relink the selected transitions. If none are selected, relink them all.
 		if (!SelectedTransitionNodes.IsEmpty() && SelectedTransitionNodes.Find(TransitionNode) == nullptr)
@@ -215,7 +215,7 @@ TArray<URuleTransitionNode*> URuleTransitionNode::GetListTransitionNodesToRelink
 	return Result;
 }
 
-void URuleTransitionNode::Serialize(FArchive& Ar)
+void UDungeonRulesNode_Transition::Serialize(FArchive& Ar)
 {
 	Super::Serialize(Ar);
 	Ar.UsingCustomVersion(FAnimPhysObjectVersion::GUID);

@@ -7,12 +7,12 @@
 	DungeonRuleNodeBase.cpp
 =============================================================================*/
 
-#include "RuleNodeBase.h"
+#include "DungeonRulesNode.h"
 #include "UObject/FrameworkObjectVersion.h"
 #include "DungeonRulesGraph.h"
 #include "DungeonRulesSchema.h"
 #include "Kismet2/KismetEditorUtilities.h"
-#include "RuleTransitionNode.h"
+#include "DungeonRulesNode_Transition.h"
 #include "DungeonRules.h"
 #include "Internationalization/Regex.h"
 
@@ -43,14 +43,14 @@ FString GetNodeUniqueName(UEdGraphNode* Node, const FString& DesiredName)
 class FDungeonRuleNodeNameValidator : public FStringSetNameValidator
 {
 public:
-	FDungeonRuleNodeNameValidator(const URuleNodeBase* InNode)
+	FDungeonRuleNodeNameValidator(const UDungeonRulesNode* InNode)
 		: FStringSetNameValidator(FString())
 	{
 		UDungeonRulesGraph* RulesGraph = CastChecked<UDungeonRulesGraph>(InNode->GetOuter());
 
-		TArray<URuleNodeBase*> Nodes;
-		RulesGraph->GetNodesOfClass<URuleNodeBase>(Nodes);
-		for (URuleNodeBase* Node : Nodes)
+		TArray<UDungeonRulesNode*> Nodes;
+		RulesGraph->GetNodesOfClass<UDungeonRulesNode>(Nodes);
+		for (UDungeonRulesNode* Node : Nodes)
 		{
 			if (Node != InNode)
 			{
@@ -63,12 +63,12 @@ public:
 /////////////////////////////////////////////////////
 // UDungeonRuleNodeBase
 
-URuleNodeBase::URuleNodeBase()
+UDungeonRulesNode::UDungeonRulesNode()
 	: Super()
 {
 }
 
-void URuleNodeBase::AutowireNewNode(UEdGraphPin* FromPin)
+void UDungeonRulesNode::AutowireNewNode(UEdGraphPin* FromPin)
 {
 	Super::AutowireNewNode(FromPin);
 
@@ -81,17 +81,17 @@ void URuleNodeBase::AutowireNewNode(UEdGraphPin* FromPin)
 	FromPin->GetOwningNode()->NodeConnectionListChanged();
 }
 
-UObject* URuleNodeBase::GetJumpTargetForDoubleClick() const
+UObject* UDungeonRulesNode::GetJumpTargetForDoubleClick() const
 {
 	return nullptr;
 }
 
-bool URuleNodeBase::CanJumpToDefinition() const
+bool UDungeonRulesNode::CanJumpToDefinition() const
 {
 	return GetJumpTargetForDoubleClick() != nullptr;
 }
 
-void URuleNodeBase::JumpToDefinition() const
+void UDungeonRulesNode::JumpToDefinition() const
 {
 	if (UObject* HyperlinkTarget = GetJumpTargetForDoubleClick())
 	{
@@ -99,17 +99,17 @@ void URuleNodeBase::JumpToDefinition() const
 	}
 }
 
-bool URuleNodeBase::CanCreateUnderSpecifiedSchema(const UEdGraphSchema* Schema) const
+bool UDungeonRulesNode::CanCreateUnderSpecifiedSchema(const UEdGraphSchema* Schema) const
 {
 	return Schema->IsA(UDungeonRulesSchema::StaticClass());
 }
 
-TSharedPtr<class INameValidatorInterface> URuleNodeBase::MakeNameValidator() const
+TSharedPtr<class INameValidatorInterface> UDungeonRulesNode::MakeNameValidator() const
 {
 	return MakeShareable(new FDungeonRuleNodeNameValidator(this));
 }
 
-FText URuleNodeBase::GetTooltipText() const
+FText UDungeonRulesNode::GetTooltipText() const
 {
 	if (INodeTooltip* TooltipInterface = Cast<INodeTooltip>(NodeInstance))
 		return TooltipInterface->GetNodeTooltip();
@@ -117,7 +117,7 @@ FText URuleNodeBase::GetTooltipText() const
 	return Super::GetTooltipText();
 }
 
-void URuleNodeBase::PrepareForCopying()
+void UDungeonRulesNode::PrepareForCopying()
 {
 	if (NodeInstance)
 	{
@@ -126,18 +126,18 @@ void URuleNodeBase::PrepareForCopying()
 	}
 }
 
-FString URuleNodeBase::GetDocumentationLink() const
+FString UDungeonRulesNode::GetDocumentationLink() const
 {
 	return TEXT("DungeonRules");
 }
 
-void URuleNodeBase::Serialize(FArchive& Ar)
+void UDungeonRulesNode::Serialize(FArchive& Ar)
 {
 	Super::Serialize(Ar);
 	Ar.UsingCustomVersion(FFrameworkObjectVersion::GUID);
 }
 
-void URuleNodeBase::PostLoad()
+void UDungeonRulesNode::PostLoad()
 {
 	Super::PostLoad();
 
@@ -162,7 +162,7 @@ void URuleNodeBase::PostLoad()
 	}
 }
 
-void URuleNodeBase::GetTransitionList(TArray<URuleTransitionNode*>& OutTransitions, bool bWantSortedList /*= false*/) const
+void UDungeonRulesNode::GetTransitionList(TArray<UDungeonRulesNode_Transition*>& OutTransitions, bool bWantSortedList /*= false*/) const
 {
 	UEdGraphPin* OutputPin = GetOutputPin();
 	if (!OutputPin)
@@ -172,7 +172,7 @@ void URuleNodeBase::GetTransitionList(TArray<URuleTransitionNode*>& OutTransitio
 	for (int32 LinkIndex = 0; LinkIndex < OutputPin->LinkedTo.Num(); ++LinkIndex)
 	{
 		UEdGraphNode* TargetNode = OutputPin->LinkedTo[LinkIndex]->GetOwningNode();
-		if (URuleTransitionNode* Transition = Cast<URuleTransitionNode>(TargetNode))
+		if (UDungeonRulesNode_Transition* Transition = Cast<UDungeonRulesNode_Transition>(TargetNode))
 		{
 			OutTransitions.Add(Transition);
 		}
@@ -184,7 +184,7 @@ void URuleNodeBase::GetTransitionList(TArray<URuleTransitionNode*>& OutTransitio
 	{
 		struct FCompareTransitionsByPriority
 		{
-			FORCEINLINE bool operator()(const URuleTransitionNode& A, const URuleTransitionNode& B) const
+			FORCEINLINE bool operator()(const UDungeonRulesNode_Transition& A, const UDungeonRulesNode_Transition& B) const
 			{
 				return A.PriorityOrder < B.PriorityOrder;
 			}
@@ -195,14 +195,14 @@ void URuleNodeBase::GetTransitionList(TArray<URuleTransitionNode*>& OutTransitio
 #endif
 }
 
-void URuleNodeBase::PostPasteNode()
+void UDungeonRulesNode::PostPasteNode()
 {
 	// Deep copy the pasted rule instance
 	CreateInstance(NodeInstance != nullptr);
 	Super::PostPasteNode();
 }
 
-void URuleNodeBase::PostPlacedNewNode()
+void UDungeonRulesNode::PostPlacedNewNode()
 {
 	if (NodeInstance)
 		return;
@@ -210,7 +210,7 @@ void URuleNodeBase::PostPlacedNewNode()
 	CreateInstance();
 }
 
-void URuleNodeBase::OnRenameNode(const FString& NewName)
+void UDungeonRulesNode::OnRenameNode(const FString& NewName)
 {
 	INodeName* NameInterface = Cast<INodeName>(NodeInstance);
 	if (!NameInterface)
@@ -220,26 +220,26 @@ void URuleNodeBase::OnRenameNode(const FString& NewName)
 	NameInterface->OnNodeRename(NewName);
 }
 
-FText URuleNodeBase::GetNodeTitle(ENodeTitleType::Type TitleType) const
+FText UDungeonRulesNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
 	return FText::FromString(GetStateName());
 }
 
-void URuleNodeBase::PostCopyNode()
+void UDungeonRulesNode::PostCopyNode()
 {
 	ResetInstanceOwner();
 }
 
 #if WITH_EDITOR
 
-void URuleNodeBase::PostEditImport()
+void UDungeonRulesNode::PostEditImport()
 {
 	ResetInstanceOwner();
 	if (NodeInstance)
 		InitializeInstance();
 }
 
-void URuleNodeBase::PostEditUndo()
+void UDungeonRulesNode::PostEditUndo()
 {
 	UEdGraphNode::PostEditUndo();
 	ResetInstanceOwner();
@@ -247,7 +247,7 @@ void URuleNodeBase::PostEditUndo()
 
 #endif
 
-void URuleNodeBase::CreateInstance(bool bDuplicateInstance /* = false*/)
+void UDungeonRulesNode::CreateInstance(bool bDuplicateInstance /* = false*/)
 {
 	UEdGraph* Graph = GetGraph();
 	UObject* GraphOwner = Graph ? Graph->GetOuter() : nullptr;
@@ -283,7 +283,7 @@ void URuleNodeBase::CreateInstance(bool bDuplicateInstance /* = false*/)
 		InitializeInstance();
 }
 
-void URuleNodeBase::ResetInstanceOwner()
+void UDungeonRulesNode::ResetInstanceOwner()
 {
 	if (NodeInstance)
 	{

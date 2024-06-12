@@ -10,19 +10,19 @@
 class STextEntryPopup;
 class SToolTip;
 class SWidget;
-class URuleTransitionNode;
+class UDungeonRulesNode_Transition;
 class UObject;
 struct FGeometry;
 struct FPointerEvent;
 struct FSlateBrush;
 
-class SGraphNodeDungeonRuleTransition : public SGraphNode
+class SGraphNodeDungeonRules_Transition : public SGraphNode
 {
 public:
-	SLATE_BEGIN_ARGS(SGraphNodeDungeonRuleTransition){}
+	SLATE_BEGIN_ARGS(SGraphNodeDungeonRules_Transition){}
 	SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs, URuleTransitionNode* InNode);
+	void Construct(const FArguments& InArgs, UDungeonRulesNode_Transition* InNode);
 
 	//~ Begin SNodePanel::SNode Interface
 	virtual void MoveTo(const FVector2D& NewPosition, FNodeSet& NodeFilter, bool bMarkDirty = true) override;
@@ -43,7 +43,7 @@ public:
 	// Calculate position for multiple nodes to be placed between a start and end point, by providing this nodes index and max expected nodes 
 	void PositionBetweenTwoNodesWithOffset(const FGeometry& StartGeom, const FGeometry& EndGeom, int32 NodeIndex, int32 MaxNodes) const;
 
-	static FLinearColor StaticGetTransitionColor(URuleTransitionNode* TransNode, bool bIsHovered);
+	static FLinearColor StaticGetTransitionColor(UDungeonRulesNode_Transition* TransNode, bool bIsHovered);
 
 private:
 	TSharedPtr<STextEntryPopup> TextEntryWidget;

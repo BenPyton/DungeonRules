@@ -19,10 +19,10 @@ public:
 
 	// Entry node within the state machine
 	UPROPERTY()
-	TObjectPtr<class URuleEntryNode> EntryNode;
+	TObjectPtr<class UDungeonRulesNode_Begin> BeginNode;
 
 	UPROPERTY()
-	TObjectPtr<class URuleExitNode> ExitNode;
+	TObjectPtr<class UDungeonRulesNode_Stop> StopNode;
 
 	virtual void OnSave();
 

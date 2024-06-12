@@ -9,14 +9,14 @@
 #include "DungeonRules.h"
 #include "DungeonRulesGraph.h"
 #include "DungeonRulesSchema.h"
-#include "Nodes/RuleNodeBase.h"
+#include "Nodes/DungeonRulesNode.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "GraphEditorActions.h"
 #include "EdGraphUtilities.h"
 #include "SNodePanel.h" // GetSnapGridSize
-#include "DetailCustomizations/DungeonDetailsCustomization.h"
+#include "DetailCustomizations/DungeonRulesDetailsCustomization.h"
 
 #define LOCTEXT_NAMESPACE "DungeonRulesEditor"
 
@@ -270,7 +270,7 @@ void FDungeonRulesToolkit::CreateInternalWidgets()
 	DetailsWidget = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
 	DetailsWidget->SetObject(DungeonRules);
 	DetailsWidget->RegisterInstancedCustomPropertyLayout(UEdGraphNode::StaticClass(), FOnGetDetailCustomizationInstance::CreateStatic(&FEditorGraphNodeNameDetails::MakeInstance, this));
-	DetailsWidget->RegisterInstancedCustomPropertyLayout(URuleNodeBase::StaticClass(), FOnGetDetailCustomizationInstance::CreateStatic(&FDungeonRuleNodeBaseDetails::MakeInstance));
+	DetailsWidget->RegisterInstancedCustomPropertyLayout(UDungeonRulesNode::StaticClass(), FOnGetDetailCustomizationInstance::CreateStatic(&FDungeonRuleNodeBaseDetails::MakeInstance));
 }
 
 void FDungeonRulesToolkit::SaveAsset_Execute()
@@ -344,7 +344,7 @@ void FDungeonRulesToolkit::OnSelectedNodesChanged(const TSet<class UObject*>& Ne
 		for (UObject* SelectedObj : NewSelection)
 		{
 #if false // TODO: Should be removed, the detail customizations take care of that now.
-			if (URuleNodeBase* GraphNode = Cast<URuleNodeBase>(SelectedObj))
+			if (UDungeonRulesNode* GraphNode = Cast<UDungeonRulesNode>(SelectedObj))
 			{
 				Selection.Add(GraphNode->GetNodeInstance());
 			}
@@ -481,7 +481,7 @@ void FDungeonRulesToolkit::CopySelectedNodes()
 
 	for (UObject* SelectedObj : SelectedNodes)
 	{
-		URuleNodeBase* Node = Cast<URuleNodeBase>(SelectedObj);
+		UDungeonRulesNode* Node = Cast<UDungeonRulesNode>(SelectedObj);
 		if (Node && Node->CanDuplicateNode())
 		{
 			NodesToCopy.Add(Node);
@@ -496,7 +496,7 @@ void FDungeonRulesToolkit::CopySelectedNodes()
 
 	for (UObject* CopiedNode : NodesToCopy)
 	{
-		URuleNodeBase* Node = Cast<URuleNodeBase>(CopiedNode);
+		UDungeonRulesNode* Node = Cast<UDungeonRulesNode>(CopiedNode);
 		if (Node)
 			Node->PostCopyNode();
 	}

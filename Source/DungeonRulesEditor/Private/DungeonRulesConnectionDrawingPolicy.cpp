@@ -4,10 +4,10 @@
 // (See accompanying file LICENSE or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 #include "DungeonRulesConnectionDrawingPolicy.h"
-#include "Nodes/RuleConduitNode.h"
-#include "Nodes/RuleEntryNode.h"
-#include "Nodes/RuleTransitionNode.h"
-#include "NodeSlates/SGraphNodeDungeonRuleTransition.h"
+#include "Nodes/DungeonRulesNode_Conduit.h"
+#include "Nodes/DungeonRulesNode_Begin.h"
+#include "Nodes/DungeonRulesNode_Transition.h"
+#include "NodeSlates/SGraphNodeDungeonRules_Transition.h"
 
 class FSlateRect;
 class SWidget;
@@ -31,10 +31,10 @@ void FDungeonRulesConnectionDrawingPolicy::DetermineWiringStyle(UEdGraphPin* Out
 
 	if (InputPin)
 	{
-		if (URuleTransitionNode* TransNode = Cast<URuleTransitionNode>(InputPin->GetOwningNode()))
+		if (UDungeonRulesNode_Transition* TransNode = Cast<UDungeonRulesNode_Transition>(InputPin->GetOwningNode()))
 		{
 			const bool IsInputPinHovered = HoveredPins.Contains(InputPin);
-			Params.WireColor = SGraphNodeDungeonRuleTransition::StaticGetTransitionColor(TransNode, IsInputPinHovered);
+			Params.WireColor = SGraphNodeDungeonRules_Transition::StaticGetTransitionColor(TransNode, IsInputPinHovered);
 		}
 	}
 
@@ -63,7 +63,7 @@ void FDungeonRulesConnectionDrawingPolicy::DetermineWiringStyle(UEdGraphPin* Out
 		if (OutputPin->GetOwningNode()->NodeGuid == SourcePinHandle.NodeGuid)
 		{
 			// Safety check to verify if the node is a transition node
-			if (URuleTransitionNode* TransitonNode = Cast<URuleTransitionNode>(InputPin->GetOwningNode()))
+			if (UDungeonRulesNode_Transition* TransitonNode = Cast<UDungeonRulesNode_Transition>(InputPin->GetOwningNode()))
 			{
 				if (UEdGraphPin* TransitionOutputPin = TransitonNode->GetOutputPin())
 				{
@@ -86,18 +86,18 @@ void FDungeonRulesConnectionDrawingPolicy::DetermineLinkGeometry(
 	/*out*/ FArrangedWidget*& EndWidgetGeometry
 	)
 {
-	if (URuleEntryNode* EntryNode = Cast<URuleEntryNode>(OutputPin->GetOwningNode()))
+	if (UDungeonRulesNode_Begin* EntryNode = Cast<UDungeonRulesNode_Begin>(OutputPin->GetOwningNode()))
 	{
 		StartWidgetGeometry = PinGeometries->Find(OutputPinWidget);
 
-		URuleNodeBase* State = CastChecked<URuleNodeBase>(InputPin->GetOwningNode());
+		UDungeonRulesNode* State = CastChecked<UDungeonRulesNode>(InputPin->GetOwningNode());
 		int32 StateIndex = NodeWidgetMap.FindChecked(State);
 		EndWidgetGeometry = &(ArrangedNodes[StateIndex]);
 	}
-	else if (URuleTransitionNode* TransNode = Cast<URuleTransitionNode>(InputPin->GetOwningNode()))
+	else if (UDungeonRulesNode_Transition* TransNode = Cast<UDungeonRulesNode_Transition>(InputPin->GetOwningNode()))
 	{
-		URuleNodeBase* PrevState = TransNode->GetPreviousState();
-		URuleNodeBase* NextState = TransNode->GetNextState();
+		UDungeonRulesNode* PrevState = TransNode->GetPreviousState();
+		UDungeonRulesNode* NextState = TransNode->GetNextState();
 		if ((PrevState != NULL) && (NextState != NULL))
 		{
 			int32* PrevNodeIndex = NodeWidgetMap.Find(PrevState);
@@ -233,9 +233,9 @@ void FDungeonRulesConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVec
 		int32 NumRelinkedTransitions = 0;
 		for (const FRelinkConnection& Connection : RelinkConnections)
 		{
-			NumRelinkedTransitions += URuleTransitionNode::GetListTransitionNodesToRelink(Connection.SourcePin, Connection.TargetPin, SelectedGraphNodes).Num();
+			NumRelinkedTransitions += UDungeonRulesNode_Transition::GetListTransitionNodesToRelink(Connection.SourcePin, Connection.TargetPin, SelectedGraphNodes).Num();
 
-			if (URuleEntryNode* EntryNode = Cast<URuleEntryNode>(Connection.SourcePin->GetOwningNode()))
+			if (UDungeonRulesNode_Begin* EntryNode = Cast<UDungeonRulesNode_Begin>(Connection.SourcePin->GetOwningNode()))
 			{
 				NumRelinkedTransitions += 1;
 			}
@@ -318,12 +318,12 @@ FVector2D FDungeonRulesConnectionDrawingPolicy::Internal_FindLineAnchorPoint(con
 {
 	if (Pin)
 	{
-		const URuleConduitNode* Conduit = Cast<URuleConduitNode>(Pin->GetOwningNode());
+		const UDungeonRulesNode_Conduit* Conduit = Cast<UDungeonRulesNode_Conduit>(Pin->GetOwningNode());
 		if (!Conduit)
 		{
-			if (const URuleTransitionNode* Transition = Cast<URuleTransitionNode>(Pin->GetOwningNode()))
+			if (const UDungeonRulesNode_Transition* Transition = Cast<UDungeonRulesNode_Transition>(Pin->GetOwningNode()))
 			{
-				Conduit = Cast<URuleConduitNode>((Pin->Direction == EGPD_Input) ? Transition->GetNextState() : Transition->GetPreviousState());
+				Conduit = Cast<UDungeonRulesNode_Conduit>((Pin->Direction == EGPD_Input) ? Transition->GetNextState() : Transition->GetPreviousState());
 			}
 		}
 

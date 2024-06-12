@@ -7,12 +7,12 @@
 
 #include "CoreMinimal.h"
 #include "EdGraph/EdGraphNode.h"
-#include "RuleEntryNode.generated.h"
+#include "DungeonRulesNode_Begin.generated.h"
 
 class UObject;
 
 UCLASS(MinimalAPI)
-class URuleEntryNode : public UEdGraphNode
+class UDungeonRulesNode_Begin : public UEdGraphNode
 {
 	GENERATED_UCLASS_BODY()
 

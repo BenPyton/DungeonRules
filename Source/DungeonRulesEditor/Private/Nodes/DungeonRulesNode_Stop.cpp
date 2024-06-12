@@ -7,32 +7,32 @@
 	DungeonRuleNode.cpp
 =============================================================================*/
 
-#include "RuleExitNode.h"
+#include "DungeonRulesNode_Stop.h"
 #include "DungeonRulesSchema.h"
 #include "DungeonRulesEdTypes.h"
 
-#define LOCTEXT_NAMESPACE "RuleExitNode"
+#define LOCTEXT_NAMESPACE "DungeonRulesNode_Stop"
 
 /////////////////////////////////////////////////////
-// URuleExitNode
+// UDungeonRulesNode_Stop
 
-URuleExitNode::URuleExitNode()
+UDungeonRulesNode_Stop::UDungeonRulesNode_Stop()
 	: Super()
 {
 }
 
-void URuleExitNode::AllocateDefaultPins()
+void UDungeonRulesNode_Stop::AllocateDefaultPins()
 {
-	UEdGraphPin* Inputs = CreatePin(EGPD_Input, DungeonRulesPinCategory::Exec, TEXT("Exit"));
+	UEdGraphPin* Inputs = CreatePin(EGPD_Input, DungeonRulesPinCategory::Exec, TEXT("Stop"));
 }
 
-FText URuleExitNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
+FText UDungeonRulesNode_Stop::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
 	UEdGraph* Graph = GetGraph();
 	return FText::FromString(Graph->GetName());
 }
 
-FText URuleExitNode::GetTooltipText() const
+FText UDungeonRulesNode_Stop::GetTooltipText() const
 {
 	return LOCTEXT("DungeonRuleExitNodeTooltip", "Exit point for state machine");
 }

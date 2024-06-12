@@ -6,18 +6,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RuleNodeBase.h"
-#include "RuleExitNode.generated.h"
+#include "DungeonRulesNode.h"
+#include "DungeonRulesNode_Stop.generated.h"
 
 class UObject;
 
 UCLASS(MinimalAPI)
-class URuleExitNode : public URuleNodeBase
+class UDungeonRulesNode_Stop : public UDungeonRulesNode
 {
 	GENERATED_BODY()
 
 public:
-	URuleExitNode();
+	UDungeonRulesNode_Stop();
 
 	//~ Begin UEdGraphNode Interface
 	virtual void AllocateDefaultPins() override;
@@ -27,8 +27,8 @@ public:
 	virtual bool CanUserDeleteNode() const override { return false; }
 	//~ End UEdGraphNode Interface
 	
-	//~ Begin URuleNodeBase Interface
+	//~ Begin UDungeonRulesNode Interface
 	virtual UEdGraphPin* GetInputPin() const override { return Pins[0]; }
-	virtual FString GetStateName() const override { return TEXT("Exit"); }
-	//~ End URuleNodeBase Interface
+	virtual FString GetStateName() const override { return TEXT("Stop"); }
+	//~ End UDungeonRulesNode Interface
 };

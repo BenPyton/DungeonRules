@@ -8,17 +8,17 @@
 #include "SGraphNode.h"
 
 class SGraphPin;
-class URuleExitNode;
+class UDungeonRulesNode_Begin;
 struct FGraphInformationPopupInfo;
 struct FNodeInfoContext;
 
-class SGraphNodeDungeonRuleExit : public SGraphNode
+class SGraphNodeDungeonRules_Begin : public SGraphNode
 {
 public:
-	SLATE_BEGIN_ARGS(SGraphNodeDungeonRuleExit){}
+	SLATE_BEGIN_ARGS(SGraphNodeDungeonRules_Begin){}
 	SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs, URuleExitNode* InNode);
+	void Construct(const FArguments& InArgs, UDungeonRulesNode_Begin* InNode);
 
 	//~ Begin SGraphNode Interface
 	virtual void UpdateGraphNode() override;

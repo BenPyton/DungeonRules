@@ -51,7 +51,7 @@ private:
 	FDungeonRulesToolkit* ToolkitPtr {nullptr};
 };
 
-/** Details customization for URuleNodeBase instances */
+/** Details customization for UDungeonRulesNode instances */
 class FDungeonRuleNodeBaseDetails : public IDetailCustomization
 {
 public:
@@ -70,5 +70,5 @@ public:
 	//~ End IDetailCustomization Interface
 
 private:
-	TWeakObjectPtr<class URuleNodeBase> RuleNodePtr;
+	TWeakObjectPtr<class UDungeonRulesNode> RuleNodePtr;
 };

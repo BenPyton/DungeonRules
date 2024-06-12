@@ -1,22 +1,22 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "DungeonRuleAliasNodeDetails.h"
-#include "Nodes/RuleAliasNode.h"
-#include "Nodes/RuleNode.h"
+#include "DungeonRulesNode_AliasDetails.h"
+#include "Nodes/DungeonRulesNode_Alias.h"
+#include "Nodes/DungeonRulesNode_State.h"
 #include "DungeonRulesGraph.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
 
-#define LOCTEXT_NAMESPACE "FDungeonRuleAliasNodeDetails"
+#define LOCTEXT_NAMESPACE "FDungeonRulesNode_AliasDetails"
 
 /////////////////////////////////////////////////////////////////////////
 
-TSharedRef<IDetailCustomization> FDungeonRuleAliasNodeDetails::MakeInstance()
+TSharedRef<IDetailCustomization> FDungeonRulesNode_AliasDetails::MakeInstance()
 {
-	return MakeShareable( new FDungeonRuleAliasNodeDetails);
+	return MakeShareable( new FDungeonRulesNode_AliasDetails);
 }
 
-void FDungeonRuleAliasNodeDetails::CustomizeDetails( IDetailLayoutBuilder& DetailBuilder )
+void FDungeonRulesNode_AliasDetails::CustomizeDetails( IDetailLayoutBuilder& DetailBuilder )
 {
 	// Get a handle to the node we're viewing
 	const TArray< TWeakObjectPtr<UObject> >& SelectedObjects = DetailBuilder.GetSelectedObjects();
@@ -26,10 +26,10 @@ void FDungeonRuleAliasNodeDetails::CustomizeDetails( IDetailLayoutBuilder& Detai
 	}
 
 	const TWeakObjectPtr<UObject>& CurrentObject = SelectedObjects[0];
-	URuleAliasNode* StateAliasNode = nullptr;
+	UDungeonRulesNode_Alias* StateAliasNode = nullptr;
 	if (CurrentObject.IsValid())
 	{
-		StateAliasNodeWeak = StateAliasNode = Cast<URuleAliasNode>(CurrentObject.Get());
+		StateAliasNodeWeak = StateAliasNode = Cast<UDungeonRulesNode_Alias>(CurrentObject.Get());
 	}
 
 	if (StateAliasNode == nullptr)
@@ -40,12 +40,12 @@ void FDungeonRuleAliasNodeDetails::CustomizeDetails( IDetailLayoutBuilder& Detai
 	GenerateStatePickerDetails(*StateAliasNode, DetailBuilder);
 }
 
-void FDungeonRuleAliasNodeDetails::GetReferenceableStates(const URuleAliasNode& OwningNode, TSet<TWeakObjectPtr<URuleNodeBase>>& OutStates) const
+void FDungeonRulesNode_AliasDetails::GetReferenceableStates(const UDungeonRulesNode_Alias& OwningNode, TSet<TWeakObjectPtr<UDungeonRulesNode>>& OutStates) const
 {
 	UDungeonRulesGraph* DungeonRules = CastChecked<UDungeonRulesGraph>(OwningNode.GetOuter());
 
-	TArray<URuleNode*> Nodes;
-	DungeonRules->GetNodesOfClass<URuleNode>(Nodes);
+	TArray<UDungeonRulesNode_State*> Nodes;
+	DungeonRules->GetNodesOfClass<UDungeonRulesNode_State>(Nodes);
 	for (auto NodeIt = Nodes.CreateIterator(); NodeIt; ++NodeIt)
 	{
 		auto Node = *NodeIt;
@@ -53,9 +53,9 @@ void FDungeonRuleAliasNodeDetails::GetReferenceableStates(const URuleAliasNode& 
 	}
 }
 
-bool FDungeonRuleAliasNodeDetails::IsGlobalAlias() const
+bool FDungeonRulesNode_AliasDetails::IsGlobalAlias() const
 {
-	if (URuleAliasNode* StateAliasNode = StateAliasNodeWeak.Get())
+	if (UDungeonRulesNode_Alias* StateAliasNode = StateAliasNodeWeak.Get())
 	{
 		return StateAliasNode->bGlobalAlias;
 	}
@@ -63,9 +63,9 @@ bool FDungeonRuleAliasNodeDetails::IsGlobalAlias() const
 	return false;
 }
 
-void FDungeonRuleAliasNodeDetails::OnPropertyAliasAllStatesCheckboxChanged(ECheckBoxState NewState)
+void FDungeonRulesNode_AliasDetails::OnPropertyAliasAllStatesCheckboxChanged(ECheckBoxState NewState)
 {
-	if (URuleAliasNode* StateAliasNode = StateAliasNodeWeak.Get())
+	if (UDungeonRulesNode_Alias* StateAliasNode = StateAliasNodeWeak.Get())
 	{
 		FScopedTransaction Transaction(LOCTEXT("Undo_SelectAllAliasState", "Select all state alias"));
 
@@ -81,9 +81,9 @@ void FDungeonRuleAliasNodeDetails::OnPropertyAliasAllStatesCheckboxChanged(EChec
 	}
 }
 
-ECheckBoxState FDungeonRuleAliasNodeDetails::AreAllStatesAliased() const
+ECheckBoxState FDungeonRulesNode_AliasDetails::AreAllStatesAliased() const
 {
-	if (const URuleAliasNode* StateAliasNode = StateAliasNodeWeak.Get())
+	if (const UDungeonRulesNode_Alias* StateAliasNode = StateAliasNodeWeak.Get())
 	{
 		const int32 NumAlisedStates = StateAliasNode->GetAliasedStates().Num();
 		const int32 NumStates = ReferenceableStates.Num();
@@ -101,12 +101,12 @@ ECheckBoxState FDungeonRuleAliasNodeDetails::AreAllStatesAliased() const
 	return ECheckBoxState::Undetermined;
 }
 
-void FDungeonRuleAliasNodeDetails::OnPropertyIsStateAliasedCheckboxChanged(ECheckBoxState NewState, const TWeakObjectPtr<URuleNodeBase> StateNodeWeak)
+void FDungeonRulesNode_AliasDetails::OnPropertyIsStateAliasedCheckboxChanged(ECheckBoxState NewState, const TWeakObjectPtr<UDungeonRulesNode> StateNodeWeak)
 {
 	if (!StateNodeWeak.IsValid())
 		return;
 
-	if (URuleAliasNode* StateAliasNode = StateAliasNodeWeak.Get())
+	if (UDungeonRulesNode_Alias* StateAliasNode = StateAliasNodeWeak.Get())
 	{
 		FScopedTransaction Transaction(LOCTEXT("Undo_AliasState", "Select state alias"));
 
@@ -122,11 +122,11 @@ void FDungeonRuleAliasNodeDetails::OnPropertyIsStateAliasedCheckboxChanged(EChec
 	}
 }
 
-ECheckBoxState FDungeonRuleAliasNodeDetails::IsStateAliased(const TWeakObjectPtr<URuleNodeBase> StateNodeWeak) const
+ECheckBoxState FDungeonRulesNode_AliasDetails::IsStateAliased(const TWeakObjectPtr<UDungeonRulesNode> StateNodeWeak) const
 {
-	if (const URuleNodeBase* StateNode = StateNodeWeak.Get())
+	if (const UDungeonRulesNode* StateNode = StateNodeWeak.Get())
 	{
-		if (const URuleAliasNode* StateAliasNode = StateAliasNodeWeak.Get())
+		if (const UDungeonRulesNode_Alias* StateAliasNode = StateAliasNodeWeak.Get())
 		{
 			if (StateAliasNode->GetAliasedStates().Find(StateNodeWeak))
 			{
@@ -138,7 +138,7 @@ ECheckBoxState FDungeonRuleAliasNodeDetails::IsStateAliased(const TWeakObjectPtr
 	return ECheckBoxState::Unchecked;
 }
 
-void FDungeonRuleAliasNodeDetails::GenerateStatePickerDetails(URuleAliasNode& AliasNode, IDetailLayoutBuilder& DetailBuilder)
+void FDungeonRulesNode_AliasDetails::GenerateStatePickerDetails(UDungeonRulesNode_Alias& AliasNode, IDetailLayoutBuilder& DetailBuilder)
 {
 	ReferenceableStates.Reset();
 	GetReferenceableStates(AliasNode, ReferenceableStates);
@@ -146,7 +146,7 @@ void FDungeonRuleAliasNodeDetails::GenerateStatePickerDetails(URuleAliasNode& Al
 	if (ReferenceableStates.Num() > 0)
 	{
 		IDetailCategoryBuilder& CategoryBuilder = DetailBuilder.EditCategory(FName(TEXT("Rule Alias")));
-		CategoryBuilder.AddProperty(GET_MEMBER_NAME_CHECKED(URuleAliasNode, bGlobalAlias));
+		CategoryBuilder.AddProperty(GET_MEMBER_NAME_CHECKED(UDungeonRulesNode_Alias, bGlobalAlias));
 
 		FDetailWidgetRow& HeaderWidgetRow = CategoryBuilder.AddCustomRow(LOCTEXT("SelectAll", "Select All"));
 
@@ -174,8 +174,8 @@ void FDungeonRuleAliasNodeDetails::GenerateStatePickerDetails(URuleAliasNode& Al
 				.VAlign(VAlign_Center)
 				[
 					SNew(SCheckBox)
-					.IsChecked(this, &FDungeonRuleAliasNodeDetails::AreAllStatesAliased)
-					.OnCheckStateChanged(this, &FDungeonRuleAliasNodeDetails::OnPropertyAliasAllStatesCheckboxChanged)
+					.IsChecked(this, &FDungeonRulesNode_AliasDetails::AreAllStatesAliased)
+					.OnCheckStateChanged(this, &FDungeonRulesNode_AliasDetails::OnPropertyAliasAllStatesCheckboxChanged)
 					.IsEnabled_Lambda([this]() -> bool 
 						{
 							return !IsGlobalAlias();
@@ -185,8 +185,8 @@ void FDungeonRuleAliasNodeDetails::GenerateStatePickerDetails(URuleAliasNode& Al
 
 		for (auto StateIt = ReferenceableStates.CreateConstIterator(); StateIt; ++StateIt)
 		{
-			const TWeakObjectPtr<URuleNodeBase>& StateNodeWeak = *StateIt;
-			if (const URuleNodeBase* StateNode = StateNodeWeak.Get())
+			const TWeakObjectPtr<UDungeonRulesNode>& StateNodeWeak = *StateIt;
+			if (const UDungeonRulesNode* StateNode = StateNodeWeak.Get())
 			{
 				FString StateName = StateNode->GetStateName();
 				FText StateText = FText::FromString(StateName);
@@ -210,8 +210,8 @@ void FDungeonRuleAliasNodeDetails::GenerateStatePickerDetails(URuleAliasNode& Al
 						.VAlign(VAlign_Center)
 						[
 							SNew(SCheckBox)
-							.IsChecked(this, &FDungeonRuleAliasNodeDetails::IsStateAliased, StateNodeWeak)
-							.OnCheckStateChanged(this, &FDungeonRuleAliasNodeDetails::OnPropertyIsStateAliasedCheckboxChanged, StateNodeWeak)
+							.IsChecked(this, &FDungeonRulesNode_AliasDetails::IsStateAliased, StateNodeWeak)
+							.OnCheckStateChanged(this, &FDungeonRulesNode_AliasDetails::OnPropertyIsStateAliasedCheckboxChanged, StateNodeWeak)
 							.IsEnabled_Lambda([this]() -> bool 
 								{
 								return !IsGlobalAlias();

@@ -1,14 +1,14 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "DungeonDetailsCustomization.h"
+#include "DungeonRulesDetailsCustomization.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
 #include "EdGraphNode_Comment.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SMultiLineEditableTextBox.h"
-#include "Nodes/RuleNodeBase.h"
+#include "Nodes/DungeonRulesNode.h"
 
-#define LOCTEXT_NAMESPACE "DungeonDetailsCustomization"
+#define LOCTEXT_NAMESPACE "DungeonRulesDetailsCustomization"
 
 namespace BlueprintDocumentationDetailDefs
 {
@@ -195,7 +195,7 @@ void FDungeonRuleNodeBaseDetails::CustomizeDetails(IDetailLayoutBuilder& DetailL
 	{
 		if (SelectedObjects[0].IsValid() && SelectedObjects[0]->IsA<UEdGraphNode>())
 		{
-			RuleNodePtr = Cast<URuleNodeBase>(SelectedObjects[0].Get());
+			RuleNodePtr = Cast<UDungeonRulesNode>(SelectedObjects[0].Get());
 		}
 	}
 

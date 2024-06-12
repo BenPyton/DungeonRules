@@ -6,21 +6,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RuleNodeBase.h"
-#include "RuleAliasNode.generated.h"
+#include "DungeonRulesNode.h"
+#include "DungeonRulesNode_Alias.generated.h"
 
 class FArchive;
-class URuleNode;
+class UDungeonRulesNode_State;
 class UEdGraph;
 class UEdGraphPin;
 class UObject;
 
 UCLASS(MinimalAPI)
-class URuleAliasNode : public URuleNodeBase
+class UDungeonRulesNode_Alias : public UDungeonRulesNode
 {
 	GENERATED_BODY()
 public:
-	URuleAliasNode();
+	UDungeonRulesNode_Alias();
 
 	// This will alias any state. Takes into account new states created after this alias has been setup.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State Alias")
@@ -39,24 +39,24 @@ public:
 	virtual void OnRenameNode(const FString& NewName) override;
 	//~ End UEdGraphNode Interface
 
-	//~ Begin URuleNodeBase Interface
+	//~ Begin UDungeonRulesNode Interface
 	virtual UEdGraphPin* GetInputPin() const override;
 	virtual UEdGraphPin* GetOutputPin() const override;
 	virtual FString GetStateName() const override;
 	virtual FString GetDesiredNewNodeName() const override;
 	UObject* GetJumpTargetForDoubleClick() const;
-	//~ End URuleNodeBase Interface
+	//~ End UDungeonRulesNode Interface
 	
-	DUNGEONRULESEDITOR_API const TSet<TWeakObjectPtr<URuleNodeBase>>& GetAliasedStates() const;
-	DUNGEONRULESEDITOR_API TSet<TWeakObjectPtr<URuleNodeBase>>& GetAliasedStates();
+	DUNGEONRULESEDITOR_API const TSet<TWeakObjectPtr<UDungeonRulesNode>>& GetAliasedStates() const;
+	DUNGEONRULESEDITOR_API TSet<TWeakObjectPtr<UDungeonRulesNode>>& GetAliasedStates();
 
 	// Returns null if aliasing more than one state.
-	DUNGEONRULESEDITOR_API URuleNodeBase* GetAliasedState() const;
+	DUNGEONRULESEDITOR_API UDungeonRulesNode* GetAliasedState() const;
 
 private:
 
 	void RebuildAliasedStateNodeReferences();
 
 	UPROPERTY()
-	TSet<TWeakObjectPtr<URuleNodeBase>> AliasedStateNodes;
+	TSet<TWeakObjectPtr<UDungeonRulesNode>> AliasedStateNodes;
 };

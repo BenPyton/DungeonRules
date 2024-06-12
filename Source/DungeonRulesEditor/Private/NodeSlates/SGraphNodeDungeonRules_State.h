@@ -9,8 +9,8 @@
 
 class SGraphPin;
 class SToolTip;
-class URuleConduitNode;
-class URuleNodeBase;
+class UDungeonRulesNode_Conduit;
+class UDungeonRulesNode;
 class UEdGraphNode;
 struct FGeometry;
 struct FGraphInformationPopupInfo;
@@ -18,13 +18,13 @@ struct FNodeInfoContext;
 struct FPointerEvent;
 struct FSlateBrush;
 
-class SGraphNodeDungeonRule : public SGraphNode
+class SGraphNodeDungeonRules_State : public SGraphNode
 {
 public:
-	SLATE_BEGIN_ARGS(SGraphNodeDungeonRule){}
+	SLATE_BEGIN_ARGS(SGraphNodeDungeonRules_State){}
 	SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs, URuleNodeBase* InNode);
+	void Construct(const FArguments& InArgs, UDungeonRulesNode* InNode);
 
 	// SGraphNode interface
 	virtual void UpdateGraphNode() override;

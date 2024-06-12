@@ -4,9 +4,9 @@
 // (See accompanying file LICENSE or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 
-#include "SGraphNodeDungeonRuleTransition.h"
-#include "Nodes/RuleNodeBase.h"
-#include "Nodes/RuleTransitionNode.h"
+#include "SGraphNodeDungeonRules_Transition.h"
+#include "Nodes/DungeonRulesNode.h"
+#include "Nodes/DungeonRulesNode_Transition.h"
 #include "DungeonRules.h"
 #include "ConnectionDrawingPolicy.h"
 #include "Layout/Geometry.h"
@@ -22,27 +22,27 @@ struct FSlateBrush;
 #define LOCTEXT_NAMESPACE "TransitionNodes"
 
 /////////////////////////////////////////////////////
-// SGraphNodeDungeonRuleTransition
+// SGraphNodeDungeonRules_Transition
 
-void SGraphNodeDungeonRuleTransition::Construct(const FArguments& InArgs, URuleTransitionNode* InNode)
+void SGraphNodeDungeonRules_Transition::Construct(const FArguments& InArgs, UDungeonRulesNode_Transition* InNode)
 {
 	this->GraphNode = InNode;
 	this->UpdateGraphNode();
 }
 
-void SGraphNodeDungeonRuleTransition::MoveTo(const FVector2D& NewPosition, FNodeSet& NodeFilter, bool bMarkDirty)
+void SGraphNodeDungeonRules_Transition::MoveTo(const FVector2D& NewPosition, FNodeSet& NodeFilter, bool bMarkDirty)
 {
 	// Ignored; position is set by the location of the attached state nodes
 }
 
-bool SGraphNodeDungeonRuleTransition::RequiresSecondPassLayout() const
+bool SGraphNodeDungeonRules_Transition::RequiresSecondPassLayout() const
 {
 	return true;
 }
 
-void SGraphNodeDungeonRuleTransition::PerformSecondPassLayout(const TMap< UObject*, TSharedRef<SNode> >& NodeToWidgetLookup) const
+void SGraphNodeDungeonRules_Transition::PerformSecondPassLayout(const TMap< UObject*, TSharedRef<SNode> >& NodeToWidgetLookup) const
 {
-	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
+	UDungeonRulesNode_Transition* TransNode = CastChecked<UDungeonRulesNode_Transition>(GraphNode);
 
 	// Find the geometry of the state nodes we're connecting
 	FGeometry StartGeom;
@@ -51,8 +51,8 @@ void SGraphNodeDungeonRuleTransition::PerformSecondPassLayout(const TMap< UObjec
 	int32 TransIndex = 0;
 	int32 NumOfTrans = 1;
 
-	URuleNodeBase* PrevState = TransNode->GetPreviousState();
-	URuleNodeBase* NextState = TransNode->GetNextState();
+	UDungeonRulesNode* PrevState = TransNode->GetPreviousState();
+	UDungeonRulesNode* NextState = TransNode->GetNextState();
 	if ((PrevState != NULL) && (NextState != NULL))
 	{
 		const TSharedRef<SNode>* pPrevNodeWidget = NodeToWidgetLookup.Find(PrevState);
@@ -65,10 +65,10 @@ void SGraphNodeDungeonRuleTransition::PerformSecondPassLayout(const TMap< UObjec
 			StartGeom = FGeometry(FVector2D(PrevState->NodePosX, PrevState->NodePosY), FVector2D::ZeroVector, PrevNodeWidget->GetDesiredSize(), 1.0f);
 			EndGeom = FGeometry(FVector2D(NextState->NodePosX, NextState->NodePosY), FVector2D::ZeroVector, NextNodeWidget->GetDesiredSize(), 1.0f);
 
-			TArray<URuleTransitionNode*> Transitions;
+			TArray<UDungeonRulesNode_Transition*> Transitions;
 			PrevState->GetTransitionList(Transitions);
 
-			Transitions = Transitions.FilterByPredicate([NextState](const URuleTransitionNode* InTransition) -> bool
+			Transitions = Transitions.FilterByPredicate([NextState](const UDungeonRulesNode_Transition* InTransition) -> bool
 			{
 				return InTransition->GetNextState() == NextState;
 			});
@@ -84,9 +84,9 @@ void SGraphNodeDungeonRuleTransition::PerformSecondPassLayout(const TMap< UObjec
 	PositionBetweenTwoNodesWithOffset(StartGeom, EndGeom, TransIndex, NumOfTrans);
 }
 
-TSharedRef<SWidget> SGraphNodeDungeonRuleTransition::GenerateRichTooltip()
+TSharedRef<SWidget> SGraphNodeDungeonRules_Transition::GenerateRichTooltip()
 {
-	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
+	UDungeonRulesNode_Transition* TransNode = CastChecked<UDungeonRulesNode_Transition>(GraphNode);
 
 	TSharedRef<SVerticalBox> Widget = SNew(SVerticalBox);
 
@@ -121,7 +121,7 @@ TSharedRef<SWidget> SGraphNodeDungeonRuleTransition::GenerateRichTooltip()
 	return Widget;
 }
 
-TSharedPtr<SToolTip> SGraphNodeDungeonRuleTransition::GetComplexTooltip()
+TSharedPtr<SToolTip> SGraphNodeDungeonRules_Transition::GetComplexTooltip()
 {
 	return SNew(SToolTip)
 		[
@@ -129,7 +129,7 @@ TSharedPtr<SToolTip> SGraphNodeDungeonRuleTransition::GetComplexTooltip()
 		];
 }
 
-void SGraphNodeDungeonRuleTransition::UpdateGraphNode()
+void SGraphNodeDungeonRules_Transition::UpdateGraphNode()
 {
 	InputPins.Empty();
 	OutputPins.Empty();
@@ -148,14 +148,14 @@ void SGraphNodeDungeonRuleTransition::UpdateGraphNode()
 			[
 				SNew(SImage)
 				.Image( FAppStyle::GetBrush("Graph.TransitionNode.ColorSpill") )
-				.ColorAndOpacity( this, &SGraphNodeDungeonRuleTransition::GetTransitionColor )
+				.ColorAndOpacity( this, &SGraphNodeDungeonRules_Transition::GetTransitionColor )
 			]
 #if false // TODO: should be kept or removed?
 			+SOverlay::Slot()
 			[
 				// TODO: remove icon and write the priority number instead
 				SNew(SImage)
-				.Image( this, &SGraphNodeDungeonRuleTransition::GetTransitionIconImage )
+				.Image( this, &SGraphNodeDungeonRules_Transition::GetTransitionIconImage )
 			]
 #endif
 			+ SOverlay::Slot()
@@ -164,7 +164,7 @@ void SGraphNodeDungeonRuleTransition::UpdateGraphNode()
 			.Padding(5.0f)
 			[
 				SNew(STextBlock)
-				.Text(this, &SGraphNodeDungeonRuleTransition::GetTransitionPriorityOrder)
+				.Text(this, &SGraphNodeDungeonRules_Transition::GetTransitionPriorityOrder)
 				.ColorAndOpacity(FLinearColor::Black)
 				.Justification(ETextJustify::Center)
 				.MinDesiredWidth(15.0f)
@@ -172,12 +172,12 @@ void SGraphNodeDungeonRuleTransition::UpdateGraphNode()
 		];
 }
 
-FText SGraphNodeDungeonRuleTransition::GetPreviewCornerText(bool bReverse) const
+FText SGraphNodeDungeonRules_Transition::GetPreviewCornerText(bool bReverse) const
 {
-	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
+	UDungeonRulesNode_Transition* TransNode = CastChecked<UDungeonRulesNode_Transition>(GraphNode);
 
-	URuleNodeBase* PrevState = (bReverse ? TransNode->GetNextState() : TransNode->GetPreviousState());
-	URuleNodeBase* NextState = (bReverse ? TransNode->GetPreviousState() : TransNode->GetNextState());
+	UDungeonRulesNode* PrevState = (bReverse ? TransNode->GetNextState() : TransNode->GetPreviousState());
+	UDungeonRulesNode* NextState = (bReverse ? TransNode->GetPreviousState() : TransNode->GetNextState());
 
 	FText Result = LOCTEXT("BadTransition", "Bad transition (missing source or target)");
 
@@ -189,7 +189,7 @@ FText SGraphNodeDungeonRuleTransition::GetPreviewCornerText(bool bReverse) const
 			const UDungeonRuleTransition* TransitionInstance = TransNode->GetNodeInstance<UDungeonRuleTransition>();
 			int32 ThisPriorityOrder = TransitionInstance->PriorityOrder;
 
-			TArray<URuleTransitionNode*> TransitionFromSource;
+			TArray<UDungeonRulesNode_Transition*> TransitionFromSource;
 			PrevState->GetTransitionList(/*out*/ TransitionFromSource);
 
 			bool bMultiplePriorities = false;
@@ -221,7 +221,7 @@ FText SGraphNodeDungeonRuleTransition::GetPreviewCornerText(bool bReverse) const
 	return Result;
 }
 
-FLinearColor SGraphNodeDungeonRuleTransition::StaticGetTransitionColor(URuleTransitionNode* TransNode, bool bIsHovered)
+FLinearColor SGraphNodeDungeonRules_Transition::StaticGetTransitionColor(UDungeonRulesNode_Transition* TransNode, bool bIsHovered)
 {
 	//@TODO: Make configurable by styling
 	const FLinearColor HoverColor(0.724f, 0.256f, 0.0f, 1.0f);
@@ -229,29 +229,29 @@ FLinearColor SGraphNodeDungeonRuleTransition::StaticGetTransitionColor(URuleTran
 	return bIsHovered ? HoverColor : BaseColor;
 }
 
-FSlateColor SGraphNodeDungeonRuleTransition::GetTransitionColor() const
+FSlateColor SGraphNodeDungeonRules_Transition::GetTransitionColor() const
 {	
 	// Highlight the transition node when the node is hovered or when the previous state is hovered
-	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
+	UDungeonRulesNode_Transition* TransNode = CastChecked<UDungeonRulesNode_Transition>(GraphNode);
 	return StaticGetTransitionColor(TransNode, (IsHovered() || (PrevStateNodeWidgetPtr.IsValid() && PrevStateNodeWidgetPtr.Pin()->IsHovered())));
 }
 
-const FSlateBrush* SGraphNodeDungeonRuleTransition::GetTransitionIconImage() const
+const FSlateBrush* SGraphNodeDungeonRules_Transition::GetTransitionIconImage() const
 {
-	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
+	UDungeonRulesNode_Transition* TransNode = CastChecked<UDungeonRulesNode_Transition>(GraphNode);
 	return FAppStyle::GetBrush("Graph.TransitionNode.Icon");
 }
 
-FText SGraphNodeDungeonRuleTransition::GetTransitionPriorityOrder() const
+FText SGraphNodeDungeonRules_Transition::GetTransitionPriorityOrder() const
 {
-	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
+	UDungeonRulesNode_Transition* TransNode = CastChecked<UDungeonRulesNode_Transition>(GraphNode);
 	const UDungeonRuleTransition* TransInstance = TransNode->GetNodeInstance<UDungeonRuleTransition>();
 	return TransInstance ? FText::AsNumber(TransInstance->PriorityOrder) : FText::FromString("?");
 }
 
-void SGraphNodeDungeonRuleTransition::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+void SGraphNodeDungeonRules_Transition::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
+	UDungeonRulesNode_Transition* TransNode = CastChecked<UDungeonRulesNode_Transition>(GraphNode);
 	if (UEdGraphPin* Pin = TransNode->GetInputPin())
 	{
 		GetOwnerPanel()->AddPinToHoverSet(Pin);
@@ -260,9 +260,9 @@ void SGraphNodeDungeonRuleTransition::OnMouseEnter(const FGeometry& MyGeometry, 
 	SGraphNode::OnMouseEnter(MyGeometry, MouseEvent);
 }
 
-void SGraphNodeDungeonRuleTransition::OnMouseLeave(const FPointerEvent& MouseEvent)
+void SGraphNodeDungeonRules_Transition::OnMouseLeave(const FPointerEvent& MouseEvent)
 {	
-	URuleTransitionNode* TransNode = CastChecked<URuleTransitionNode>(GraphNode);
+	UDungeonRulesNode_Transition* TransNode = CastChecked<UDungeonRulesNode_Transition>(GraphNode);
 	if (UEdGraphPin* Pin = TransNode->GetInputPin())
 	{
 		GetOwnerPanel()->RemovePinFromHoverSet(Pin);
@@ -271,7 +271,7 @@ void SGraphNodeDungeonRuleTransition::OnMouseLeave(const FPointerEvent& MouseEve
 	SGraphNode::OnMouseLeave(MouseEvent);
 }
 
-void SGraphNodeDungeonRuleTransition::PositionBetweenTwoNodesWithOffset(const FGeometry& StartGeom, const FGeometry& EndGeom, int32 NodeIndex, int32 MaxNodes) const
+void SGraphNodeDungeonRules_Transition::PositionBetweenTwoNodesWithOffset(const FGeometry& StartGeom, const FGeometry& EndGeom, int32 NodeIndex, int32 MaxNodes) const
 {
 	// Get a reasonable seed point (halfway between the boxes)
 	const FVector2D StartCenter = FGeometryHelper::CenterOf(StartGeom);

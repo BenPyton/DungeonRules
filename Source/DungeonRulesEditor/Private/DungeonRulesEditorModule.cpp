@@ -5,9 +5,9 @@
 
 #include "DungeonRulesEditorModule.h"
 #include "DungeonRulesEdLog.h"
-#include "Nodes/RuleAliasNode.h"
+#include "Nodes/DungeonRulesNode_Alias.h"
 #include "Factories/DungeonRulesVisualFactories.h"
-#include "DetailCustomizations/DungeonRuleAliasNodeDetails.h"
+#include "DetailCustomizations/DungeonRulesNode_AliasDetails.h"
 #include "EdGraphUtilities.h"
 #include "Styling/SlateStyleRegistry.h"
 #include "Interfaces/IPluginManager.h"
@@ -41,7 +41,7 @@ void FDungeonRulesEditorModule::StartupModule()
 	// Register detail customizations
 	{
 		auto& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-		REGISTER_CUSTOM_CLASS_DETAILS(URuleAliasNode, FDungeonRuleAliasNodeDetails);
+		REGISTER_CUSTOM_CLASS_DETAILS(UDungeonRulesNode_Alias, FDungeonRulesNode_AliasDetails);
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
 
@@ -75,7 +75,7 @@ void FDungeonRulesEditorModule::ShutdownModule()
 	// Unregister detail customizations
 	{
 		auto& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-		UNREGISTER_CUSTOM_CLASS_DETAILS(URuleAliasNode);
+		UNREGISTER_CUSTOM_CLASS_DETAILS(UDungeonRulesNode_Alias);
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
 
