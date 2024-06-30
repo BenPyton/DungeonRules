@@ -8,6 +8,7 @@
 #include "CoreMinimal.h"
 #include "RuleTransitionCondition.h"
 #include "DungeonRulesTypes.h"
+#include "Templates/SubclassOf.h"
 #include "DRT_RoomClassCount.generated.h"
 
 UCLASS(meta = (DisplayName = "Room Count (Class)"))
