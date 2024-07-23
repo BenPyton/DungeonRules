@@ -7,13 +7,16 @@
 #include "DungeonRules.h"
 #include "DungeonRulesLog.h"
 
+#define CHECK_RULES(RETURN_VALUE) \
+if (!DungeonRules) \
+{ \
+	RulesLog_Error("Missing DungeonRules data in the Dungeon Generator '%s'", *GetNameSafe(this)); \
+	return RETURN_VALUE; \
+}
+
 URoomData* ADungeonGeneratorWithRules::ChooseFirstRoomData_Implementation()
 {
-	if (!DungeonRules)
-	{
-		RulesLog_Error("Missing DungeonRules data in the Dungeon Generator '%s'", *GetNameSafe(this));
-		return nullptr;
-	}
+	CHECK_RULES(nullptr);
 
 	if (!CurrentRule)
 	{
@@ -27,11 +30,7 @@ URoomData* ADungeonGeneratorWithRules::ChooseFirstRoomData_Implementation()
 
 URoomData* ADungeonGeneratorWithRules::ChooseNextRoomData_Implementation(const URoomData* CurrentRoom, const FDoorDef& DoorData, int& DoorIndex)
 {
-	if (!DungeonRules)
-	{
-		RulesLog_Error("Missing DungeonRules data in the Dungeon Generator '%s'", *GetNameSafe(this));
-		return nullptr;
-	}
+	CHECK_RULES(nullptr);
 
 	if (!CurrentRule)
 	{
@@ -47,39 +46,60 @@ URoomData* ADungeonGeneratorWithRules::ChooseNextRoomData_Implementation(const U
 //{
 //}
 
-//bool ADungeonGeneratorWithRules::IsValidDungeon_Implementation()
-//{
-//}
+bool ADungeonGeneratorWithRules::IsValidDungeon_Implementation()
+{
+	CHECK_RULES(false);
+	return DungeonRules->IsDungeonValid(this);
+}
 
 bool ADungeonGeneratorWithRules::ContinueToAddRoom_Implementation()
 {
-	if (!DungeonRules)
-	{
-		RulesLog_Error("Missing DungeonRules data in the Dungeon Generator '%s'", *GetNameSafe(this));
-		return false;
-	}
-
+	CHECK_RULES(false);
 	return CurrentRule != nullptr;
+}
+
+void ADungeonGeneratorWithRules::InitializeDungeon_Implementation(const UDungeonGraph* Rooms)
+{
+	CHECK_RULES();
+	DungeonRules->InitializeDungeon(this, Rooms);
+}
+
+void ADungeonGeneratorWithRules::OnPreGeneration_Implementation()
+{
+	CHECK_RULES();
+	DungeonRules->OnPreGeneration(this);
+}
+
+void ADungeonGeneratorWithRules::OnPostGeneration_Implementation()
+{
+	CHECK_RULES();
+	DungeonRules->OnPostGeneration(this);
 }
 
 void ADungeonGeneratorWithRules::OnGenerationInit_Implementation()
 {
-	if (!DungeonRules)
-	{
-		RulesLog_Error("Missing DungeonRules data in the Dungeon Generator '%s'", *GetNameSafe(this));
-		return;
-	}
-
+	CHECK_RULES();
+	DungeonRules->OnGenerationInit(this);
 	CurrentRule = DungeonRules->GetFirstRule();
+}
+
+void ADungeonGeneratorWithRules::OnGenerationFailed_Implementation()
+{
+	CHECK_RULES();
+	DungeonRules->OnGenerationFailed(this);
 }
 
 void ADungeonGeneratorWithRules::OnRoomAdded_Implementation(const URoomData* NewRoom)
 {
-	if (!DungeonRules)
-	{
-		RulesLog_Error("Missing DungeonRules data in the Dungeon Generator '%s'", *GetNameSafe(this));
-		return;
-	}
-
+	CHECK_RULES();
+	DungeonRules->OnRoomAdded(this, NewRoom);
 	CurrentRule = DungeonRules->GetNextRule(this, CurrentRule, NewRoom);
 }
+
+void ADungeonGeneratorWithRules::OnFailedToAddRoom_Implementation(const URoomData* FromRoom, const FDoorDef& FromDoor)
+{
+	CHECK_RULES();
+	DungeonRules->OnFailedToAddRoom(this, FromRoom, FromDoor);
+}
+
+#undef CHECK_RULES

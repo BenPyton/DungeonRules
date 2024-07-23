@@ -357,8 +357,8 @@ void FDungeonRulesToolkit::OnSelectedNodesChanged(const TSet<class UObject*>& Ne
 	}
 	else
 	{
-		// No need for now
-		//Selection.Add(DungeonRules);
+		// @TODO: Maybe create a details panel specifically for the rules asset?
+		Selection.Add(DungeonRules);
 	}
 
 	if (DetailsWidget.IsValid())
