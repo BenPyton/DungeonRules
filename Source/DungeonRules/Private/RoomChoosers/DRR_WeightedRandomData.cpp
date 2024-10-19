@@ -3,10 +3,10 @@
 // Distributed under the Boost Software License, Version 1.0. 
 // (See accompanying file LICENSE or copy at https://www.boost.org/LICENSE_1_0.txt)
 
-
 #include "RoomChoosers/DRR_WeightedRandomData.h"
 #include "RoomData.h"
 #include "DungeonGenerator.h"
+#include "RoomData.h"
 
 #define LOCTEXT_NAMESPACE "UDRR_WeightedRandomData"
 
@@ -23,7 +23,7 @@ URoomData* UDRR_WeightedRandomData::ChooseFirstRoomData_Implementation(ADungeonG
 	return Generator->GetRandomRoomDataWeighted(WeightedMap);
 }
 
-URoomData* UDRR_WeightedRandomData::ChooseNextRoomData_Implementation(ADungeonGenerator* Generator, const URoomData* PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const
+URoomData* UDRR_WeightedRandomData::ChooseNextRoomData_Implementation(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const
 {
 	check(IsValid(Generator));
 
@@ -42,4 +42,3 @@ FText UDRR_WeightedRandomData::GetDescription_Implementation() const
 }
 
 #undef LOCTEXT_NAMESPACE
-

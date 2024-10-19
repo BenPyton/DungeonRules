@@ -4,15 +4,16 @@
 // (See accompanying file LICENSE or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 #include "DungeonRules.h"
+#include "Room.h" // IReadOnlyRoom
 #include "RoomData.h"
 #include "DungeonGenerator.h"
 #include "DungeonRulesLog.h"
 #include "DungeonRoomChooser.h"
 #include "RuleTransitionCondition.h"
 
-bool UDungeonRuleTransition::CheckCondition(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
+bool UDungeonRuleTransition::CheckCondition(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const
 {
-	UE_LOG(LogTemp, Log, TEXT("[%s] Transition Check Condition"), *GetNameSafe(PreviousRoom));
+	UE_LOG(LogTemp, Log, TEXT("[%s] Transition Check Condition"), *GetNameSafe(PreviousRoom->GetRoomData()));
 	if (const IDungeonConditionProvider* ConditionProvider = Cast<IDungeonConditionProvider>(NextRule.GetObject()))
 	{
 		UE_LOG(LogTemp, Log, TEXT("NextRule has condition"));
@@ -43,7 +44,7 @@ FText UDungeonRuleTransition::GetNodeTooltip() const
 	return Condition->GetDescription();
 }
 
-TOptional<const UDungeonRule*> UDungeonRuleTransition::GetNextRuleFromTransitionList(ADungeonGenerator* Generator, const URoomData* PreviousRoom, const TArray<TWeakObjectPtr<const UDungeonRuleTransition>>& Transitions, const UObject* Context /*= nullptr*/)
+TOptional<const UDungeonRule*> UDungeonRuleTransition::GetNextRuleFromTransitionList(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom, const TArray<TWeakObjectPtr<const UDungeonRuleTransition>>& Transitions, const UObject* Context /*= nullptr*/)
 {
 	TOptional<const UDungeonRule*> NextRule;
 	int32 CurrentPriority = INT32_MAX;
@@ -71,7 +72,7 @@ TOptional<const UDungeonRule*> UDungeonRuleTransition::GetNextRuleFromTransition
 
 //////////////////////////////////////////////////////////////////////
 
-TOptional<const UDungeonRule*> UDungeonRule::GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
+TOptional<const UDungeonRule*> UDungeonRule::GetNextRule(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const
 {
 	return UDungeonRuleTransition::GetNextRuleFromTransitionList(Generator, PreviousRoom, Transitions, this);
 }
@@ -99,15 +100,15 @@ void UDungeonRule::AddTransition(const UDungeonRuleTransition* Transition)
 
 ///////////////////////////////////////////////////////////////////
 
-const UDungeonRule* URuleConduit::GetRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
+const UDungeonRule* URuleConduit::GetRule(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const
 {
 	auto NextRule = UDungeonRuleTransition::GetNextRuleFromTransitionList(Generator, PreviousRoom, Transitions, this);
 	return NextRule.IsSet() ? NextRule.GetValue() : nullptr;
 }
 
-bool URuleConduit::CheckCondition(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
+bool URuleConduit::CheckCondition(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const
 {
-	UE_LOG(LogTemp, Log, TEXT("[%s] Conduit Check Condition"), *GetNameSafe(PreviousRoom));
+	UE_LOG(LogTemp, Log, TEXT("[%s] Conduit Check Condition"), *GetNameSafe(PreviousRoom->GetRoomData()));
 	// Returns true if at least one output is valid.
 	for (const auto& Transition : Transitions)
 	{
@@ -162,7 +163,7 @@ URoomData* UDungeonRules::GetFirstRoomData(ADungeonGenerator* Generator, const U
 	return Room;
 }
 
-URoomData* UDungeonRules::GetNextRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const URoomData* PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const
+URoomData* UDungeonRules::GetNextRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const TScriptInterface<IReadOnlyRoom>& PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const
 {
 	if (!IsValid(CurrentRule))
 	{
@@ -187,16 +188,16 @@ URoomData* UDungeonRules::GetNextRoomData(ADungeonGenerator* Generator, const UD
 	return Room;
 }
 
-const UDungeonRule* UDungeonRules::GetNextRule(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const URoomData* Room) const
+const UDungeonRule* UDungeonRules::GetNextRule(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const
 {
 	if (!IsValid(CurrentRule))
 		return nullptr;
 
-	TOptional<const UDungeonRule*> NextRule = CurrentRule->GetNextRule(Generator, Room);
+	TOptional<const UDungeonRule*> NextRule = CurrentRule->GetNextRule(Generator, PreviousRoom);
 	if (NextRule.IsSet())
 		return NextRule.GetValue();
 
-	NextRule = UDungeonRuleTransition::GetNextRuleFromTransitionList(Generator, Room, GlobalTransitions, this);
+	NextRule = UDungeonRuleTransition::GetNextRuleFromTransitionList(Generator, PreviousRoom, GlobalTransitions, this);
 	return NextRule.IsSet() ? NextRule.GetValue() : CurrentRule;
 }
 

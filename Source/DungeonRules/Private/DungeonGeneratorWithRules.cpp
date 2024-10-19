@@ -25,7 +25,7 @@ URoomData* ADungeonGeneratorWithRules::ChooseFirstRoomData_Implementation()
 	return FirstRoom;
 }
 
-URoomData* ADungeonGeneratorWithRules::ChooseNextRoomData_Implementation(const URoomData* CurrentRoom, const FDoorDef& DoorData, int& DoorIndex)
+URoomData* ADungeonGeneratorWithRules::ChooseNextRoomData_Implementation(const URoomData* CurrentRoom, const TScriptInterface<IReadOnlyRoom>& CurrentRoomInstance, const FDoorDef& DoorData, int& DoorIndex)
 {
 	if (!DungeonRules)
 	{
@@ -39,7 +39,8 @@ URoomData* ADungeonGeneratorWithRules::ChooseNextRoomData_Implementation(const U
 		return nullptr;
 	}
 
-	URoomData* NextRoom = DungeonRules->GetNextRoomData(this, CurrentRule, CurrentRoom, DoorData, DoorIndex);
+	DoorIndex = -1;
+	URoomData* NextRoom = DungeonRules->GetNextRoomData(this, CurrentRule, CurrentRoomInstance, DoorData, DoorIndex);
 	return NextRoom;
 }
 
@@ -73,7 +74,7 @@ void ADungeonGeneratorWithRules::OnGenerationInit_Implementation()
 	CurrentRule = DungeonRules->GetFirstRule();
 }
 
-void ADungeonGeneratorWithRules::OnRoomAdded_Implementation(const URoomData* NewRoom)
+void ADungeonGeneratorWithRules::OnRoomAdded_Implementation(const URoomData* NewRoom, const TScriptInterface<IReadOnlyRoom>& RoomInstance)
 {
 	if (!DungeonRules)
 	{
@@ -81,5 +82,5 @@ void ADungeonGeneratorWithRules::OnRoomAdded_Implementation(const URoomData* New
 		return;
 	}
 
-	CurrentRule = DungeonRules->GetNextRule(this, CurrentRule, NewRoom);
+	CurrentRule = DungeonRules->GetNextRule(this, CurrentRule, RoomInstance);
 }

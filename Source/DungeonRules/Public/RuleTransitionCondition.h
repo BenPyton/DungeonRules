@@ -7,10 +7,12 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "UObject/ScriptInterface.h"
 #include "RuleTransitionCondition.generated.h"
 
 class URoomData;
 class ADungeonGenerator;
+class IReadOnlyRoom;
 
 UCLASS(Abstract, Blueprintable, BlueprintType, EditInlineNew)
 class DUNGEONRULES_API URuleTransitionCondition : public UObject
@@ -19,7 +21,7 @@ class DUNGEONRULES_API URuleTransitionCondition : public UObject
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Dungeon Rules")
-	bool Check(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
+	bool Check(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Dungeon Rules")
 	FText GetDescription() const;

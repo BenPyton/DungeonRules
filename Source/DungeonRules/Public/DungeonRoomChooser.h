@@ -7,11 +7,13 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "UObject/ScriptInterface.h"
 #include "ProceduralDungeonTypes.h"
 #include "DungeonRoomChooser.generated.h"
 
 class URoomData;
 class ADungeonGenerator;
+class IReadOnlyRoom;
 
 UCLASS(Abstract, Blueprintable, BlueprintType, EditInlineNew)
 class DUNGEONRULES_API UDungeonRoomChooser : public UObject
@@ -23,7 +25,7 @@ public:
 	URoomData* ChooseFirstRoomData(ADungeonGenerator* Generator) const;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Dungeon Rules", meta = (DisplayName = "Choose Next Room", ReturnDisplayName = "Room Data", AutoCreateRefTerm = "DoorIndex"))
-	URoomData* ChooseNextRoomData(ADungeonGenerator* Generator, const URoomData* PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const;
+	URoomData* ChooseNextRoomData(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Dungeon Rules")
 	FText GetDescription() const;

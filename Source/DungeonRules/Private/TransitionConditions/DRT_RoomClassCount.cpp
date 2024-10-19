@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "DRT_RoomClassCount"
 
-bool UDRT_RoomClassCount::Check_Implementation(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
+bool UDRT_RoomClassCount::Check_Implementation(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const
 {
 	check(IsValid(Generator));
 	const int Result = (RoomClassToCount.Num() > 0)

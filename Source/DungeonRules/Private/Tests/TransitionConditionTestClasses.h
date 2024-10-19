@@ -23,7 +23,7 @@ class UDRT_True : public URuleTransitionCondition
 	GENERATED_BODY()
 
 public:
-	virtual bool Check_Implementation(ADungeonGenerator*, const URoomData*) const override { return true; }
+	virtual bool Check_Implementation(ADungeonGenerator*, const TScriptInterface<IReadOnlyRoom>&) const override { return true; }
 };
 
 // Transition condition that always return false.
@@ -33,5 +33,5 @@ class UDRT_False : public URuleTransitionCondition
 	GENERATED_BODY()
 
 public:
-	virtual bool Check_Implementation(ADungeonGenerator*, const URoomData*) const override { return false; }
+	virtual bool Check_Implementation(ADungeonGenerator*, const TScriptInterface<IReadOnlyRoom>&) const override { return false; }
 };

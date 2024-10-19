@@ -8,7 +8,7 @@
 
 #define LOCTEXT_NAMESPACE "DRT_LogicalOperator"
 
-bool UDRT_LogicalOperator::Check_Implementation(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
+bool UDRT_LogicalOperator::Check_Implementation(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const
 {
 	// If there is no condition, by default the transition pass.
 	// So if there is no condition in an AND or an OR, the transition must pass too.
