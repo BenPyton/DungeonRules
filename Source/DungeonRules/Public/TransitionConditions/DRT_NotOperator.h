@@ -16,7 +16,7 @@ class DUNGEONRULES_API UDRT_NotOperator : public URuleTransitionCondition
 
 public:
 	//~ Begin URuleTransitionCondition Interface
-	virtual bool Check_Implementation(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const override;
+	virtual bool Check_Implementation(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const override;
 	virtual FText GetDescription_Implementation() const override;
 	//~ End URuleTransitionCondition Interface
 

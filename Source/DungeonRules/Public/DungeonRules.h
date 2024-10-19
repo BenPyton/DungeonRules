@@ -36,13 +36,13 @@ public:
 	TScriptInterface<IDungeonRuleProvider> NextRule {nullptr};
 
 public:
-	bool CheckCondition(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
+	bool CheckCondition(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const;
 
 	//~ Begin INodeTooltip Interface
 	virtual FText GetNodeTooltip() const override;
 	//~ End INodeTooltip Interface
 
-	static TOptional<const UDungeonRule*> GetNextRuleFromTransitionList(ADungeonGenerator* Generator, const URoomData* PreviousRoom, const TArray<TWeakObjectPtr<const UDungeonRuleTransition>>& Transitions, const UObject* Context = nullptr);
+	static TOptional<const UDungeonRule*> GetNextRuleFromTransitionList(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom, const TArray<TWeakObjectPtr<const UDungeonRuleTransition>>& Transitions, const UObject* Context = nullptr);
 };
 
 /////////////////////////////////////////
@@ -73,11 +73,11 @@ public:
 	//~ End INodeTooltip Interface
 
 	//~ Begin IDungeonRuleProvider Interface
-	virtual const UDungeonRule* GetRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const override { return this; }
+	virtual const UDungeonRule* GetRule(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const override { return this; }
 	//~ End IDungeonRuleProvider Interface
 
 public:
-	TOptional<const UDungeonRule*> GetNextRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const;
+	TOptional<const UDungeonRule*> GetNextRule(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const;
 
 #if WITH_EDITOR
 public:
@@ -98,11 +98,11 @@ public:
 	TArray<TWeakObjectPtr<const UDungeonRuleTransition>> Transitions;
 
 	//~ Begin IDungeonRuleProvider Interface
-	virtual const UDungeonRule* GetRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const override;
+	virtual const UDungeonRule* GetRule(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const override;
 	//~ End IDungeonRuleProvider Interface
 
 	//~ Begin IDungeonConditionProvider Interface
-	virtual bool CheckCondition(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const override;
+	virtual bool CheckCondition(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const override;
 	//~ End IDungeonConditionProvider Interface
 
 #if WITH_EDITOR
@@ -124,8 +124,8 @@ public:
 
 public:
 	URoomData* GetFirstRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule) const;
-	URoomData* GetNextRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const URoomData* PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const;
-	const UDungeonRule* GetNextRule(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const URoomData* RoomData) const;
+	URoomData* GetNextRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const TScriptInterface<IReadOnlyRoom>& PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const;
+	const UDungeonRule* GetNextRule(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const;
 	FORCEINLINE const UDungeonRule* GetFirstRule() const { return FirstRule.Get(); }
 
 #if WITH_EDITOR

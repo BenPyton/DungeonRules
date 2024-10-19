@@ -3,7 +3,6 @@
 // Distributed under the Boost Software License, Version 1.0. 
 // (See accompanying file LICENSE or copy at https://www.boost.org/LICENSE_1_0.txt)
 
-
 #include "RoomChoosers/DRR_SingleData.h"
 #include "RoomData.h"
 
@@ -14,7 +13,7 @@ URoomData* UDRR_SingleData::ChooseFirstRoomData_Implementation(ADungeonGenerator
 	return RoomData;
 }
 
-URoomData* UDRR_SingleData::ChooseNextRoomData_Implementation(ADungeonGenerator* Generator, const URoomData* PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const
+URoomData* UDRR_SingleData::ChooseNextRoomData_Implementation(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const
 {
 	return RoomData;
 }

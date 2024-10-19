@@ -17,7 +17,7 @@ class DUNGEONRULES_API UDRR_RandomData : public UDungeonRoomChooser
 public:
 	//~ Begin UDungeonRoomChooser Interface
 	virtual URoomData* ChooseFirstRoomData_Implementation(ADungeonGenerator* Generator) const override;
-	virtual URoomData* ChooseNextRoomData_Implementation(ADungeonGenerator* Generator, const URoomData* PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const override;
+	virtual URoomData* ChooseNextRoomData_Implementation(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const override;
 	virtual FText GetDescription_Implementation() const override;
 	//~ End UDungeonRoomChooser Interface
 

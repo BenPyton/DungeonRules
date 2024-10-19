@@ -6,7 +6,7 @@
 #include "RuleTransitionCondition.h"
 #include "DungeonRulesLog.h"
 
-bool URuleTransitionCondition::Check_Implementation(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
+bool URuleTransitionCondition::Check_Implementation(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const
 {
 	RulesLog_Error("Check is not implemented in %s.", *GetClass()->GetName());
 	return false;

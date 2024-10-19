@@ -8,7 +8,7 @@
 
 #define LOCTEXT_NAMESPACE "DRT_NotOperator"
 
-bool UDRT_NotOperator::Check_Implementation(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const
+bool UDRT_NotOperator::Check_Implementation(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const
 {
 	return Condition && !Condition->Check(Generator, PreviousRoom);
 }

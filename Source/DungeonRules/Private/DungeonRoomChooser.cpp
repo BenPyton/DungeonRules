@@ -12,7 +12,7 @@ URoomData* UDungeonRoomChooser::ChooseFirstRoomData_Implementation(ADungeonGener
 	return nullptr;
 }
 
-URoomData* UDungeonRoomChooser::ChooseNextRoomData_Implementation(ADungeonGenerator* Generator, const URoomData* PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const
+URoomData* UDungeonRoomChooser::ChooseNextRoomData_Implementation(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const
 {
 	RulesLog_Error("Choose Next Room is not implemented in %s.", *GetNameSafe(this));
 	return nullptr;

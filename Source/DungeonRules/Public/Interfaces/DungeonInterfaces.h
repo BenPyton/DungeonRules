@@ -7,11 +7,13 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "UObject/ScriptInterface.h"
 #include "DungeonInterfaces.generated.h"
 
 class ADungeonGenerator;
 class URoomData;
 class UDungeonRule;
+class IReadOnlyRoom;
 
 UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
 class UDungeonRuleProvider : public UInterface
@@ -23,7 +25,7 @@ class DUNGEONRULES_API IDungeonRuleProvider
 {
 	GENERATED_BODY()
 public:
-	virtual const UDungeonRule* GetRule(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const = 0;
+	virtual const UDungeonRule* GetRule(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const = 0;
 };
 
 /////////////////////////////////////////
@@ -38,5 +40,5 @@ class DUNGEONRULES_API IDungeonConditionProvider
 {
 	GENERATED_BODY()
 public:
-	virtual bool CheckCondition(ADungeonGenerator* Generator, const URoomData* PreviousRoom) const = 0;
+	virtual bool CheckCondition(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const = 0;
 };
