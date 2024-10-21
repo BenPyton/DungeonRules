@@ -1,13 +1,22 @@
 # Dungeon Rules Plugin
 
-![Plugin version number](https://img.shields.io/badge/Version-v0.1.0-orange)
-[![ProceduralDungeon version number](https://img.shields.io/badge/Procedural_Dungeon-v3.3+-blue)][DEPENDANCY]
+![Plugin version number](https://img.shields.io/badge/Version-v0.2.0-orange)
+[![ProceduralDungeon version number](https://img.shields.io/badge/Procedural_Dungeon-v3.4-blue)][DEPENDANCY]
 [![Unreal Engine Supported Versions](https://img.shields.io/badge/Unreal_Engine-5.3+%3F-9455CE?logo=unrealengine)](https://github.com/BenPyton/DungeonRules/releases)
 [![License](https://img.shields.io/github/license/BenPyton/DungeonRules?label=License&color=blue)](LICENSE)
 [![Active Development](https://img.shields.io/badge/Maintenance%20Level-Actively%20Developed-brightgreen.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
 [![Discord](https://img.shields.io/discord/1182461404092055574?logo=discord&logoColor=white&label=Discord&color=%235865F2)][DISCORD]
 
-${\color{orange}\boxed{DISCLAIMER}}$ This plugin is currently experimental and not production ready yet. Use it only for testing purpose, if you want to help me improve it (either with bug reports/feature suggestions, or by contributing) or if you are ready to modify the C++ code to your needs.
+> [!WARNING]
+> This plugin is currently **experimental** and **not production ready** yet.\
+> Use it only if:
+> - you want to test if it suits your needs.
+> - you want to help me improve it (either with bug reports, feature suggestions, or by contributing)
+> - you are ready to modify the C++ code to fit your needs.
+
+> [!IMPORTANT]
+> This plugin requires the [Procedural Dungeon **v3.4**][DEPENDANCY] because it uses some features not available in older versions.\
+> Also, there is no warranty to work as-is on newer versions neither.
 
 ## Overview
 
@@ -32,29 +41,28 @@ If you want to contribute, feel free to create a pull request.
 ## How to use it
 
 ### The Dungeon Rules
-Create a new `Dungeon Rules` data asset with `right-click` &rarr; `Procedural Dungeon` &rarr; `Dungeon Rules`.\
-Double-click on your new asset to open the graph editor.\
-Place new states with right-click and drag link between states to create transitions.\
-Create new child blueprints from classes `Room Chooser` and `Transition Condition` and implement their overridable functions to fit your project needs.\
-In your `Dungeon Rules` asset, fill your states and transitions with your new classes.
+
+1. Create a new `Dungeon Rules` data asset with `right-click` &rarr; `Procedural Dungeon` &rarr; `Dungeon Rules`.
+2. Double-click on your new asset to open the graph editor.
+3. Place new states with right-click and drag link between states to create transitions.
+4. Create new child blueprints from classes `Room Chooser`, `Transition Condition`, `Dungeon Initializer`, `Dungeon Validator` and `Dungeon Event Receiver` and implement their overridable functions to fit your project needs.
+5. In your `Dungeon Rules` asset, fill your states and transitions with your new classes, as well as the global arrays of `Dungeon Initializer`, `Dungeon Validator` and `Dungeon Event Receiver`.
 
 ### The Dungeon Generator
-Create a new actor blueprint deriving from `Dungeon Generator With Rules`.\
-Fill the `Dungeon Rules` variable with your new asset.\
-Override the [Is Valid Dungeon](https://github.com/BenPyton/ProceduralDungeon/wiki/Is-Valid-Dungeon) and [Choose Door](https://github.com/BenPyton/ProceduralDungeon/wiki/Choose-Door) like you would do with the Procedural Dungeon plugin.\
-Call its `Generate` somewhere (e.g. in its `Begin Play`).
+
+1. Create a new actor blueprint deriving from `Dungeon Generator With Rules`.
+2. Fill the `Dungeon Rules` variable with your new asset.
+3. Override the [Choose Door](https://github.com/BenPyton/ProceduralDungeon/wiki/Choose-Door) like you would do with the Procedural Dungeon plugin.
+4. Call its `Generate` function somewhere (e.g. in its `Begin Play`).
 
 ## Installation
 
-Install the [Procedural Dungeon plugin][DEPENDANCY] v3.3 or newer.
+Install the [Procedural Dungeon plugin][DEPENDANCY] **v3.4**.
 
-### - Blueprint-only Porject (*only for UE 5.3 at the moment*)
-Download and unzip the [latest pre-compiled build](https://github.com/BenPyton/DungeonRules/releases/latest):\
-in your engine at `<engine_path>/Engine/Plugins/Marketplace`\
-**OR**\
-in your project at `<project_path>/Plugins`.
+### - Blueprint-only Project (*only for UE 5.3 at the moment*)
+Download and unzip the [latest pre-compiled build](https://github.com/BenPyton/DungeonRules/releases/latest) in your engine at `<engine_path>/Engine/Plugins/Marketplace`.
 
-### - C++ Project (*May require code modification for UE != 5.3*)
+### - C++ Project (*may require code modification for UE != 5.3*)
 Download the sources and place it in your C++ project at `<project_path>/Plugins`.\
 Regenerate your VS files and compile your project.
 
