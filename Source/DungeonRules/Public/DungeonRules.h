@@ -16,7 +16,11 @@ class UDungeonRoomChooser;
 class URuleTransitionCondition;
 class ADungeonGenerator;
 class URoomData;
+class UDungeonGraph;
 class UDungeonRule;
+class UDungeonEventReceiver;
+class UDungeonValidator;
+class UDungeonInitializer;
 
 UCLASS()
 class DUNGEONRULES_API UDungeonRuleTransition : public UObject, public INodeTooltip
@@ -123,8 +127,18 @@ public:
 	UDungeonRules();
 
 public:
+	// Functions replacing calls from generator actor.
 	URoomData* GetFirstRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule) const;
 	URoomData* GetNextRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const TScriptInterface<IReadOnlyRoom>& PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const;
+	bool IsDungeonValid(const ADungeonGenerator* Generator);
+	void InitializeDungeon(ADungeonGenerator* Generator, const UDungeonGraph* Rooms);
+	void OnPreGeneration(ADungeonGenerator* Generator);
+	void OnPostGeneration(ADungeonGenerator* Generator);
+	void OnGenerationInit(ADungeonGenerator* Generator);
+	void OnGenerationFailed(ADungeonGenerator* Generator);
+	void OnRoomAdded(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& NewRoom);
+	void OnFailedToAddRoom(ADungeonGenerator* Generator, const URoomData* FromRoom, const FDoorDef& FromDoor);
+
 	const UDungeonRule* GetNextRule(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const;
 	FORCEINLINE const UDungeonRule* GetFirstRule() const { return FirstRule.Get(); }
 
@@ -165,4 +179,18 @@ private:
 	// The transition objects must be registered in the Transitions array too.
 	UPROPERTY()
 	TArray<TWeakObjectPtr<const UDungeonRuleTransition>> GlobalTransitions;
+
+	// Holds logic done during generation events (OnGenerationInit, OnRoomAdded, etc.)
+	UPROPERTY(EditAnywhere, Instanced, Category = "Dungeon Rules", meta = (AllowPrivateAccess = true))
+	TArray<TObjectPtr<UDungeonEventReceiver>> EventReceivers;
+
+	// Conditions to validate the generated dungeon. (Called in place of IsValidDungeon)
+	// All validators must be true to validate a dungeon.
+	// If no validator, dungeon is always valid.
+	UPROPERTY(EditAnywhere, Instanced, Category = "Dungeon Rules", meta = (AllowPrivateAccess = true))
+	TArray<TObjectPtr<UDungeonValidator>> Validators;
+
+	// Holds logic to initialize the dungeon.
+	UPROPERTY(EditAnywhere, Instanced, Category = "Dungeon Rules", meta = (AllowPrivateAccess = true))
+	TArray<TObjectPtr<UDungeonInitializer>> Initializers;
 };

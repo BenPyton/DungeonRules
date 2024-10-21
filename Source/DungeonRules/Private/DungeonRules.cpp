@@ -10,6 +10,9 @@
 #include "DungeonRulesLog.h"
 #include "DungeonRoomChooser.h"
 #include "RuleTransitionCondition.h"
+#include "DungeonEventReceiver.h"
+#include "DungeonValidator.h"
+#include "DungeonInitializer.h"
 
 bool UDungeonRuleTransition::CheckCondition(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const
 {
@@ -187,6 +190,64 @@ URoomData* UDungeonRules::GetNextRoomData(ADungeonGenerator* Generator, const UD
 
 	return Room;
 }
+
+bool UDungeonRules::IsDungeonValid(const ADungeonGenerator* Generator)
+{
+	for (const UDungeonValidator* Validator : Validators)
+	{
+		if (!Validator)
+			continue;
+		if (!Validator->IsDungeonValid(Generator))
+			return false;
+	}
+	return true;
+}
+
+void UDungeonRules::InitializeDungeon(ADungeonGenerator* Generator, const UDungeonGraph* Rooms)
+{
+	for (const UDungeonInitializer* Initializer : Initializers)
+	{
+		if (!Initializer)
+			continue;
+		Initializer->InitializeDungeon(Generator, Rooms);
+	}
+}
+
+#define ROUTE_DUNGEON_EVENT(EVENT_NAME, ...) \
+for (UDungeonEventReceiver* EventReceiver : EventReceivers) \
+{ if (EventReceiver) EventReceiver->EVENT_NAME(__VA_ARGS__); }
+
+void UDungeonRules::OnPreGeneration(ADungeonGenerator* Generator)
+{
+	ROUTE_DUNGEON_EVENT(OnPreGeneration, Generator);
+}
+
+void UDungeonRules::OnPostGeneration(ADungeonGenerator* Generator)
+{
+	ROUTE_DUNGEON_EVENT(OnPostGeneration, Generator);
+}
+
+void UDungeonRules::OnGenerationInit(ADungeonGenerator* Generator)
+{
+	ROUTE_DUNGEON_EVENT(OnGenerationInit, Generator);
+}
+
+void UDungeonRules::OnGenerationFailed(ADungeonGenerator* Generator)
+{
+	ROUTE_DUNGEON_EVENT(OnGenerationFailed, Generator);
+}
+
+void UDungeonRules::OnRoomAdded(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& NewRoom)
+{
+	ROUTE_DUNGEON_EVENT(OnRoomAdded, Generator, NewRoom);
+}
+
+void UDungeonRules::OnFailedToAddRoom(ADungeonGenerator* Generator, const URoomData* FromRoom, const FDoorDef& FromDoor)
+{
+	ROUTE_DUNGEON_EVENT(OnFailedToAddRoom, Generator, FromRoom, FromDoor);
+}
+
+#undef ROUTE_DUNGEON_EVENT_TO_RECEIVER
 
 const UDungeonRule* UDungeonRules::GetNextRule(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const
 {
