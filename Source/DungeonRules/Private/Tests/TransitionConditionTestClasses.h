@@ -17,7 +17,7 @@ static_assert("Do not include this file outside of unit tests!");
 	TStrongObjectPtr<TYPE> NAME(NewObject<TYPE>(GetTransientPackage(), #NAME));
 
 // Transition condition that always return true.
-UCLASS()
+UCLASS(NotBlueprintable, NotBlueprintType, Hidden)
 class UDRT_True : public URuleTransitionCondition
 {
 	GENERATED_BODY()
@@ -27,7 +27,7 @@ public:
 };
 
 // Transition condition that always return false.
-UCLASS()
+UCLASS(NotBlueprintable, NotBlueprintType, Hidden)
 class UDRT_False : public URuleTransitionCondition
 {
 	GENERATED_BODY()
