@@ -13,6 +13,8 @@
 #include "DungeonEventReceiver.h"
 #include "DungeonValidator.h"
 #include "DungeonInitializer.h"
+#include "DungeonDoorSelector.h"
+#include "Door.h"
 
 bool UDungeonRuleTransition::CheckCondition(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& PreviousRoom) const
 {
@@ -189,6 +191,18 @@ URoomData* UDungeonRules::GetNextRoomData(ADungeonGenerator* Generator, const UD
 	}
 
 	return Room;
+}
+
+TSubclassOf<ADoor> UDungeonRules::ChooseDoor(const URoom* RoomA, const URoom* RoomB, const UDoorType* DoorType, bool& bFlipped) const
+{
+	for (const UDungeonDoorSelector* DoorSelector : DoorSelectors)
+	{
+		if (!DoorSelector)
+			continue;
+		if (TSubclassOf<ADoor> Door = DoorSelector->ChooseDoor(RoomA, RoomB, DoorType, bFlipped))
+			return Door;
+	}
+	return nullptr;
 }
 
 bool UDungeonRules::IsDungeonValid(const ADungeonGenerator* Generator)
