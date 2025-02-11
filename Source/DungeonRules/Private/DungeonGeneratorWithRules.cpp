@@ -43,9 +43,10 @@ URoomData* ADungeonGeneratorWithRules::ChooseNextRoomData_Implementation(const U
 	return NextRoom;
 }
 
-//TSubclassOf<ADoor> ADungeonGeneratorWithRules::ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoomData* NextRoom, const UDoorType* DoorType, bool& Flipped)
-//{
-//}
+TSubclassOf<ADoor> ADungeonGeneratorWithRules::ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoom* CurrentRoomInstance, const URoomData* NextRoom, const URoom* NextRoomInstance, const UDoorType* DoorType, bool& bFlipped)
+{
+	return DungeonRules->ChooseDoor(CurrentRoomInstance, NextRoomInstance, DoorType, bFlipped);
+}
 
 bool ADungeonGeneratorWithRules::IsValidDungeon_Implementation()
 {

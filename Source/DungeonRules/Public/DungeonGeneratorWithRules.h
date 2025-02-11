@@ -21,7 +21,7 @@ public:
 	//~ Begin ADungeonGenerator Interface
 	virtual URoomData* ChooseFirstRoomData_Implementation() override;
 	virtual URoomData* ChooseNextRoomData_Implementation(const URoomData* CurrentRoom, const TScriptInterface<IReadOnlyRoom>& CurrentRoomInstance, const FDoorDef& DoorData, int& DoorIndex) override;
-	//virtual TSubclassOf<ADoor> ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoomData* NextRoom, const UDoorType* DoorType, bool& Flipped) override;
+	virtual TSubclassOf<ADoor> ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoom* CurrentRoomInstance, const URoomData* NextRoom, const URoom* NextRoomInstance, const UDoorType* DoorType, bool& bFlipped) override;
 	virtual bool IsValidDungeon_Implementation() override;
 	virtual bool ContinueToAddRoom_Implementation() override;
 	virtual void InitializeDungeon_Implementation(const UDungeonGraph* Rooms) override;

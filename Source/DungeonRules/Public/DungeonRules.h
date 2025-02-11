@@ -10,6 +10,7 @@
 #include "ProceduralDungeonTypes.h"
 #include "Interfaces/NodeInterfaces.h"
 #include "Interfaces/DungeonInterfaces.h"
+#include "Templates/SubclassOf.h"
 #include "DungeonRules.generated.h"
 
 class UDungeonRoomChooser;
@@ -21,6 +22,10 @@ class UDungeonRule;
 class UDungeonEventReceiver;
 class UDungeonValidator;
 class UDungeonInitializer;
+class UDungeonDoorSelector;
+class ADoor;
+class URoom;
+class UDoorType;
 
 UCLASS()
 class DUNGEONRULES_API UDungeonRuleTransition : public UObject, public INodeTooltip
@@ -130,6 +135,7 @@ public:
 	// Functions replacing calls from generator actor.
 	URoomData* GetFirstRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule) const;
 	URoomData* GetNextRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const TScriptInterface<IReadOnlyRoom>& PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const;
+	TSubclassOf<ADoor> ChooseDoor(const URoom* RoomA, const URoom* RoomB, const UDoorType* DoorType, bool& bFlipped) const;
 	bool IsDungeonValid(const ADungeonGenerator* Generator);
 	void InitializeDungeon(ADungeonGenerator* Generator, const UDungeonGraph* Rooms);
 	void OnPreGeneration(ADungeonGenerator* Generator);
@@ -193,4 +199,8 @@ private:
 	// Holds logic to initialize the dungeon.
 	UPROPERTY(EditAnywhere, Instanced, Category = "Dungeon Rules", meta = (AllowPrivateAccess = true))
 	TArray<TObjectPtr<UDungeonInitializer>> Initializers;
+
+	// Holds logic to choose doors between rooms.
+	UPROPERTY(EditAnywhere, Instanced, Category = "Dungeon Rules", meta = (AllowPrivateAccess = true))
+	TArray<TObjectPtr<UDungeonDoorSelector>> DoorSelectors;
 };
