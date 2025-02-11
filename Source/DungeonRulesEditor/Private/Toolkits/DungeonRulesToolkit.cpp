@@ -140,7 +140,6 @@ TSharedRef<SDockTab> FDungeonRulesToolkit::SpawnTab_Properties(const FSpawnTabAr
 	check(Args.GetTabId() == DetailsTabId);
 
 	return SNew(SDockTab)
-		.Icon(FStyleProvider::GetBrush("LevelEditor.Tabs.Details"))
 		.Label(LOCTEXT("DungeonRulesDetailsTitle", "Details"))
 		.TabRole(ETabRole::PanelTab)
 		[
