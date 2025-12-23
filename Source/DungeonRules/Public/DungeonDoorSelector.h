@@ -20,5 +20,5 @@ class DUNGEONRULES_API UDungeonDoorSelector : public UObject
 
 public:
 	UFUNCTION(BlueprintPure, BlueprintNativeEvent, Category = "Dungeon Rules")
-	TSubclassOf<ADoor> ChooseDoor(const URoom* RoomA, const URoom* RoomB, const UDoorType* DoorType, bool& bFlipped) const;
+	TSubclassOf<ADoor> ChooseDoor(const URoom* RoomA, const URoom* RoomB, const UDoorType* DoorType, const UDoorType* OtherDoorType, bool& bFlipped) const;
 };

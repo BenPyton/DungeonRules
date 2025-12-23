@@ -12,6 +12,7 @@
 #include "DungeonRulesEdTypes.h"
 #include "DungeonRules.h"
 #include "EdGraphUtilities.h"
+#include "UObject/UE5MainStreamObjectVersion.h"
 
 #define LOCTEXT_NAMESPACE "A3Nodes"
 

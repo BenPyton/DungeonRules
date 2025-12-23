@@ -11,6 +11,7 @@
 #include "EdGraphUtilities.h"
 #include "Styling/SlateStyleRegistry.h"
 #include "Interfaces/IPluginManager.h"
+#include "Styling/SlateStyle.h"
 
 #define LOCTEXT_NAMESPACE "FDungeonRulesEditorModule"
 

@@ -17,6 +17,10 @@ void UDungeonEventReceiver::OnGenerationInit_Implementation(ADungeonGenerator* G
 {
 }
 
+void UDungeonEventReceiver::OnGenerationSuccess_Implementation(ADungeonGenerator* Generator)
+{
+}
+
 void UDungeonEventReceiver::OnGenerationFailed_Implementation(ADungeonGenerator* Generator)
 {
 }

@@ -135,12 +135,13 @@ public:
 	// Functions replacing calls from generator actor.
 	URoomData* GetFirstRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule) const;
 	URoomData* GetNextRoomData(ADungeonGenerator* Generator, const UDungeonRule* CurrentRule, const TScriptInterface<IReadOnlyRoom>& PreviousRoom, const FDoorDef& DoorData, int& DoorIndex) const;
-	TSubclassOf<ADoor> ChooseDoor(const URoom* RoomA, const URoom* RoomB, const UDoorType* DoorType, bool& bFlipped) const;
+	TSubclassOf<ADoor> ChooseDoor(const URoom* RoomA, const URoom* RoomB, const UDoorType* DoorType, const UDoorType* OtherDoorType, bool& bFlipped) const;
 	bool IsDungeonValid(const ADungeonGenerator* Generator);
 	void InitializeDungeon(ADungeonGenerator* Generator, const UDungeonGraph* Rooms);
 	void OnPreGeneration(ADungeonGenerator* Generator);
 	void OnPostGeneration(ADungeonGenerator* Generator);
 	void OnGenerationInit(ADungeonGenerator* Generator);
+	void OnGenerationSuccess(ADungeonGenerator* Generator);
 	void OnGenerationFailed(ADungeonGenerator* Generator);
 	void OnRoomAdded(ADungeonGenerator* Generator, const TScriptInterface<IReadOnlyRoom>& NewRoom);
 	void OnFailedToAddRoom(ADungeonGenerator* Generator, const URoomData* FromRoom, const FDoorDef& FromDoor);

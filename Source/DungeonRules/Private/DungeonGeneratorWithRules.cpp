@@ -43,9 +43,9 @@ URoomData* ADungeonGeneratorWithRules::ChooseNextRoomData_Implementation(const U
 	return NextRoom;
 }
 
-TSubclassOf<ADoor> ADungeonGeneratorWithRules::ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoom* CurrentRoomInstance, const URoomData* NextRoom, const URoom* NextRoomInstance, const UDoorType* DoorType, bool& bFlipped)
+TSubclassOf<ADoor> ADungeonGeneratorWithRules::ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoom* CurrentRoomInstance, const URoomData* NextRoom, const URoom* NextRoomInstance, const UDoorType* DoorType, const UDoorType* OtherDoorType, bool& bFlipped)
 {
-	return DungeonRules->ChooseDoor(CurrentRoomInstance, NextRoomInstance, DoorType, bFlipped);
+	return DungeonRules->ChooseDoor(CurrentRoomInstance, NextRoomInstance, DoorType, OtherDoorType, bFlipped);
 }
 
 bool ADungeonGeneratorWithRules::IsValidDungeon_Implementation()
@@ -62,45 +62,51 @@ bool ADungeonGeneratorWithRules::ContinueToAddRoom_Implementation()
 
 void ADungeonGeneratorWithRules::InitializeDungeon_Implementation(const UDungeonGraph* Rooms)
 {
-	CHECK_RULES();
+	CHECK_RULES(void());
 	DungeonRules->InitializeDungeon(this, Rooms);
 }
 
 void ADungeonGeneratorWithRules::OnPreGeneration_Implementation()
 {
-	CHECK_RULES();
+	CHECK_RULES(void());
 	DungeonRules->OnPreGeneration(this);
 }
 
 void ADungeonGeneratorWithRules::OnPostGeneration_Implementation()
 {
-	CHECK_RULES();
+	CHECK_RULES(void());
 	DungeonRules->OnPostGeneration(this);
 }
 
 void ADungeonGeneratorWithRules::OnGenerationInit_Implementation()
 {
-	CHECK_RULES();
+	CHECK_RULES(void());
 	DungeonRules->OnGenerationInit(this);
 	CurrentRule = DungeonRules->GetFirstRule();
 }
 
+void ADungeonGeneratorWithRules::OnGenerationSuccess_Implementation()
+{
+	CHECK_RULES(void());
+	DungeonRules->OnGenerationSuccess(this);
+}
+
 void ADungeonGeneratorWithRules::OnGenerationFailed_Implementation()
 {
-	CHECK_RULES();
+	CHECK_RULES(void());
 	DungeonRules->OnGenerationFailed(this);
 }
 
 void ADungeonGeneratorWithRules::OnRoomAdded_Implementation(const URoomData* NewRoom, const TScriptInterface<IReadOnlyRoom>& RoomInstance)
 {
-	CHECK_RULES();
+	CHECK_RULES(void());
 	DungeonRules->OnRoomAdded(this, RoomInstance);
 	CurrentRule = DungeonRules->GetNextRule(this, CurrentRule, RoomInstance);
 }
 
 void ADungeonGeneratorWithRules::OnFailedToAddRoom_Implementation(const URoomData* FromRoom, const FDoorDef& FromDoor)
 {
-	CHECK_RULES();
+	CHECK_RULES(void());
 	DungeonRules->OnFailedToAddRoom(this, FromRoom, FromDoor);
 }
 

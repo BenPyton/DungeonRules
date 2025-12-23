@@ -28,6 +28,9 @@ public:
 	void OnGenerationInit(ADungeonGenerator* Generator);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Rules")
+	void OnGenerationSuccess(ADungeonGenerator* Generator);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Rules")
 	void OnGenerationFailed(ADungeonGenerator* Generator);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Rules")

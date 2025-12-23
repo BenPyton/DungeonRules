@@ -193,13 +193,13 @@ URoomData* UDungeonRules::GetNextRoomData(ADungeonGenerator* Generator, const UD
 	return Room;
 }
 
-TSubclassOf<ADoor> UDungeonRules::ChooseDoor(const URoom* RoomA, const URoom* RoomB, const UDoorType* DoorType, bool& bFlipped) const
+TSubclassOf<ADoor> UDungeonRules::ChooseDoor(const URoom* RoomA, const URoom* RoomB, const UDoorType* DoorType, const UDoorType* OtherDoorType, bool& bFlipped) const
 {
 	for (const UDungeonDoorSelector* DoorSelector : DoorSelectors)
 	{
 		if (!DoorSelector)
 			continue;
-		if (TSubclassOf<ADoor> Door = DoorSelector->ChooseDoor(RoomA, RoomB, DoorType, bFlipped))
+		if (TSubclassOf<ADoor> Door = DoorSelector->ChooseDoor(RoomA, RoomB, DoorType, OtherDoorType, bFlipped))
 			return Door;
 	}
 	return nullptr;
@@ -244,6 +244,11 @@ void UDungeonRules::OnPostGeneration(ADungeonGenerator* Generator)
 void UDungeonRules::OnGenerationInit(ADungeonGenerator* Generator)
 {
 	ROUTE_DUNGEON_EVENT(OnGenerationInit, Generator);
+}
+
+void UDungeonRules::OnGenerationSuccess(ADungeonGenerator* Generator)
+{
+	ROUTE_DUNGEON_EVENT(OnGenerationSuccess, Generator);
 }
 
 void UDungeonRules::OnGenerationFailed(ADungeonGenerator* Generator)

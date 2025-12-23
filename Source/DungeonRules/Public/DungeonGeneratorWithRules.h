@@ -21,13 +21,14 @@ public:
 	//~ Begin ADungeonGenerator Interface
 	virtual URoomData* ChooseFirstRoomData_Implementation() override;
 	virtual URoomData* ChooseNextRoomData_Implementation(const URoomData* CurrentRoom, const TScriptInterface<IReadOnlyRoom>& CurrentRoomInstance, const FDoorDef& DoorData, int& DoorIndex) override;
-	virtual TSubclassOf<ADoor> ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoom* CurrentRoomInstance, const URoomData* NextRoom, const URoom* NextRoomInstance, const UDoorType* DoorType, bool& bFlipped) override;
+	virtual TSubclassOf<ADoor> ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoom* CurrentRoomInstance, const URoomData* NextRoom, const URoom* NextRoomInstance, const UDoorType* DoorType, const UDoorType* OtherDoorType, bool& bFlipped) override;
 	virtual bool IsValidDungeon_Implementation() override;
 	virtual bool ContinueToAddRoom_Implementation() override;
 	virtual void InitializeDungeon_Implementation(const UDungeonGraph* Rooms) override;
 	virtual void OnPreGeneration_Implementation() override;
 	virtual void OnPostGeneration_Implementation() override;
 	virtual void OnGenerationInit_Implementation() override;
+	virtual void OnGenerationSuccess_Implementation() override;
 	virtual void OnGenerationFailed_Implementation() override;
 	virtual void OnRoomAdded_Implementation(const URoomData* NewRoom, const TScriptInterface<IReadOnlyRoom>& RoomInstance) override;
 	virtual void OnFailedToAddRoom_Implementation(const URoomData* FromRoom, const FDoorDef& FromDoor) override;

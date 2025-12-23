@@ -7,6 +7,7 @@
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SMultiLineEditableTextBox.h"
 #include "Nodes/DungeonRulesNode.h"
+#include "SlateOptMacros.h"
 
 #define LOCTEXT_NAMESPACE "DungeonRulesDetailsCustomization"
 

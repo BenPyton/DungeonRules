@@ -8,6 +8,7 @@
 #include "Nodes/DungeonRulesNode_Begin.h"
 #include "Nodes/DungeonRulesNode_Transition.h"
 #include "NodeSlates/SGraphNodeDungeonRules_Transition.h"
+#include "Brushes/SlateRoundedBoxBrush.h"
 
 class FSlateRect;
 class SWidget;

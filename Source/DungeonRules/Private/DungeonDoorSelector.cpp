@@ -5,7 +5,7 @@
 
 #include "DungeonDoorSelector.h"
 
-TSubclassOf<ADoor> UDungeonDoorSelector::ChooseDoor_Implementation(const URoom* RoomA, const URoom* RoomB, const UDoorType* DoorType, bool& bFlipped) const
+TSubclassOf<ADoor> UDungeonDoorSelector::ChooseDoor_Implementation(const URoom* RoomA, const URoom* RoomB, const UDoorType* DoorType, const UDoorType* OtherDoorType, bool& bFlipped) const
 {
 	return nullptr;
 }
